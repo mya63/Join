@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { FigmaHeader } from './shared/layout/figma-header/figma-header';
 import { FigmaSidenav } from './shared/layout/figma-sidenav/figma-sidenav';
 import { FigmaBottomNav } from './shared/layout/figma-bottom-nav/figma-bottom-nav';
+import { Location } from '@angular/common';
 
 
 @Component({
@@ -13,4 +14,13 @@ import { FigmaBottomNav } from './shared/layout/figma-bottom-nav/figma-bottom-na
 })
 export class App {
   protected readonly title = signal('join2');
+  constructor(private location: Location) { this.goOn() }
+
+  goOn() {
+    const currentPath = this.location.path();
+    const goOn = ["/summary","", "/", "/login", "/sign-up", "/privacy-policy", "/legal-noticetings"].includes(currentPath)
+    console.log(this.location.path(), goOn);
+    return goOn;
+  };
+
 }

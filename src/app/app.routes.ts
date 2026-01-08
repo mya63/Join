@@ -7,7 +7,7 @@ import { BoardCard } from './board/board-card/board-card';
 import { Login } from './login/login';
 
 export const routes: Routes = [
-   { path: '', component: Board },
+   { path: '', component: Login },
    { path: 'summary', component: Login },
    // { path: 'summary', redirectTo: '', pathMatch: 'full' },
    { path: 'contacts', component: Contacts },

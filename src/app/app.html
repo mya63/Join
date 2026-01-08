@@ -1,8 +1,8 @@
 <div class="join-app">
-  <figma-header></figma-header>
-  <figma-sidenav></figma-sidenav>
+  <figma-header [class.showme]="goOn()"></figma-header>
+  <figma-sidenav [class.showme]="goOn()"></figma-sidenav>
   <main id="main-content">
-<router-outlet />
-    <figma-bottom-nav></figma-bottom-nav>
+    <router-outlet></router-outlet>
+    <figma-bottom-nav [class.showme]="goOn()"></figma-bottom-nav>
   </main>
 </div>
