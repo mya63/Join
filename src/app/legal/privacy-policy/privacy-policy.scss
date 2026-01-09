@@ -1,0 +1,138 @@
+
+.legal-page {
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+
+  padding: 96px 0 40px 232px;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.legal-card {
+  position: relative;
+  width: 1440px;
+  height: 1024px;
+  max-width: 100%;
+  max-height: calc(100vh - 96px - 40px);
+
+  overflow-y: auto;
+  background: #F6F7F8;
+  border-radius: 30px;
+
+  padding: 48px 72px;
+  box-shadow:
+    0 4px 4px rgba(0, 0, 0, 0.04),
+    0 6px 6px rgba(0, 0, 0, 0.06);
+}
+
+.legal-card h1 {
+  font-size: 61px;
+  font-weight: 700;
+  color: #2a3647;
+  margin: 0 0 24px 0;
+}
+
+.legal-card h2 {
+  font-size: 27px;
+  font-weight: 600;
+  color: #2a3647;
+  margin: 24px 0 12px 0;
+}
+
+.legal-card p {
+  font-size: 16px;
+  line-height: 150%;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.legal-card ul {
+  margin: 0 0 16px 20px;
+  padding: 0;
+}
+
+.legal-card li {
+  font-size: 16px;
+  line-height: 150%;
+  color: #000000;
+}
+
+@media (max-width: 1200px) {
+  .legal-page {
+    padding: 96px 16px 24px 16px;
+  }
+
+  .legal-card {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    border-radius: 20px;
+    padding: 32px 24px;
+  }
+
+  .legal-card h1 {
+    font-size: 40px;
+  }
+
+  .legal-card h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 900px) {
+  .privacy-page,
+  .privacy-card {
+    padding-bottom: 80px;
+  }
+}
+
+.legal-mobile-footer {
+  display: none;
+}
+
+@media (max-width: 900px) {}
+.legal-mobile-footer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 100%;
+  max-width: 428px;
+  background: #2a3647;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+.legal-footer-btn {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #2a3647;
+  background: #2a3647;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: 'Inter', system-ui, sans-serif;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.legal-footer-btn--secondary {
+  background: #091931;
+}
+
+.legal-footer-btn--active {
+  background: #ffffff;
+  color: #2a3647;
+}

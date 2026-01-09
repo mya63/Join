@@ -18,7 +18,7 @@ export class App {
 
   goOn() {
     const currentPath = this.location.path();
-    const goOn = ["/summary","", "/", "/login", "/sign-up", "/privacy-policy", "/legal-noticetings"].includes(currentPath)
+    const goOn = ["", "/", "/login", "/sign-up", "/privacy-policy", "/legal-noticetings"].includes(currentPath)
     console.log(this.location.path(), goOn);
     return goOn;
   };
