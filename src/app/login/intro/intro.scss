@@ -7,7 +7,6 @@
 }
 
 .intro-logo {
-  width: 140px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -21,10 +20,17 @@
     left: 50%;
     transform: translate(-50%, -50%) scale(2);
   }
+
+    50% {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(2);
+  }
+
   100% {
-    top: 50px;
-    left: 53px;
-    transform: translate(0, 0) scale(0.72);
+    top: 80px;
+    left: 77px;
+    transform: translate(0, 0) scale(1);
   }
 }
 
@@ -67,6 +73,7 @@
   0% {
     transform: translate(-50%, -50%) scale(1.6);
   }
+
   100% {
     top: 120px;
     left: 30px;
