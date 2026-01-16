@@ -2,13 +2,13 @@
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   background-color: #f6f7f8;
 }
 
 .login-frame {
-  min-height: 100vh;
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
@@ -21,7 +21,7 @@
 .login-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 96px;
 }
 
@@ -52,7 +52,7 @@
 .login-signup-hint {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 35px;
   font-size: 14px;
   color: #2a3647;
 }
@@ -146,10 +146,11 @@
 }
 
 .login-footer {
-  margin-top: 64px;
+  position: relative;
   display: flex;
   justify-content: center;
   gap: 32px;
+ margin-bottom: 50px;
 }
 
 .login-footer-link {

@@ -3,8 +3,8 @@
     <header class="login-header">
       <div class="logo-container">
 
-<img src="assets/img/login/joindark.png" alt="Join Logo" class="logo-img">
-</div>
+        <img src="assets/img/login/joindark.png" alt="Join Logo" class="logo-img">
+      </div>
 
       <div class="login-signup-hint">
         <span>Not a Join user?</span>
@@ -19,30 +19,16 @@
 
         <form (ngSubmit)="onSubmit()" class="login-form">
           <div class="input-group mya-input-group">
-            <input
-              type="email"
-              name="email"
-              [(ngModel)]="email"
-              placeholder="Email"
-              required
-              class="login-input mya-input-with-icon"
-              [ngClass]="{ 'input-error': loginErrors.email }"
-            />
+            <input type="email" name="email" [(ngModel)]="email" placeholder="Email" required
+              class="login-input mya-input-with-icon" [ngClass]="{ 'input-error': loginErrors.email }" />
             <img src="assets/img/login/mail.svg" alt="" class="login-input-icon" />
           </div>
 
           <p class="error-text" *ngIf="loginErrors.email">{{ loginErrors.email }}</p>
 
           <div class="input-group mya-input-group">
-            <input
-              type="password"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="Password"
-              required
-              class="login-input mya-input-with-icon"
-              [ngClass]="{ 'input-error': loginErrors.password }"
-            />
+            <input type="password" name="password" [(ngModel)]="password" placeholder="Password" required
+              class="login-input mya-input-with-icon" [ngClass]="{ 'input-error': loginErrors.password }" />
             <img src="assets/img/login/lock.svg" alt="" class="login-input-icon" />
           </div>
 
@@ -62,15 +48,14 @@
       <span>Not a Join user?</span>
       <button type="button" class="login-signup-btn" (click)="goToSignUp()">Sign Up</button>
     </div>
-
-    <footer class="login-footer">
-      <button type="button" class="login-footer-link" routerLink="/privacy-policy">
-        Privacy Policy
-      </button>
-      <button type="button" class="login-footer-link" routerLink="/legal-notice">
-        Legal Notice
-      </button>
-    </footer>
   </div>
-</main>
+  <footer class="login-footer">
+    <button type="button" class="login-footer-link" routerLink="/privacy-policy">
+      Privacy Policy
+    </button>
+    <button type="button" class="login-footer-link" routerLink="/legal-notice">
+      Legal Notice
+    </button>
+  </footer>
 
+</main>
