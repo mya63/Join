@@ -150,7 +150,7 @@
   display: flex;
   justify-content: center;
   gap: 32px;
- margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 .login-footer-link {
@@ -211,18 +211,25 @@ button {
 
   .login-signup-hint-mobile {
     display: flex;
-    width: 220px;
+    width: 292px;
+    height: 49px;
     margin: 24px auto 0;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     font-size: 14px;
     color: #2a3647;
+    gap: 35px;
   }
 
-  .login-signup-hint-mobile .login-signup-btn {
-    padding: 6px 14px;
-    font-size: 14px;
+  .login-signup-hint-mobile {
+    font-size: 20px;
+  }
+
+  .login-signup-btn {
+    font-size: 16px;
     border-radius: 8px;
+    width: 104px;
+    height: 100%;
   }
 
   .login-footer {
