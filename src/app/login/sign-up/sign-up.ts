@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { FbAuthService } from '../../services/fb-auth-service';
 
 @Component({
   selector: 'app-sign-up',
@@ -11,7 +12,7 @@ import { Router, RouterLink } from '@angular/router';
   styleUrl: './sign-up.scss',
 })
 export class SignUp {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: FbAuthService) {}
 
   signUpData = {
     name: '',
@@ -29,6 +30,7 @@ export class SignUp {
     password: '',
     confirmPassword: '',
     privacy: '',
+    firebase: '',  // Neu für Firebase-Fehler
   };
 
   private resetErrors(): void {
@@ -122,6 +124,26 @@ export class SignUp {
     return false;
   }
 
+  private handleFirebaseError(error: any): void {
+    console.error('Sign-up failed:', error);
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        this.signUpErrors.firebase = 'This email is already registered.';
+        break;
+      case 'auth/weak-password':
+        this.signUpErrors.firebase = 'Password should be at least 6 characters.';
+        break;
+      case 'auth/invalid-email':
+        this.signUpErrors.firebase = 'Please enter a valid email address.';
+        break;
+      case 'auth/network-request-failed':
+        this.signUpErrors.firebase = 'Network error. Please check your connection.';
+        break;
+      default:
+        this.signUpErrors.firebase = 'An error occurred during sign-up. Please try again.';
+    }
+  }
+
   onSubmit(): void {
     this.resetErrors();
     this.validateName();
@@ -133,7 +155,14 @@ export class SignUp {
     if (this.hasErrors()) {
       return;
     }
-    this.router.navigate(['/login']);
+    this.authService.signUp(
+      this.signUpData.email,
+      this.signUpData.password,
+      this.signUpData.name,
+      this.signUpData.surname
+    ).catch(error => {
+      this.handleFirebaseError(error);
+    });
   }
 
   goBack(): void {

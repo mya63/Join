@@ -4,12 +4,14 @@ import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { IContact } from '../interfaces/i-contact';
 //import { EditDesktop } from '../contacts/edit-desktop/edit-desktop';
 import { Contacts } from '../contacts/contacts';
+import { FbAuthService } from './fb-auth-service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FbService {
   private db = inject(Firestore);
+  private authService = inject(FbAuthService);
 
   contact: IContact;
   currentContact: IContact;
@@ -126,8 +128,7 @@ export class FbService {
   }
 
   getCurrentUserId(): string {
-    // Placeholder for actual user ID retrieval logic
-    return 'ownerId';
+    return this.authService.getCurrentUserId() || 'guest';
   }
 
   setCurrentContact(id: number): IContact {
