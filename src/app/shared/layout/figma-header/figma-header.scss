@@ -1,23 +1,22 @@
 :host {
   position: fixed;
   top: 0;
-  left: 232px;
+  left: var(--sidebar-w, 232px);
   right: 0;
   height: var(--header-h, 96px);
   z-index: var(--z-header, 1500);
 }
 
 .maxContent {
-  position: absolute;
-  display:flex;
+  display: flex;
   flex-direction: row;
-  align-items: start;
-  left: 0;
+  align-items: center;
+  justify-content: space-between;
   max-width: 1440px;
   width: 100%;
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 .wrap {
@@ -27,10 +26,8 @@
   background: var(--topbar-bg, #fff);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-
-  padding: 20px 40px 20px calc(116px + var(--sidebar-w, 232px));
+  justify-content: center;
+  padding: 0;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
   font-family: Inter, system-ui, Arial, sans-serif;
 }
@@ -48,8 +45,7 @@
 }
 
 .title {
-  position: absolute;
-  left: 96px;
+  position: static;
   font-size: 18px;
   line-height: 120%;
   color: #000;
@@ -82,8 +78,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #29abe2;
-  color: #29abe2;
+  border: 1px solid #a8a8a8;
+  color: #a8a8a8;
   font-weight: 700;
   font-size: 14px;
   background: #fff;
@@ -91,10 +87,6 @@
 
 .user {
   position: relative;
-  .initials {
-    color:#29abe2;
-  }
-
 }
 .circle {
   width: 56px;
@@ -106,7 +98,7 @@
   place-items: center;
 }
 .initials {
-  color: #2a3647;
+  color: #29abe2;
   font-weight: 700;
   font-size: 16px;
 }
@@ -166,8 +158,12 @@
   }
   .wrap {
     height: 80px;
-    padding: 0 16px;
+    padding: 0;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  }
+  .maxContent {
+    padding-left: 16px;
+    padding-right: 16px;
   }
   .title {
     display: none;

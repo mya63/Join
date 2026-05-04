@@ -1,1 +1,33 @@
-.showme {display: none;}
+.showme {
+	display: none;
+}
+
+:host {
+	display: block;
+	min-height: 100dvh;
+}
+
+.join-app {
+	min-height: 100dvh;
+}
+
+#main-content {
+	margin-left: var(--sidebar-w);
+	width: calc(100% - var(--sidebar-w));
+	min-height: 100dvh;
+	padding-top: var(--header-h);
+}
+
+#main-content.public-route {
+	margin-left: 0;
+	width: 100%;
+	padding-top: 0;
+}
+
+@media (max-width: 1350px) {
+	#main-content {
+		margin-left: 0;
+		width: 100%;
+		padding-top: 80px;
+	}
+}

@@ -25,6 +25,11 @@
   margin-bottom: 96px;
 }
 
+.logo-img {
+  width: 120px;
+  height: auto;
+}
+
 .login-logo-block {
   display: flex;
   align-items: center;
@@ -72,18 +77,18 @@
   padding: 48px 56px;
   border-radius: 30px;
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
 
 .login-title {
   margin: 0 0 8px;
-  font-size: 32px;
+  font-size: 61px;
   font-weight: 700;
 }
 
 .login-title-underline {
-  width: 80px;
+  width: 150px;
   height: 3px;
   background: #29abe2;
   margin: 0 auto 32px;

@@ -10,14 +10,14 @@ import { Intro } from './login/intro/intro';
 import { AppShell } from './shared/layout/app-shell/app-shell';
 import { LegalNotice } from './legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './legal/privacy-policy/privacy-policy';
+import { Summary } from './summary/summary';
 
 export const routes: Routes = [
 
    { path: '', component: Intro },
    { path: 'login', component: Login },
    { path: 'sign-up', component: SignUp },
-   { path: 'summary', component: Login },
-   { path: 'summary', redirectTo: '', pathMatch: 'full' },
+   { path: 'summary', component: Summary },
    { path: 'contacts', component: Contacts },
    { path: 'board', component: Board },
    { path: 'add-task', component: Tasktest },

@@ -2,19 +2,24 @@
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   background-color: #f6f7f8;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 .signup-frame {
   width: 100%;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 64px 24px;
+  padding-top: 80px;
+  padding-left: 77px;
+  padding-right: 64px;
+  padding-bottom: 0;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .logo-container {
@@ -26,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 96px;
+  margin-bottom: 48px;
 }
 
 .back-button {
@@ -47,14 +52,15 @@
 }
 
 .logo-img {
-  height: 122px;
+  width: 120px;
+  height: auto;
   object-fit: contain;
 }
 
 .signup-card {
   max-width: 500px;
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   margin: 0 auto;
   text-align: center;
   border-radius: 30px;
@@ -62,7 +68,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: -150px;
 }
 
 .signup-title-row {
@@ -83,13 +88,13 @@
 }
 
 .signup-title {
-  font-size: 32px;
+  font-size: 61px;
   font-weight: 700;
   margin: 0;
 }
 
 .signup-title-underline {
-  width: 80px;
+  width: 150px;
   height: 3px;
   background: #29abe2;
   margin: 0 auto 32px;
@@ -168,7 +173,8 @@
 }
 
 .login-footer {
-  margin-top: 64px;
+  margin-top: auto;
+  padding: 32px 0 50px;
   display: flex;
   justify-content: center;
   gap: 32px;

@@ -1,0 +1,87 @@
+<main class="summary-page">
+  <div class="summary-shell">
+    <header class="summary-top">
+      <div class="summary-title-group">
+        <h1 class="summary-title">Join 360</h1>
+        <span class="summary-separator" aria-hidden="true"></span>
+        <p class="summary-subtitle">Key Metrics at a Glance</p>
+      </div>
+    </header>
+
+    <div class="summary-content">
+      <section class="summary-board" aria-label="Summary metrics">
+        <div class="cards-row cards-row-two">
+          <article class="metric-card compact-card">
+            <div class="metric-main">
+              <span class="metric-icon todo-icon" aria-hidden="true">
+                <img src="assets/img/contacts/mobile-menu/edit-icon-only.svg" alt="" />
+              </span>
+              <p class="metric-number">{{ todoCount }}</p>
+            </div>
+            <p class="metric-caption">To-do</p>
+          </article>
+
+          <article class="metric-card compact-card">
+            <div class="metric-main">
+              <span class="metric-icon done-icon" aria-hidden="true">
+                <img src="assets/img/board/check.svg" alt="" />
+              </span>
+              <p class="metric-number">{{ doneCount }}</p>
+            </div>
+            <p class="metric-caption">Done</p>
+          </article>
+        </div>
+
+        <article class="metric-card urgent-deadline-card">
+          <div class="urgent-main">
+            <span class="metric-icon urgent-icon" aria-hidden="true">
+              <img src="assets/img/board/board-card/prio-urgent-white.svg" alt="" />
+            </span>
+            <div>
+              <p class="metric-number">{{ urgentCount }}</p>
+              <p class="metric-caption">Urgent</p>
+            </div>
+          </div>
+
+          <span class="urgent-separator" aria-hidden="true"></span>
+
+          <div class="deadline-box">
+            @if (upcomingDeadline) {
+              <p class="deadline-date">{{ upcomingDeadline.date }}</p>
+              <p class="deadline-label">Upcoming Deadline</p>
+            } @else {
+              <p class="deadline-date">No date</p>
+              <p class="deadline-label">Upcoming Deadline</p>
+            }
+          </div>
+        </article>
+
+        <div class="cards-row cards-row-three">
+          <article class="metric-card info-card">
+            <p class="info-number">{{ tasksInBoard }}</p>
+            <p class="info-label">Tasks in<br>Board</p>
+          </article>
+
+          <article class="metric-card info-card">
+            <p class="info-number">{{ tasksInProgress }}</p>
+            <p class="info-label">Tasks In<br>Progress</p>
+          </article>
+
+          <article class="metric-card info-card">
+            <p class="info-number">{{ awaitingFeedback }}</p>
+            <p class="info-label">Awaiting<br>Feedback</p>
+          </article>
+        </div>
+      </section>
+
+      <div class="summary-greeting">
+        @if (!isGuest) {
+          <p class="greeting-text">Good morning,</p>
+          <p class="greeting-name">{{ currentUserName }}</p>
+        } @else {
+          <p class="greeting-text">Good morning!</p>
+        }
+      </div>
+    </div>
+  </div>
+</main>

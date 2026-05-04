@@ -6,7 +6,6 @@ import { FbAuthService } from '../../services/fb-auth-service';
 
 @Component({
   selector: 'app-sign-up',
-  standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './sign-up.html',
   styleUrl: './sign-up.scss',
@@ -16,7 +15,6 @@ export class SignUp {
 
   signUpData = {
     name: '',
-    surname: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -25,12 +23,11 @@ export class SignUp {
 
   signUpErrors: any = {
     name: '',
-    surname: '',
     email: '',
     password: '',
     confirmPassword: '',
     privacy: '',
-    firebase: '',  // Neu für Firebase-Fehler
+    firebase: '',
   };
 
   private resetErrors(): void {
@@ -52,22 +49,6 @@ export class SignUp {
     }
     if (!/^[A-ZÄÖÜ][a-zäöüß]+(?: [A-ZÄÖÜ][a-zäöüß]+)*$/.test(name)) {
       this.signUpErrors.name = 'Please start with a capital letter.';
-    }
-  }
-
-  private validateSurname(): void {
-    const surname = this.signUpData.surname.trim();
-    this.signUpErrors.surname = '';
-    if (!surname) {
-      this.signUpErrors.surname = 'Please enter your surname.';
-      return;
-    }
-    if (surname.length < 2) {
-      this.signUpErrors.surname = 'Surname is too short.';
-      return;
-    }
-    if (!/^[A-ZÄÖÜ][a-zäöüß]+(?: [A-ZÄÖÜ][a-zäöüß]+)*$/.test(surname)) {
-      this.signUpErrors.surname = 'Please start with a capital letter.';
     }
   }
 
@@ -147,7 +128,6 @@ export class SignUp {
   onSubmit(): void {
     this.resetErrors();
     this.validateName();
-    this.validateSurname();
     this.validateEmail();
     this.validatePassword();
     this.validateConfirmPassword();
@@ -155,11 +135,14 @@ export class SignUp {
     if (this.hasErrors()) {
       return;
     }
+    const parts = this.signUpData.name.trim().split(/\s+/);
+    const firstName = parts[0];
+    const lastName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
     this.authService.signUp(
       this.signUpData.email,
       this.signUpData.password,
-      this.signUpData.name,
-      this.signUpData.surname
+      firstName,
+      lastName
     ).catch(error => {
       this.handleFirebaseError(error);
     });
