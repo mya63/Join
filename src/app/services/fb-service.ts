@@ -1,6 +1,7 @@
 import { Injectable, inject, HostListener, ComponentRef } from '@angular/core';
 import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { IContact } from '../interfaces/i-contact';
 //import { EditDesktop } from '../contacts/edit-desktop/edit-desktop';
 import { Contacts } from '../contacts/contacts';
@@ -12,6 +13,7 @@ import { FbAuthService } from './fb-auth-service';
 export class FbService {
   private db = inject(Firestore);
   private authService = inject(FbAuthService);
+  private auth = inject(Auth);
 
   contact: IContact;
   currentContact: IContact;
@@ -22,6 +24,7 @@ export class FbService {
 
 
   myContacts;
+  allContacts: IContact[] = [];
   contactsArray: IContact[] = [];
   contactsGroups: string[] = [];
   showEditContact: boolean = false;
@@ -39,19 +42,15 @@ export class FbService {
     this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
 
     this.myContacts = onSnapshot(this.contactsCollectionSorted, (snapshot) => {
-      this.contactsArray = [];
-      this.contactsGroups = [];
+      this.allContacts = [];
       snapshot.forEach((element) => {
-        this.contactsArray.push({ id: element.id, ...element.data() } as IContact);
-        this.contactsGroups.push(element.data()['name'].charAt(0).toUpperCase());
-        this.contactsGroups = Array.from(new Set(this.contactsGroups)).sort();
+        this.allContacts.push({ id: element.id, ...element.data() } as IContact);
       });
-      this.id = 0;
-      const filtered = this.contactsArray.filter(contact => contact.ownerId === this.getCurrentUserId());
-      this.contactsArray = filtered;
-      this.currentContact = filtered[0];
-      this.setCurrentContact(this.id);
-      //console.log(this.id, this.contactsArray, this.currentContact);
+      this.applyOwnerFilter();
+    });
+
+    onAuthStateChanged(this.auth, () => {
+      this.applyOwnerFilter();
     });
 
 
@@ -129,6 +128,27 @@ export class FbService {
 
   getCurrentUserId(): string {
     return this.authService.getCurrentUserId() || 'guest';
+  }
+
+  private applyOwnerFilter(): void {
+    const userId = this.getCurrentUserId();
+    this.contactsArray = this.allContacts.filter(contact => contact.ownerId === userId);
+
+    this.contactsGroups = Array.from(
+      new Set(this.contactsArray.map(contact => (contact.name || '').charAt(0).toUpperCase()).filter(Boolean))
+    ).sort();
+
+    if (this.contactsArray.length === 0) {
+      this.id = 0;
+      this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
+      return;
+    }
+
+    if (this.id < 0 || this.id >= this.contactsArray.length) {
+      this.id = 0;
+    }
+
+    this.currentContact = this.contactsArray[this.id];
   }
 
   setCurrentContact(id: number): IContact {

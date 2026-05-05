@@ -7,7 +7,7 @@
   position: relative;
   overflow: hidden;
   width: 100%;
-  height: 100vh;
+  height: calc(100dvh - var(--header-h));
 }
 
 * {
@@ -42,8 +42,8 @@
 
 .heading {
   position: absolute;
-  left: 743px;
-  top: 206px;
+  left: 511px;
+  top: 110px;
   width: 569px;
   height: 73px;
   display: flex;
@@ -78,17 +78,17 @@
 
 .list-panel {
   position: absolute;
-  top: 96px;
-  left: 232px;
+  top: 0;
+  left: 0;
   width: 456px;
   background: #fff;
   box-shadow: 4px 0 6px rgba(0, 0, 0, 0.08);
-  height: calc(100vh - 100px);
+  height: 100%;
   overflow: hidden;
 
 
   .list-panel__inner {
-    max-height: calc(100vh - 100px);
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -504,11 +504,11 @@ div.contact-row:active {
   .list-panel {
     position: absolute;
     left: 0px;
-    top: 80px;
+    top: 0;
   }
 
   .list-panel__inner {
-    height: calc(100vh - 176px);
+    height: 100%;
 
     .contacts-list {
       width: 100%;
@@ -545,7 +545,7 @@ div.contact-row:active {
   .list-panel {
     position: absolute;
     left: 0px;
-    top: 80px;
+    top: 0;
     width: 100%;
     height: auto;
 
@@ -555,7 +555,7 @@ div.contact-row:active {
     }
 
     .list-panel__inner {
-      height: calc(100vh - 140px);
+      height: calc(100dvh - 80px);
 
       .contacts-list {
         width: 100%;
@@ -604,7 +604,7 @@ div.contact-row:active {
   .list-panel {
     position: absolute;
     left: 0px;
-    top: 80px;
+    top: 0;
   }
 }
 
