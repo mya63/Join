@@ -30,6 +30,7 @@ export class FbService {
   contactsGroups: string[] = [];
   showEditContact: boolean = false;
   contactlistHidden = false;
+  pendingNewContactEmail = '';
   myWidth: number = window.innerWidth;
   id: number = 0;
   i: number[] = [0];
@@ -74,6 +75,7 @@ export class FbService {
   }
 
   async addContact(contact: IContact) {
+    this.pendingNewContactEmail = contact.email;
     await addDoc(this.contactsCollection, { ownerId: this.getCurrentUserId(), date: new Date(), color: this.getRandomColorOld(), ...contact });
   }
 
@@ -156,6 +158,16 @@ export class FbService {
       this.id = 0;
       this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
       return;
+    }
+
+    if (this.pendingNewContactEmail) {
+      const newIdx = this.contactsArray.findIndex(c => c.email === this.pendingNewContactEmail);
+      if (newIdx !== -1) {
+        this.id = newIdx;
+        this.currentContact = this.contactsArray[newIdx];
+        this.pendingNewContactEmail = '';
+        return;
+      }
     }
 
     if (this.id < 0 || this.id >= this.contactsArray.length) {

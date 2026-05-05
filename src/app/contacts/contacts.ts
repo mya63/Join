@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../services/fb-service';
@@ -15,7 +15,6 @@ import { EditMobile } from './edit-mobile/edit-mobile';
   imports: [CommonModule, FormsModule, AddDesktop, AddMobile, Created, DetailsCard, MobileMenu, EditMobile],
   templateUrl: './contacts.html',
   styleUrls: ['./contacts.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Contacts {
   fbService = inject(FbService);
@@ -77,8 +76,10 @@ export class Contacts {
     this.deleteError.set(false);
     this.fbService.id = index;
     this.currentContact = this.fbService.setCurrentContact(index);
+    const firstName = this.currentContact.name || '';
+    const lastName = this.currentContact.surname || '';
     this.currentContactInitials =
-      this.currentContact.name.substring(0, 1).toUpperCase() + this.currentContact.surname.substring(0, 1).toUpperCase();
+      firstName.substring(0, 1).toUpperCase() + lastName.substring(0, 1).toUpperCase();
     this.myWidth < 1100 ? this.fbService.contactlistHidden = true : null;
   }
 

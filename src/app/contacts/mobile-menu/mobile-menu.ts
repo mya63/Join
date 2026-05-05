@@ -7,7 +7,6 @@ import { FbService } from '../../services/fb-service';
   imports: [CommonModule],
   templateUrl: './mobile-menu.html',
   styleUrls: ['./mobile-menu.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileMenu {
   fbService = inject(FbService);

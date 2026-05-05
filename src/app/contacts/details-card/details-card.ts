@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, DoCheck, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IContact } from '../../interfaces/i-contact';
 import { FbService } from '../../services/fb-service';
@@ -10,17 +10,43 @@ import { EditMobile } from '../edit-mobile/edit-mobile';
   imports: [CommonModule, EditDesktop, EditMobile],
   templateUrl: './details-card.html',
   styleUrl: './details-card.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DetailsCard {
   private fbService = inject(FbService);
+  private emptyContact: IContact = { name: '', surname: '', email: '', phone: '' } as IContact;
 
-  slide = false;
+  slideClass: 'slideInFromRightA' | 'slideInFromRightB' = 'slideInFromRightA';
   currentContactId = -1;
   deleteError = signal(false);
 
   get currentContact(): IContact {
-    return this.fbService.currentContact;
+    const selected = this.fbService.contactsArray[this.fbService.id];
+    const base = selected ?? this.fbService.currentContact ?? this.emptyContact;
+    return {
+      ...base,
+      name: base.name || '',
+      surname: base.surname || '',
+      email: base.email || '',
+      phone: base.phone || '',
+    } as IContact;
+  }
+
+  get initials(): string {
+    const nameInitial = this.currentContact.name.substring(0, 1).toUpperCase();
+    const surnameInitial = this.currentContact.surname.substring(0, 1).toUpperCase();
+    return `${nameInitial}${surnameInitial}`;
+  }
+
+  get fullName(): string {
+    return `${this.currentContact.name} ${this.currentContact.surname}`.trim();
+  }
+
+  ngDoCheck(): void {
+    if (this.fbService.id !== this.currentContactId) {
+      this.deleteError.set(false);
+      this.currentContactId = this.fbService.id;
+      this.slideClass = this.slideClass === 'slideInFromRightA' ? 'slideInFromRightB' : 'slideInFromRightA';
+    }
   }
 
   async delContact() {
@@ -42,18 +68,6 @@ export class DetailsCard {
 
   showMobile() {
     return this.fbService.showEditContact;
-  }
-
-  setSlide() {
-    if (this.fbService.id != this.currentContactId) {
-      this.slide = true;
-      this.deleteError.set(false);
-      setTimeout(() => {
-        this.currentContactId = this.fbService.id;
-        this.slide = false;
-      }, 100);
-    }
-    return this.slide;
   }
 
   closeMobileContactCard() {

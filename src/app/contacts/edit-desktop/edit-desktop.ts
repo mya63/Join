@@ -9,7 +9,6 @@ import { FbService } from '../../services/fb-service';
   imports: [CommonModule, FormsModule],
   templateUrl: './edit-desktop.html',
   styleUrls: ['./edit-desktop.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditDesktop {
   private fbService = inject(FbService);

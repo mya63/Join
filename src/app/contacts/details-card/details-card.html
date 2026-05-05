@@ -1,20 +1,21 @@
 <section>
-  <div class="floating-contact" [class.slideInFromRight]="setSlide()">
+  <div class="floating-contact"
+       [class.slideInFromRightA]="slideClass === 'slideInFromRightA'"
+       [class.slideInFromRightB]="slideClass === 'slideInFromRightB'">
     <!-- Header section with avatar and name -->
     <div class="header-frame">
       <!-- Avatar circle -->
       <div class="avatar-container">
         <div class="avatar-circle" [style.background]="currentContact.color">
           <span class="avatar-initials">
-            {{ currentContact.name.substring(0, 1).toUpperCase() + currentContact.surname.substring(0, 1).toUpperCase()
-            }}</span>
+            {{ initials }}</span>
         </div>
       </div>
 
       <!-- Name and actions section -->
       <div class="name-section">
         <div class="name-container">
-          <h2 class="contact-name">{{ currentContact.name + ' ' + currentContact.surname }}</h2>
+          <h2 class="contact-name">{{ fullName }}</h2>
 
         </div>
         <!-- Action buttons -->

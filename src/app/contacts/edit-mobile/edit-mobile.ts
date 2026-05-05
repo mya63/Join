@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -9,7 +9,6 @@ import { FbService } from '../../services/fb-service';
   imports: [CommonModule, FormsModule],
   templateUrl: './edit-mobile.html',
   styleUrls: ['./edit-mobile.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditMobile {
   private fbService = inject(FbService);
