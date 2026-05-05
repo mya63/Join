@@ -12,6 +12,7 @@ import { FbAuthService } from '../../services/fb-auth-service';
 })
 export class SignUp {
   constructor(private router: Router, private authService: FbAuthService) {}
+  private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 
   signUpData = {
     name: '',
@@ -49,7 +50,11 @@ export class SignUp {
       this.signUpErrors.name = 'Name is too short.';
       return;
     }
-    if (!/^[A-ZÄÖÜ][a-zäöüß]+$/.test(name)) {
+    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name)) {
+      this.signUpErrors.name = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
+      return;
+    }
+    if (!/^[A-ZÄÖÜ]/.test(name)) {
       this.signUpErrors.name = 'Please start with a capital letter.';
     }
   }
@@ -65,7 +70,11 @@ export class SignUp {
       this.signUpErrors.surname = 'Surname is too short.';
       return;
     }
-    if (!/^[A-ZÄÖÜ][a-zäöüß]+(?: [A-ZÄÖÜ][a-zäöüß]+)*$/.test(surname)) {
+    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(surname)) {
+      this.signUpErrors.surname = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
+      return;
+    }
+    if (!/^[A-ZÄÖÜ]/.test(surname)) {
       this.signUpErrors.surname = 'Please start with a capital letter.';
     }
   }
@@ -76,6 +85,10 @@ export class SignUp {
       this.signUpErrors.name = '';
       return;
     }
+    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name)) {
+      this.signUpErrors.name = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
+      return;
+    }
     this.signUpErrors.name = /^[A-ZÄÖÜ]/.test(name) ? '' : 'Please start with a capital letter.';
   }
 
@@ -83,6 +96,10 @@ export class SignUp {
     const surname = this.signUpData.surname.trim();
     if (!surname) {
       this.signUpErrors.surname = '';
+      return;
+    }
+    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(surname)) {
+      this.signUpErrors.surname = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
       return;
     }
     this.signUpErrors.surname = /^[A-ZÄÖÜ]/.test(surname)
@@ -97,10 +114,20 @@ export class SignUp {
       this.signUpErrors.email = 'Please enter your email.';
       return;
     }
-    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!pattern.test(email)) {
+    if (!this.emailPattern.test(email)) {
       this.signUpErrors.email = 'Please enter a valid email address.';
     }
+  }
+
+  onEmailInput(): void {
+    const email = this.signUpData.email.trim();
+    if (!email) {
+      this.signUpErrors.email = '';
+      return;
+    }
+    this.signUpErrors.email = this.emailPattern.test(email)
+      ? ''
+      : 'Please enter a valid email address.';
   }
 
   private validatePassword(): void {

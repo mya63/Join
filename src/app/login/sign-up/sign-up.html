@@ -53,9 +53,10 @@
 
         <div class="input-group mya-input-group">
           <input
-            type="email"
+            type="text"
             name="email"
             [(ngModel)]="signUpData.email"
+            (ngModelChange)="onEmailInput()"
             placeholder="Email"
             class="signup-input mya-input-with-icon"
             [class.input-error]="signUpErrors.email"

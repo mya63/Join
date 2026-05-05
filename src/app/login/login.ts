@@ -18,9 +18,39 @@ export class Login {
   password: string = '';
 
   loginErrors: { email: string; password: string; firebase: string } = { email: '', password: '', firebase: '' };
+  private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 
   private resetErrors(): void {
     this.loginErrors = { email: '', password: '', firebase: '' };
+  }
+
+  private validateEmail(): void {
+    const email = this.email.trim();
+    this.loginErrors.email = '';
+    if (!email) {
+      this.loginErrors.email = 'Please enter your email.';
+      return;
+    }
+    if (!this.emailPattern.test(email)) {
+      this.loginErrors.email = 'Please enter a valid email address.';
+    }
+  }
+
+  onEmailInput(): void {
+    const email = this.email.trim();
+    if (!email) {
+      this.loginErrors.email = '';
+      return;
+    }
+    this.loginErrors.email = this.emailPattern.test(email)
+      ? ''
+      : 'Please enter a valid email address.';
+  }
+
+  onPasswordInput(): void {
+    if (this.password) {
+      this.loginErrors.password = '';
+    }
   }
 
   goToSignUp(): void {
@@ -51,20 +81,18 @@ export class Login {
   }
 
   onSubmit(): void {
-this.resetErrors();
+    this.resetErrors();
+    this.validateEmail();
 
-if (!this.email) {
-  this.loginErrors.email = 'Please enter your email.';
-}
-if (!this.password) {
-  this.loginErrors.password = 'Please enter your password.';
-}
-if (this.loginErrors.email || this.loginErrors.password) {
-  return;
-}
-this.authService.login(this.email, this.password).catch(error => {
-  this.handleFirebaseError(error);
-});
+    if (!this.password) {
+      this.loginErrors.password = 'Please enter your password.';
+    }
+    if (this.loginErrors.email || this.loginErrors.password) {
+      return;
+    }
+    this.authService.login(this.email.trim(), this.password).catch(error => {
+      this.handleFirebaseError(error);
+    });
   }
 
   onGuestLogin(): void {

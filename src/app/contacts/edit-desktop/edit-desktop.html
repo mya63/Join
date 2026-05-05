@@ -71,7 +71,7 @@
         <!-- Email Input with Validation -->
         <div class="form-field">
           <div class="input-wrapper">
-            <input type="email" id="email" [(ngModel)]="editedContact.email" name="email" placeholder="Email" required
+            <input type="text" id="email" [(ngModel)]="editedContact.email" name="email" placeholder="Email" required
               email autocomplete="email" #emailInput="ngModel"
               [class.invalid]="emailInput.invalid && emailInput.touched">
             <img src="assets/img/contacts/add-desktop/mail-icon-only.svg" alt="Email Icon" class="input-icon">

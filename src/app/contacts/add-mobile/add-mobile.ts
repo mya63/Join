@@ -81,7 +81,15 @@ export class AddMobile {
     if (!name || name.length === 0) {
       return false; // Leer ist kein Kapitalisierungsfehler
     }
-    return name.charAt(0) !== name.charAt(0).toUpperCase();
+    return !/^[A-ZÄÖÜ]/.test(name);
+  }
+
+  /** Prüft ob der Name nur erlaubte Zeichen enthält */
+  hasInvalidCharacters(name: string | undefined): boolean {
+    if (!name || name.length === 0) {
+      return false;
+    }
+    return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
   }
 
   /** Erweiterte Email-Validierung: Domain gefolgt von Punkt und Top-Level-Domain */
@@ -96,7 +104,7 @@ export class AddMobile {
     }
 
     // Erweiterte Regex: mindestens 1 Zeichen vor @, dann @, dann Domain (min. 2 Buchstaben), dann Punkt, dann TLD (min. 2 Buchstaben)
-    const emailRegex = /^[^\s@]+@[^\s@]{1,}\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
     return !emailRegex.test(email);
   }
 
@@ -123,8 +131,9 @@ export class AddMobile {
       return false;
     }
 
-    // Custom Name/Surname-Kapitalisierung
-    if (this.hasInvalidCapitalization(this.contact.name) ||
+    // Custom Name/Surname-Kapitalisierung und Zeichen
+    if (this.hasInvalidCharacters(this.contact.name) || this.hasInvalidCharacters(this.contact.surname) ||
+      this.hasInvalidCapitalization(this.contact.name) ||
       this.hasInvalidCapitalization(this.contact.surname)) {
       return false;
     }

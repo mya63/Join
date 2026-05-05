@@ -66,8 +66,8 @@ export class AddDesktop {
     this.markAllFieldsAsTouched();
     
     // Prüfe ob alle Validierungen bestanden sind
-    const isNameValid = !!this.contact.name && !this.hasInvalidCapitalization(this.contact.name);
-    const isSurnameValid = !!this.contact.surname && !this.hasInvalidCapitalization(this.contact.surname);
+    const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
+    const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);
     const isPhoneValid = !this.contact.phone || !this.hasInvalidPhoneFormat(this.contact.phone);
     
@@ -88,10 +88,16 @@ export class AddDesktop {
     if (!name || name.length === 0) {
       return false; // Leer ist kein Kapitalisierungsfehler
     }
-    return name.charAt(0) !== name.charAt(0).toUpperCase();
+    return !/^[A-ZÄÖÜ]/.test(name);
   }
 
-  /** Erweiterte Email-Validierung: Domain gefolgt von Punkt und Top-Level-Domain */
+  /** Prüft ob der Name nur erlaubte Zeichen enthält */
+  hasInvalidCharacters(name: string | undefined): boolean {
+    if (!name || name.length === 0) {
+      return false;
+    }
+    return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
+  }
   hasInvalidEmailFormat(email: string | undefined): boolean {
     if (!email || email.length === 0) {
       return false; // Leer ist kein Format-Fehler (wird durch required behandelt)
@@ -103,7 +109,7 @@ export class AddDesktop {
     }
     
     // Erweiterte Regex: mindestens 1 Zeichen vor @, dann @, dann Domain (min. 2 Buchstaben), dann Punkt, dann TLD (min. 2 Buchstaben)
-    const emailRegex = /^[^\s@]+@[^\s@]{1,}\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
     return !emailRegex.test(email);
   }
 
@@ -133,8 +139,8 @@ export class AddDesktop {
     }
     
     // Verwende die gleiche Validierungslogik wie bei validateAllFields
-    const isNameValid = !!this.contact.name && !this.hasInvalidCapitalization(this.contact.name);
-    const isSurnameValid = !!this.contact.surname && !this.hasInvalidCapitalization(this.contact.surname);
+    const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
+    const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);
     const isPhoneValid = !this.contact.phone || !this.hasInvalidPhoneFormat(this.contact.phone);
     

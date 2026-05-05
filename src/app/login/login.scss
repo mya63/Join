@@ -68,6 +68,7 @@
   border: none;
   background: #2a3647;
   color: #ffffff;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -113,9 +114,10 @@
   padding: 0 16px;
   font-size: 16px;
   box-sizing: border-box;
+  outline: none;
 }
 
-.login-input:focus {
+.login-input:focus:not(.input-error) {
   outline: none;
   border-color: #29abe2;
 }
@@ -135,7 +137,7 @@
   border-radius: 10px;
   border: none;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -245,10 +247,11 @@ button {
 .input-group.mya-input-group {
   position: relative;
   width: 100%;
+  margin-bottom: 28px;
 }
 
 .mya-input-with-icon {
-  padding-right: 52px;
+  padding-right: 48px;
 }
 
 .login-input-icon {
@@ -256,17 +259,32 @@ button {
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
 }
 
-.input-error {
-  border: 1px solid #e60026;
+.input-error,
+.input-error:focus {
+  border: 1px solid #ff8190;
 }
 
 .error-text {
-  margin-top: 4px;
+  margin: 4px 0 0 0;
   font-size: 12px;
   color: #e60026;
+  line-height: 1.4;
+}
+
+.mya-input-group .error-text {
+  position: absolute;
+  bottom: -18px;
+  left: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.login-form .input-group {
+  margin-bottom: 6px;
 }

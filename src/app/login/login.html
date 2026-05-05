@@ -19,20 +19,22 @@
 
         <form (ngSubmit)="onSubmit()" class="login-form">
           <div class="input-group mya-input-group">
-            <input type="email" name="email" [(ngModel)]="email" placeholder="Email" required
-              class="login-input mya-input-with-icon" [ngClass]="{ 'input-error': loginErrors.email }" />
+            <input type="text" name="email" [(ngModel)]="email" (ngModelChange)="onEmailInput()" placeholder="Email" required
+              class="login-input mya-input-with-icon" [class.input-error]="!!loginErrors.email" />
             <img src="assets/img/login/mail.svg" alt="" class="login-input-icon" />
+            @if (loginErrors.email) {
+              <p class="error-text">{{ loginErrors.email }}</p>
+            }
           </div>
-
-          <p class="error-text" *ngIf="loginErrors.email">{{ loginErrors.email }}</p>
 
           <div class="input-group mya-input-group">
-            <input type="password" name="password" [(ngModel)]="password" placeholder="Password" required
-              class="login-input mya-input-with-icon" [ngClass]="{ 'input-error': loginErrors.password }" />
+            <input type="password" name="password" [(ngModel)]="password" (ngModelChange)="onPasswordInput()" placeholder="Password" required
+              class="login-input mya-input-with-icon" [class.input-error]="!!loginErrors.password" />
             <img src="assets/img/login/lock.svg" alt="" class="login-input-icon" />
+            @if (loginErrors.password) {
+              <p class="error-text">{{ loginErrors.password }}</p>
+            }
           </div>
-
-          <p class="error-text" *ngIf="loginErrors.password">{{ loginErrors.password }}</p>
 
           <div class="login-actions">
             <button type="submit" class="login-btn login-btn-primary">Log In</button>

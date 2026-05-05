@@ -79,7 +79,15 @@ hasInvalidCapitalization(name: string | undefined): boolean {
 if (!name || name.length === 0) {
 return false; // Leer ist kein Kapitalisierungsfehler
 }
-return name.charAt(0) !== name.charAt(0).toUpperCase();
+return !/^[A-ZÄÖÜ]/.test(name);
+}
+
+/** Prüft ob der Name nur erlaubte Zeichen enthält */
+hasInvalidCharacters(name: string | undefined): boolean {
+if (!name || name.length === 0) {
+return false;
+}
+return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
 }
 
 /** Erweiterte Email-Validierung: Domain gefolgt von Punkt und Top-Level-Domain */
@@ -94,7 +102,7 @@ return true;
 }
 
 // Erweiterte Regex: mindestens 1 Zeichen vor @, dann @, dann Domain (min. 2 Buchstaben), dann Punkt, dann TLD (min. 2 Buchstaben)
-const emailRegex = /^[^\s@]+@[^\s@]{1,}\.[a-zA-Z]{2,}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 return !emailRegex.test(email);
 }
 
