@@ -51,25 +51,37 @@ export class Summary implements OnInit, OnDestroy {
         this.currentUserName = '';
       } else {
         this.isGuest = false;
-        this.currentUserName = await this.loadDisplayName(user.uid, user.displayName, user.email);
+        this.currentUserName = await this.loadDisplayName(user.uid);
       }
       this.cdr.detectChanges();
     });
   }
 
-  private async loadDisplayName(uid: string, fallbackDisplay: string | null, email: string | null): Promise<string> {
+  private async loadDisplayName(uid: string): Promise<string> {
     try {
-      const usersRef = collection(this.db, 'users');
-      const q = query(usersRef, where('uid', '==', uid));
-      const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        const data = snapshot.docs[0].data();
+      const contactsRef = collection(this.db, 'contacts');
+      const contactByUid = query(contactsRef, where('uid', '==', uid));
+      const contactByUidSnapshot = await getDocs(contactByUid);
+      if (!contactByUidSnapshot.empty) {
+        const data = contactByUidSnapshot.docs[0].data();
         const name = data['name'] || '';
         const surname = data['surname'] || '';
         if (name || surname) return `${name} ${surname}`.trim();
       }
-    } catch { /* fall through */ }
-    return fallbackDisplay || email?.split('@')[0] || 'User';
+
+      const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
+      const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
+      if (!contactByOwnerIdSnapshot.empty) {
+        const data = contactByOwnerIdSnapshot.docs[0].data();
+        const name = data['name'] || '';
+        const surname = data['surname'] || '';
+        if (name || surname) return `${name} ${surname}`.trim();
+      }
+    } catch {
+      // Keep fallback generic if Firestore fetch fails.
+    }
+
+    return 'User';
   }
 
   /**

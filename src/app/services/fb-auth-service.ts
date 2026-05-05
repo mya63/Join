@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, User } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Firestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, query, where, getDocs } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,6 @@ export class FbAuthService {
   async signUp(email: string, password: string, name = '', surname = '') {
     try {
       const result = await createUserWithEmailAndPassword(this.auth, email, password);
-      await this.saveUserToFirestore(result.user, name, surname);
       await this.ensureSelfContact(result.user, name, surname);
       this.router.navigate(['/contacts']);
     } catch (error) {
@@ -47,19 +46,11 @@ export class FbAuthService {
     return this.auth.currentUser?.uid || null;
   }
 
-  /** Löscht den aktuell eingeloggten Auth-User + seinen users-Eintrag und loggt aus. */
+  /** Löscht den aktuell eingeloggten Auth-User und loggt aus. */
   async deleteCurrentUserAccount(): Promise<void> {
     const user = this.auth.currentUser;
     if (!user) return;
     try {
-      // users-Collection-Eintrag löschen
-      const usersCollection = collection(this.db, 'users');
-      const q = query(usersCollection, where('uid', '==', user.uid));
-      const snapshot = await getDocs(q);
-      for (const userDoc of snapshot.docs) {
-        await deleteDoc(doc(this.db, 'users', userDoc.id));
-      }
-      // Firebase Auth Account löschen
       await deleteUser(user);
       this.router.navigate(['/login']);
     } catch (error: any) {
@@ -71,25 +62,6 @@ export class FbAuthService {
         console.error('Error deleting user account:', error);
         throw error;
       }
-    }
-  }
-
-  private async saveUserToFirestore(user: User, name: string, surname: string) {
-    try {
-      const usersCollection = collection(this.db, 'users');
-      const fallbackName = this.getFallbackName(user.email || '');
-      await addDoc(usersCollection, {
-        uid: user.uid,
-        ownerId: user.uid,
-        name: name || fallbackName,
-        surname: surname || '',
-        email: user.email,
-        phone: '',
-        color: this.getRandomColor(),
-        createdAt: new Date()
-      });
-    } catch (error) {
-      console.error('Error saving user to Firestore:', error);
     }
   }
 
