@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { ITask } from '../interfaces/i-task';
 import { FbService } from './fb-service';
 import { BehaviorSubject } from 'rxjs';
@@ -12,8 +13,9 @@ import { BehaviorSubject } from 'rxjs';
 export class FbTaskService {
   private db = inject(Firestore);
   private fbService = inject(FbService);
+  private auth = inject(Auth);
 
-  myTasks;
+  myTasks: (() => void) | null;
   task: ITask;
   newTask: ITask;
   currentTask: ITask;
@@ -26,7 +28,6 @@ export class FbTaskService {
   tasksUpdated$ = this.tasksUpdatedSubject.asObservable();
 
   tasksCollection = collection(this.db, 'tasks');
-  tasksCollectionFiltered = query(this.tasksCollection, where('ownerId', '==', this.fbService.getCurrentUserId()));
 
   constructor() {
 
@@ -48,15 +49,28 @@ export class FbTaskService {
       subTasks: this.task.subTasks || [],
     };
 
-    this.myTasks = onSnapshot(this.tasksCollectionFiltered, (snapshot) => {
-      //console.log('Firebase snapshot received, updating tasks');
+    this.myTasks = null;
+
+    // Always bind listener to the UID provided by Firebase auth state.
+    onAuthStateChanged(this.auth, (user) => {
+      const userId = user?.uid || 'guest';
+      this.newTask.ownerId = userId;
+      this.startTasksListener(userId);
+    });
+  }
+
+  private startTasksListener(userId: string): void {
+    if (this.myTasks) {
+      this.myTasks();
+    }
+
+    const tasksCollectionFiltered = query(this.tasksCollection, where('ownerId', '==', userId));
+    this.myTasks = onSnapshot(tasksCollectionFiltered, (snapshot) => {
       this.tasksArray = [];
       snapshot.forEach((element) => {
         this.tasksArray.push({ dbid: element.id, ...element.data() } as ITask);
       });
-      //console.log('Raw tasks from Firebase:', this.tasksArray);
       this.tasksArray = this.tasksArray.sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-      //console.log('Sorted tasks:', this.tasksArray);
 
       // Notify components that tasks have been updated
       this.tasksUpdatedSubject.next([...this.tasksArray]);
@@ -126,7 +140,9 @@ export class FbTaskService {
 
 
   onDestroy() {
-    this.myTasks();
+    if (this.myTasks) {
+      this.myTasks();
+    }
   }
 
 }

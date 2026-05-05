@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
@@ -16,6 +16,7 @@ export class Summary implements OnInit, OnDestroy {
   private auth = inject(Auth);
   private db = inject(Firestore);
   private fbTaskService = inject(FbTaskService);
+  private cdr = inject(ChangeDetectorRef);
   
   currentUserName = '';
   isGuest = false;
@@ -52,6 +53,7 @@ export class Summary implements OnInit, OnDestroy {
         this.isGuest = false;
         this.currentUserName = await this.loadDisplayName(user.uid, user.displayName, user.email);
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -77,6 +79,7 @@ export class Summary implements OnInit, OnDestroy {
     this.subscription.add(
       this.fbTaskService.tasksUpdated$.subscribe(() => {
         this.calculateMetrics();
+        this.cdr.detectChanges();
       })
     );
     this.calculateMetrics();
