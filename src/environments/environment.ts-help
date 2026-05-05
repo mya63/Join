@@ -1,5 +1,8 @@
 export const environment = {
   production: false,
+  featureFlags: {
+    enableOwnerFilter: false,
+  },
   firebaseConfig: {
     apiKey: 'YOUR_API_KEY',
     authDomain: 'YOUR_AUTH_DOMAIN',

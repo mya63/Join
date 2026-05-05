@@ -36,8 +36,8 @@
 
 .back-button {
   position: absolute;
-  left: 0;
-  top: 50%;
+  left: -24px;
+  top: calc(50% - 2px);
   transform: translateY(-50%);
   border: none;
   background: transparent;
@@ -58,13 +58,14 @@
 }
 
 .signup-card {
-  max-width: 500px;
+  width: 100%;
+  max-width: 598px;
   background: #ffffff;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
   margin: 0 auto;
   text-align: center;
   border-radius: 30px;
-  padding: 48px 56px;
+  padding: 48px 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -150,6 +151,7 @@
 .privacy-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 14px;
 }
@@ -167,7 +169,7 @@
   background: #2a3647;
   color: #ffffff;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 700;
   cursor: pointer;
   align-self: center;
 }
@@ -188,7 +190,7 @@
   cursor: pointer;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 770px) {
   .signup-frame {
     padding: 32px 16px;
   }
@@ -200,6 +202,17 @@
 
   .signup-title {
     font-size: 28px;
+  }
+
+  .back-button {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .back-icon {
+    width: 24px;
+    height: 24px;
   }
 }
 

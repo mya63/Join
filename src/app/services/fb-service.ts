@@ -3,6 +3,7 @@ import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query,
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { IContact } from '../interfaces/i-contact';
+import { environment } from '../../environments/environment';
 //import { EditDesktop } from '../contacts/edit-desktop/edit-desktop';
 import { Contacts } from '../contacts/contacts';
 import { FbAuthService } from './fb-auth-service';
@@ -132,7 +133,10 @@ export class FbService {
 
   private applyOwnerFilter(): void {
     const userId = this.getCurrentUserId();
-    this.contactsArray = this.allContacts.filter(contact => contact.ownerId === userId);
+    const filterEnabled = environment.featureFlags?.enableOwnerFilter === true;
+    this.contactsArray = filterEnabled
+      ? this.allContacts.filter(contact => contact.ownerId === userId)
+      : [...this.allContacts];
 
     this.contactsGroups = Array.from(
       new Set(this.contactsArray.map(contact => (contact.name || '').charAt(0).toUpperCase()).filter(Boolean))

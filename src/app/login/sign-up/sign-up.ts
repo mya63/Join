@@ -15,6 +15,7 @@ export class SignUp {
 
   signUpData = {
     name: '',
+    surname: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -23,6 +24,7 @@ export class SignUp {
 
   signUpErrors: any = {
     name: '',
+    surname: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -47,9 +49,45 @@ export class SignUp {
       this.signUpErrors.name = 'Name is too short.';
       return;
     }
-    if (!/^[A-ZÄÖÜ][a-zäöüß]+(?: [A-ZÄÖÜ][a-zäöüß]+)*$/.test(name)) {
+    if (!/^[A-ZÄÖÜ][a-zäöüß]+$/.test(name)) {
       this.signUpErrors.name = 'Please start with a capital letter.';
     }
+  }
+
+  private validateSurname(): void {
+    const surname = this.signUpData.surname.trim();
+    this.signUpErrors.surname = '';
+    if (!surname) {
+      this.signUpErrors.surname = 'Please enter your surname.';
+      return;
+    }
+    if (surname.length < 2) {
+      this.signUpErrors.surname = 'Surname is too short.';
+      return;
+    }
+    if (!/^[A-ZÄÖÜ][a-zäöüß]+(?: [A-ZÄÖÜ][a-zäöüß]+)*$/.test(surname)) {
+      this.signUpErrors.surname = 'Please start with a capital letter.';
+    }
+  }
+
+  onNameInput(): void {
+    const name = this.signUpData.name.trim();
+    if (!name) {
+      this.signUpErrors.name = '';
+      return;
+    }
+    this.signUpErrors.name = /^[A-ZÄÖÜ]/.test(name) ? '' : 'Please start with a capital letter.';
+  }
+
+  onSurnameInput(): void {
+    const surname = this.signUpData.surname.trim();
+    if (!surname) {
+      this.signUpErrors.surname = '';
+      return;
+    }
+    this.signUpErrors.surname = /^[A-ZÄÖÜ]/.test(surname)
+      ? ''
+      : 'Please start with a capital letter.';
   }
 
   private validateEmail(): void {
@@ -128,6 +166,7 @@ export class SignUp {
   onSubmit(): void {
     this.resetErrors();
     this.validateName();
+    this.validateSurname();
     this.validateEmail();
     this.validatePassword();
     this.validateConfirmPassword();
@@ -135,14 +174,11 @@ export class SignUp {
     if (this.hasErrors()) {
       return;
     }
-    const parts = this.signUpData.name.trim().split(/\s+/);
-    const firstName = parts[0];
-    const lastName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
     this.authService.signUp(
       this.signUpData.email,
       this.signUpData.password,
-      firstName,
-      lastName
+      this.signUpData.name.trim(),
+      this.signUpData.surname.trim()
     ).catch(error => {
       this.handleFirebaseError(error);
     });

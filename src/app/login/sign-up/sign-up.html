@@ -24,6 +24,7 @@
             type="text"
             name="name"
             [(ngModel)]="signUpData.name"
+            (ngModelChange)="onNameInput()"
             placeholder="Name"
             class="signup-input mya-input-with-icon"
             [class.input-error]="signUpErrors.name"
@@ -31,6 +32,22 @@
           <img src="assets/img/login/signup/person.png" class="signup-input-icon" alt="" />
           @if (signUpErrors.name) {
             <p class="error-text">{{ signUpErrors.name }}</p>
+          }
+        </div>
+
+        <div class="input-group mya-input-group">
+          <input
+            type="text"
+            name="surname"
+            [(ngModel)]="signUpData.surname"
+            (ngModelChange)="onSurnameInput()"
+            placeholder="Surname"
+            class="signup-input mya-input-with-icon"
+            [class.input-error]="signUpErrors.surname"
+          />
+          <img src="assets/img/login/signup/person.png" class="signup-input-icon" alt="" />
+          @if (signUpErrors.surname) {
+            <p class="error-text">{{ signUpErrors.surname }}</p>
           }
         </div>
 
