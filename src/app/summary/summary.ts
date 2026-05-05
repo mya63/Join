@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectorRef, inject, Injector, runInInjectionContext, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
@@ -17,6 +17,7 @@ export class Summary implements OnInit, OnDestroy {
   private db = inject(Firestore);
   private fbTaskService = inject(FbTaskService);
   private cdr = inject(ChangeDetectorRef);
+  private injector = inject(Injector);
   
   currentUserName = '';
   isGuest = false;
@@ -45,7 +46,7 @@ export class Summary implements OnInit, OnDestroy {
    * Reads auth state and prepares greeting context.
    */
   private checkAuthStatus(): void {
-    onAuthStateChanged(this.auth, async (user) => {
+    runInInjectionContext(this.injector, () => onAuthStateChanged(this.auth, async (user) => {
       if (!user) {
         this.isGuest = true;
         this.currentUserName = '';
@@ -54,29 +55,33 @@ export class Summary implements OnInit, OnDestroy {
         this.currentUserName = await this.loadDisplayName(user.uid);
       }
       this.cdr.detectChanges();
-    });
+    }));
   }
 
   private async loadDisplayName(uid: string): Promise<string> {
     try {
-      const contactsRef = collection(this.db, 'contacts');
-      const contactByUid = query(contactsRef, where('uid', '==', uid));
-      const contactByUidSnapshot = await getDocs(contactByUid);
-      if (!contactByUidSnapshot.empty) {
-        const data = contactByUidSnapshot.docs[0].data();
-        const name = data['name'] || '';
-        const surname = data['surname'] || '';
-        if (name || surname) return `${name} ${surname}`.trim();
-      }
+      return await runInInjectionContext(this.injector, async () => {
+        const contactsRef = collection(this.db, 'contacts');
+        const contactByUid = query(contactsRef, where('uid', '==', uid));
+        const contactByUidSnapshot = await getDocs(contactByUid);
+        if (!contactByUidSnapshot.empty) {
+          const data = contactByUidSnapshot.docs[0].data();
+          const name = data['name'] || '';
+          const surname = data['surname'] || '';
+          if (name || surname) return `${name} ${surname}`.trim();
+        }
 
-      const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
-      const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
-      if (!contactByOwnerIdSnapshot.empty) {
-        const data = contactByOwnerIdSnapshot.docs[0].data();
-        const name = data['name'] || '';
-        const surname = data['surname'] || '';
-        if (name || surname) return `${name} ${surname}`.trim();
-      }
+        const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
+        const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
+        if (!contactByOwnerIdSnapshot.empty) {
+          const data = contactByOwnerIdSnapshot.docs[0].data();
+          const name = data['name'] || '';
+          const surname = data['surname'] || '';
+          if (name || surname) return `${name} ${surname}`.trim();
+        }
+
+        return 'User';
+      });
     } catch {
       // Keep fallback generic if Firestore fetch fails.
     }
