@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,6 +14,7 @@ import { FbAuthService } from '../../services/fb-auth-service';
 export class SignUp {
   private router = inject(Router);
   private authService = inject(FbAuthService);
+  private cdr = inject(ChangeDetectorRef);
   private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 
   signUpData = {
@@ -192,7 +193,7 @@ export class SignUp {
     }
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.resetErrors();
     this.validateName();
     this.validateSurname();
@@ -203,6 +204,14 @@ export class SignUp {
     if (this.hasErrors()) {
       return;
     }
+
+    const alreadyRegistered = await this.authService.isEmailRegistered(this.signUpData.email);
+    if (alreadyRegistered) {
+      this.signUpErrors.email = 'This email address is already registered.';
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.authService.signUp(
       this.signUpData.email,
       this.signUpData.password,
@@ -210,6 +219,7 @@ export class SignUp {
       this.signUpData.surname.trim()
     ).catch(error => {
       this.handleFirebaseError(error);
+      this.cdr.markForCheck();
     });
   }
 

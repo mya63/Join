@@ -91,6 +91,14 @@ export class FbAuthService {
     }
   }
 
+  async isEmailRegistered(email: string): Promise<boolean> {
+    const contactsCollection = collection(this.db, 'contacts');
+    const q = query(contactsCollection, where('email', '==', email.trim().toLowerCase()));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
+
   private getFallbackName(email: string): string {
     const local = email.split('@')[0] || 'User';
     if (!local) {
