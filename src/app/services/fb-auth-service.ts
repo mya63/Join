@@ -27,7 +27,7 @@ export class FbAuthService {
     try {
       const result = await signInWithEmailAndPassword(this.auth, email, password);
       await this.ensureSelfContact(result.user);
-      this.router.navigate(['/contacts']);
+      this.router.navigate(['/summary']);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
