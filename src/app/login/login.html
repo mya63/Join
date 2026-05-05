@@ -29,9 +29,11 @@
 
           <div class="input-group mya-input-group">
             <input type="password" name="password" [(ngModel)]="password" (ngModelChange)="onPasswordInput()" placeholder="Password" required
-              class="login-input mya-input-with-icon" [class.input-error]="!!loginErrors.password" />
+              class="login-input mya-input-with-icon" [class.input-error]="!!loginErrors.password || !!loginErrors.firebase" />
             <img src="assets/img/login/lock.svg" alt="" class="login-input-icon" />
-            @if (loginErrors.password) {
+            @if (loginErrors.firebase) {
+              <p class="error-text">{{ loginErrors.firebase }}</p>
+            } @else if (loginErrors.password) {
               <p class="error-text">{{ loginErrors.password }}</p>
             }
           </div>

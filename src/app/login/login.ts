@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,6 +14,7 @@ import { FbAuthService } from '../services/fb-auth-service';
 export class Login {
   private router = inject(Router);
   private authService = inject(FbAuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   email: string = '';
   password: string = '';
@@ -38,6 +39,7 @@ export class Login {
   }
 
   onEmailInput(): void {
+    this.loginErrors.firebase = '';
     const email = this.email.trim();
     if (!email) {
       this.loginErrors.email = '';
@@ -49,6 +51,7 @@ export class Login {
   }
 
   onPasswordInput(): void {
+    this.loginErrors.firebase = '';
     if (this.password) {
       this.loginErrors.password = '';
     }
@@ -61,24 +64,24 @@ export class Login {
   private handleFirebaseError(error: any): void {
     console.error('Login failed:', error);
     switch (error.code) {
+      case 'auth/invalid-credential':
       case 'auth/user-not-found':
-        this.loginErrors.firebase = 'No account found with this email.';
-        break;
       case 'auth/wrong-password':
-        this.loginErrors.firebase = 'Incorrect password.';
+        this.loginErrors.firebase = 'Falsche E-Mail oder falsches Passwort.';
         break;
       case 'auth/invalid-email':
-        this.loginErrors.firebase = 'Please enter a valid email address.';
+        this.loginErrors.firebase = 'Bitte eine gültige E-Mail-Adresse eingeben.';
         break;
       case 'auth/user-disabled':
-        this.loginErrors.firebase = 'This account has been disabled.';
+        this.loginErrors.firebase = 'Dieses Konto wurde deaktiviert.';
         break;
       case 'auth/network-request-failed':
-        this.loginErrors.firebase = 'Network error. Please check your connection.';
+        this.loginErrors.firebase = 'Netzwerkfehler. Bitte Verbindung prüfen.';
         break;
       default:
-        this.loginErrors.firebase = 'Login failed. Please try again.';
+        this.loginErrors.firebase = 'Login fehlgeschlagen. Bitte erneut versuchen.';
     }
+    this.cdr.markForCheck();
   }
 
   onSubmit(): void {
