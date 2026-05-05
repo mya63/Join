@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -7,20 +7,20 @@ import { FbService } from '../../services/fb-service';
 
 @Component({
   selector: 'app-add-mobile',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './add-mobile.html',
-  styleUrls: ['./add-mobile.scss']
+  styleUrls: ['./add-mobile.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class AddMobile {
-  @Output() close = new EventEmitter<void>();     // Overlay schließen
-  @Output() created = new EventEmitter<void>();   // Toast triggern (Parent)
+  private fbService = inject(FbService);
+
+  @Output() close = new EventEmitter<void>();
+  @Output() created = new EventEmitter<void>();
 
   contact: IContact = {} as IContact;
   id = 0;
   isClosing = false;
-  constructor(private fbService: FbService) { }
 
   /** Button-Handler für Create Contact - führt Validierung durch und speichert wenn gültig */
   onCreateContactClick(form: any) {

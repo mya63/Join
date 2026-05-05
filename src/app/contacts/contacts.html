@@ -83,6 +83,9 @@
         </div>
       </div>
       <div class="go-back" (click)="closeMobileContact()" [class.dnone]="!getContactlistHidden()"><img src="assets/img/contacts/arrow-left.svg" alt="Go Back" /></div>
+      @if (deleteError()) {
+        <p class="delete-error-msg">Dieser Kontakt ist ein registrierter Benutzer und kann nicht gelöscht werden.</p>
+      }
     </div>
   <div class="contact-edit-activation">
 

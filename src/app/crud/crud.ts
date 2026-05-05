@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FbService } from '../services/fb-service';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../interfaces/i-contact';
@@ -8,14 +8,13 @@ import { IContact } from '../interfaces/i-contact';
   selector: 'app-crud',
   imports: [FormsModule],
   templateUrl: './crud.html',
-  styleUrl: './crud.scss'
+  styleUrl: './crud.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class crud {
+  fbService = inject(FbService);
   contact: IContact = {} as IContact;
   id: number = 0;
-
-  constructor(public fbService: FbService) {
-  }
 
   getContactsGroups() {
     return this.fbService.contactsGroups;

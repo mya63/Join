@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Input, Output, EventEmitter } from '@angular/core';
 import { ITask } from '../../interfaces/i-task';  
 
 @Component({
@@ -8,6 +7,7 @@ import { ITask } from '../../interfaces/i-task';
   imports: [CommonModule],
   templateUrl: './board-card.html',
   styleUrl: './board-card.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardCard {
 

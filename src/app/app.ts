@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FigmaHeader } from './shared/layout/figma-header/figma-header';
 import { FigmaSidenav } from './shared/layout/figma-sidenav/figma-sidenav';
@@ -10,11 +10,12 @@ import { Location } from '@angular/common';
   selector: 'app-root',
   imports: [RouterOutlet, FigmaHeader, FigmaSidenav, FigmaBottomNav],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected readonly title = signal('join2');
-  constructor(private location: Location) { this.goOn() }
+  private location = inject(Location);
 
   goOn() {
     const currentPath = this.location.path();

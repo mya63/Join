@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -9,9 +9,11 @@ import { FbAuthService } from '../../services/fb-auth-service';
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './sign-up.html',
   styleUrl: './sign-up.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignUp {
-  constructor(private router: Router, private authService: FbAuthService) {}
+  private router = inject(Router);
+  private authService = inject(FbAuthService);
   private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 
   signUpData = {

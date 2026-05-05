@@ -92,10 +92,20 @@ export class FbService {
     //await updateDoc(doc(this.contactsCollection, this.contactsArray[id].id), { [field]: value });
   }
 
-  async delContact(id: number) {
-    //this.contactsArray.splice(id, 1);
-    this.contactsArray.length >= 0 ? await deleteDoc(doc(this.contactsCollection, this.contactsArray[id].id)) : null;
+  /** Gibt false zurück wenn der Kontakt ein fremder registrierter User ist (nicht löschbar). */
+  async delContact(id: number): Promise<boolean> {
+    const contact = this.contactsArray[id];
+    if (!contact) return false;
+    const currentUserId = this.getCurrentUserId();
+    // Fremder registrierter User → Löschen verweigern
+    if (contact.uid && contact.uid !== currentUserId) return false;
+    await deleteDoc(doc(this.contactsCollection, contact.id));
+    // Eigener Account → Auth + users-Dokument ebenfalls löschen
+    if (contact.uid && contact.uid === currentUserId) {
+      await this.authService.deleteCurrentUserAccount();
+    }
     this.id = this.firstConnect();
+    return true;
   }
 
   onDestroy() {

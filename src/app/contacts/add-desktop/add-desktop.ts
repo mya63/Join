@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgModel, NgForm } from '@angular/forms';
 import { FbService } from '../../services/fb-service';
@@ -6,15 +6,17 @@ import { IContact } from  '../../interfaces/i-contact';
 
 @Component({
   selector: 'app-add-desktop',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './add-desktop.html',
-  styleUrls: ['./add-desktop.scss']
+  styleUrls: ['./add-desktop.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddDesktop {
-  @Output() close = new EventEmitter<void>();     // Overlay schließen
-  @Output() created = new EventEmitter<void>();   // Toast triggern (Parent)
-  
+  fbService = inject(FbService);
+
+  @Output() close = new EventEmitter<void>();
+  @Output() created = new EventEmitter<void>();
+
   @ViewChild('nameInput') nameInput!: NgModel;
   @ViewChild('surnameInput') surnameInput!: NgModel;
   @ViewChild('emailInput') emailInput!: NgModel;
@@ -23,9 +25,7 @@ export class AddDesktop {
 
   contact: IContact = {} as IContact;
   id = 0;
-  isClosing = false;  // Für Slide-out Animation
-
-  constructor(public fbService: FbService) {}
+  isClosing = false;
 
   /** Kontakt speichern */
   addContact() {

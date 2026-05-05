@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IContact } from '../../interfaces/i-contact';
 import { FbService } from '../../services/fb-service';
@@ -7,27 +7,32 @@ import { EditMobile } from '../edit-mobile/edit-mobile';
 
 @Component({
   selector: 'app-details-card',
-  standalone: true,
   imports: [CommonModule, EditDesktop, EditMobile],
   templateUrl: './details-card.html',
   styleUrl: './details-card.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DetailsCard {
+  private fbService = inject(FbService);
+
   slide = false;
   currentContactId = -1;
-
-  constructor(private fbService: FbService) { }
+  deleteError = signal(false);
 
   get currentContact(): IContact {
     return this.fbService.currentContact;
   }
 
-  delContact() {
-    this.fbService.contactsArray.length > 0 &&
+  async delContact() {
+    const canDelete =
+      this.fbService.contactsArray.length > 0 &&
       this.fbService.contactsGroups.length > 0 &&
-      this.fbService.contactsArray.length > this.fbService.id
-      ? this.fbService.delContact(this.fbService.id)
-      : null;
+      this.fbService.contactsArray.length > this.fbService.id;
+    if (!canDelete) return;
+    const deleted = await this.fbService.delContact(this.fbService.id);
+    if (!deleted) {
+      this.deleteError.set(true);
+    }
   }
 
   setEditContact() {
@@ -42,6 +47,7 @@ export class DetailsCard {
   setSlide() {
     if (this.fbService.id != this.currentContactId) {
       this.slide = true;
+      this.deleteError.set(false);
       setTimeout(() => {
         this.currentContactId = this.fbService.id;
         this.slide = false;

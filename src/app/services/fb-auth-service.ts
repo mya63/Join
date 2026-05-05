@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, User } from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, User } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Firestore, collection, addDoc, query, where, getDocs } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +47,33 @@ export class FbAuthService {
     return this.auth.currentUser?.uid || null;
   }
 
+  /** Löscht den aktuell eingeloggten Auth-User + seinen users-Eintrag und loggt aus. */
+  async deleteCurrentUserAccount(): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) return;
+    try {
+      // users-Collection-Eintrag löschen
+      const usersCollection = collection(this.db, 'users');
+      const q = query(usersCollection, where('uid', '==', user.uid));
+      const snapshot = await getDocs(q);
+      for (const userDoc of snapshot.docs) {
+        await deleteDoc(doc(this.db, 'users', userDoc.id));
+      }
+      // Firebase Auth Account löschen
+      await deleteUser(user);
+      this.router.navigate(['/login']);
+    } catch (error: any) {
+      if (error.code === 'auth/requires-recent-login') {
+        // Session zu alt – User muss sich neu anmelden
+        await signOut(this.auth);
+        this.router.navigate(['/login']);
+      } else {
+        console.error('Error deleting user account:', error);
+        throw error;
+      }
+    }
+  }
+
   private async saveUserToFirestore(user: User, name: string, surname: string) {
     try {
       const usersCollection = collection(this.db, 'users');
@@ -79,6 +106,7 @@ export class FbAuthService {
       const fallbackName = this.getFallbackName(user.email || '');
       await addDoc(contactsCollection, {
         ownerId: user.uid,
+        uid: user.uid,
         date: new Date(),
         color: this.getRandomColor(),
         name: name || fallbackName,

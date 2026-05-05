@@ -1,13 +1,10 @@
-import { Component, input, output, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../../services/fb-service';
 import { FbTaskService } from '../../services/fb-task-service';
 import { ITask } from '../../interfaces/i-task';
 import { IContact } from '../../interfaces/i-contact';
-import { user } from '@angular/fire/auth';
-import { Value } from '@angular/fire/remote-config';
-import { inputNames } from '@angular/cdk/schematics';
 
 
 @Component({
@@ -15,6 +12,7 @@ import { inputNames } from '@angular/cdk/schematics';
   imports: [CommonModule, FormsModule],
   templateUrl: './add-card.html',
   styleUrl: './add-card.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddCard implements OnInit {
   selectedColumn = input<string>('');

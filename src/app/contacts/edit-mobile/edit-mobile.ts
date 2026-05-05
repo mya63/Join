@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -6,14 +6,15 @@ import { FbService } from '../../services/fb-service';
 
 @Component({
   selector: 'app-edit-mobile',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './edit-mobile.html',
-  styleUrls: ['./edit-mobile.scss']
+  styleUrls: ['./edit-mobile.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class EditMobile {
-  constructor(private fbService: FbService) { this.getCurrentContact() }
+  private fbService = inject(FbService);
+
+  constructor() { this.getCurrentContact(); }
 
   contact: IContact = { name: '', surname: '', email: '', phone: '' };
   editedContact: IContact = { ...this.contact };

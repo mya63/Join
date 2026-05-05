@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../services/fb-service';
@@ -12,12 +12,14 @@ import { EditMobile } from './edit-mobile/edit-mobile';
 
 @Component({
   selector: 'app-contacts',
-  standalone: true,
   imports: [CommonModule, FormsModule, AddDesktop, AddMobile, Created, DetailsCard, MobileMenu, EditMobile],
   templateUrl: './contacts.html',
-  styleUrls: ['./contacts.scss']
+  styleUrls: ['./contacts.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Contacts {
+  fbService = inject(FbService);
+
   topbarTitle = 'Kanban Project Management Tool';
 
   contact: IContact = {} as IContact;
@@ -29,8 +31,7 @@ export class Contacts {
   toastOpen = false;
   private toastTimer?: ReturnType<typeof setTimeout>;
   showOptions = false;
-
-  constructor(public fbService: FbService) { }
+  deleteError = signal(false);
 
   getContactlistHidden() { return this.fbService.contactlistHidden; }
   getContactsGroups() { return this.fbService.contactsGroups; }
@@ -73,6 +74,7 @@ export class Contacts {
   }
 
   showContact(index: number) {
+    this.deleteError.set(false);
     this.fbService.id = index;
     this.currentContact = this.fbService.setCurrentContact(index);
     this.currentContactInitials =
@@ -120,12 +122,16 @@ export class Contacts {
     // this.edit.emit();
   }
   // Mobile: Delete löscht und schließt Karte
-  onDelete() {
+  async onDelete() {
     this.fbService.contactlistHidden = true;
     this.showOptions = false;
     const idx = this.fbService.id;
     if (typeof idx === 'number') {
-      this.fbService.delContact(idx);
+      const deleted = await this.fbService.delContact(idx);
+      if (!deleted) {
+        this.fbService.contactlistHidden = true;
+        this.deleteError.set(true);
+      }
     }
     // this.delete.emit();
     // this.goBack();

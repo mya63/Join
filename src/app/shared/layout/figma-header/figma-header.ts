@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -8,6 +8,7 @@ import { Auth, onAuthStateChanged } from '@angular/fire/auth';
   imports: [CommonModule],
   templateUrl: './figma-header.html',
   styleUrls: ['./figma-header.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FigmaHeader implements OnInit {
   private auth = inject(Auth);

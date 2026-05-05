@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardHeader } from './board-header/board-header';
 import { FormsModule } from '@angular/forms';
@@ -15,8 +15,10 @@ import { Subscription } from 'rxjs';
   imports: [BoardHeader, FormsModule, BoardCard, AddCard, CdkDropList, CdkDrag, CommonModule],
   templateUrl: './board.html',
   styleUrl: './board.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Board implements OnInit, OnDestroy {
+  private fbTaskService = inject(FbTaskService);
 
   task: ITask = {} as ITask;
   currentTask: ITask = {} as ITask;
@@ -40,12 +42,10 @@ export class Board implements OnInit, OnDestroy {
 
   private tasksSubscription: Subscription = new Subscription();
 
-
-  constructor(private fbTaskService: FbTaskService) {
+  constructor() {
     this.task = this.fbTaskService.newTask;
     this.columnIndex = 0;
     this.currentTask = {} as ITask;
-    console.log(this.currentTask, this.columnIndex);
     this.fbTaskService.currentTask = this.currentTask;
   }
 

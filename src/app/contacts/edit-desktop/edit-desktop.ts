@@ -1,21 +1,20 @@
-// auf contact-edit-desktop umstellen
-
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
 import { FbService } from '../../services/fb-service';
 
 @Component({
-selector: 'app-edit-desktop',
-standalone: true,
-imports: [CommonModule, FormsModule],
-templateUrl: './edit-desktop.html',
-styleUrls: ['./edit-desktop.scss']
+  selector: 'app-edit-desktop',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './edit-desktop.html',
+  styleUrls: ['./edit-desktop.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class EditDesktop {
-constructor(private fbService: FbService) { this.getCurrentContact() }
+  private fbService = inject(FbService);
+
+  constructor() { this.getCurrentContact(); }
 
 contact: IContact = { name: '', surname: '', email: '', phone: '' };
 editedContact: IContact = { ...this.contact };

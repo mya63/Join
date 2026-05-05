@@ -1,17 +1,16 @@
-// src/app/contacts/contact-edit-mobile-menu/contact-edit-mobile-menu.ts
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FbService } from '../../services/fb-service';
 
 @Component({
   selector: 'app-mobile-menu',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './mobile-menu.html',
   styleUrls: ['./mobile-menu.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MobileMenu {
-  constructor(public fbService: FbService) { }
+  fbService = inject(FbService);
 
   isClosing = signal(false);
 

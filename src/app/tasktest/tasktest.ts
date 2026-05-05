@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../services/fb-service';
@@ -9,14 +9,14 @@ import { IContact } from '../interfaces/i-contact';
 
 @Component({
   selector: 'app-tasktest',
-  imports: [FormsModule, CommonModule,],
+  imports: [FormsModule, CommonModule],
   templateUrl: './tasktest.html',
   styleUrl: './tasktest.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Tasktest {
-
-  injectedFbService = inject(FbService);
-  FbService: FbService = this.injectedFbService;
+  fbService = inject(FbService);
+  fbTaskService = inject(FbTaskService);
 
   task: ITask = {} as ITask;
   currentTask: ITask = {} as ITask;
@@ -41,22 +41,17 @@ export class Tasktest {
   showAssignDropdown = { task: false, currentTask: false };
   subtask: { title: string; completed: boolean, onEdit: boolean } = { title: '', completed: false, onEdit: false };
 
-  constructor(public fbTaskService: FbTaskService) {
-
+  constructor() {
     this.task = this.fbTaskService.newTask;
-    // Stelle sicher, dass assignTo ein Array ist
     if (!this.task.assignTo) {
       this.task.assignTo = [];
     }
     this.columnIndex = 0;
     this.currentTask = this.task;
-    // Stelle auch für currentTask sicher, dass assignTo ein Array ist
     if (!this.currentTask.assignTo) {
       this.currentTask.assignTo = [];
     }
-    console.log(this.currentTask, this.columnIndex);
-
-    this.fbTaskService.currentTask = this.currentTask
+    this.fbTaskService.currentTask = this.currentTask;
   }
 
   gettasks() {
@@ -193,8 +188,7 @@ export class Tasktest {
 
 
   getUserForTask() {
-    console.log(this.FbService.contactsArray);
-    return this.FbService.contactsArray
+    return this.fbService.contactsArray;
   }
 
   isUserAssigned(user: IContact, assignedUsers: IContact[]): boolean {

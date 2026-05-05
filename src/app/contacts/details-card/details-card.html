@@ -31,6 +31,9 @@
             <span>Delete</span>
           </button>
         </div>
+        @if (deleteError()) {
+          <p class="delete-error-msg">Dieser Kontakt ist ein registrierter Benutzer und kann nicht gelöscht werden.</p>
+        }
       </div>
     </div>
 
