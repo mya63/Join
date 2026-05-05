@@ -18,7 +18,7 @@ export class App {
   private location = inject(Location);
 
   goOn() {
-    const currentPath = this.location.path();
+    const currentPath = this.location.path().split('?')[0];
     const goOn = ["", "/", "/login", "/sign-up", "/privacy-policy", "/legal-notice"].includes(currentPath)
     return goOn;
   };

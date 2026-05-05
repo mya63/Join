@@ -62,4 +62,13 @@
     </button>
   </footer>
 
+  @if (showSignUpSuccess()) {
+    <div class="login-success-wrap">
+      <div class="login-success-backdrop"></div>
+      <div class="login-success-toast">
+        <span>You successfully signed up. Please log in.</span>
+      </div>
+    </div>
+  }
+
 </main>

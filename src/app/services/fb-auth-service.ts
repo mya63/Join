@@ -15,10 +15,11 @@ export class FbAuthService {
     try {
       const result = await createUserWithEmailAndPassword(this.auth, email, password);
       await this.ensureSelfContact(result.user, name, surname);
-      this.router.navigate(['/contacts']);
+      await signOut(this.auth);
+      this.router.navigate(['/login'], { queryParams: { email, password, signupSuccess: '1' } });
     } catch (error) {
       console.error('Sign-up error:', error);
-      throw error; // Fehler weiterwerfen für UI-Handling
+      throw error;
     }
   }
 

@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FbAuthService } from '../services/fb-auth-service';
 
 @Component({
@@ -11,16 +11,28 @@ import { FbAuthService } from '../services/fb-auth-service';
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Login {
+export class Login implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(FbAuthService);
   private cdr = inject(ChangeDetectorRef);
 
   email: string = '';
   password: string = '';
+  showSignUpSuccess = signal(false);
 
   loginErrors: { email: string; password: string; firebase: string } = { email: '', password: '', firebase: '' };
   private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
+
+  ngOnInit(): void {
+    const params = this.route.snapshot.queryParams;
+    if (params['email']) this.email = params['email'];
+    if (params['password']) this.password = params['password'];
+    if (params['signupSuccess'] === '1') {
+      this.showSignUpSuccess.set(true);
+      setTimeout(() => this.showSignUpSuccess.set(false), 2000);
+    }
+  }
 
   private resetErrors(): void {
     this.loginErrors = { email: '', password: '', firebase: '' };
