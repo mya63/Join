@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardHeader } from './board-header/board-header';
 import { FormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ import { Subscription } from 'rxjs';
 })
 export class Board implements OnInit, OnDestroy {
   private fbTaskService = inject(FbTaskService);
+  private cdr = inject(ChangeDetectorRef);
 
   task: ITask = {} as ITask;
   currentTask: ITask = {} as ITask;
@@ -55,11 +56,13 @@ export class Board implements OnInit, OnDestroy {
       // Only update if we're not in the middle of a drag operation
       if (!this.isDragging) {
         this.updateColumnArrays();
+        this.cdr.markForCheck();
       }
     });
 
     // Initial update
     this.updateColumnArrays();
+    this.cdr.markForCheck();
   }
 
   private isDragging = false;
@@ -200,6 +203,7 @@ export class Board implements OnInit, OnDestroy {
     }
 
     this.isDragging = false;
+    this.cdr.markForCheck();
   }
 
   private getStatusFromContainerId(containerId: string): string {

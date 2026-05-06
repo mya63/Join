@@ -1,10 +1,11 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, NgZone } from '@angular/core';
 import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { ITask } from '../interfaces/i-task';
 import { FbService } from './fb-service';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
@@ -14,6 +15,7 @@ export class FbTaskService {
   private db = inject(Firestore);
   private fbService = inject(FbService);
   private auth = inject(Auth);
+  private ngZone = inject(NgZone);
 
   myTasks: (() => void) | null;
   task: ITask;
@@ -64,21 +66,68 @@ export class FbTaskService {
       this.myTasks();
     }
 
-    const tasksCollectionFiltered = query(this.tasksCollection, where('ownerId', '==', userId));
-    this.myTasks = onSnapshot(tasksCollectionFiltered, (snapshot) => {
+    const ownerFilterEnabled = environment.featureFlags?.enableOwnerFilter === true;
+    const filteredQuery = userId === 'guest'
+      ? query(this.tasksCollection, where('ownerId', '==', 'guest'))
+      : query(this.tasksCollection, where('ownerId', 'in', [userId, 'guest']));
+
+    let fallbackActive = false;
+
+    const applySnapshot = (snapshot: any) => {
       this.tasksArray = [];
-      snapshot.forEach((element) => {
+      snapshot.forEach((element: any) => {
         this.tasksArray.push({ dbid: element.id, ...element.data() } as ITask);
       });
       this.tasksArray = this.tasksArray.sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
+      this.ngZone.run(() => {
+        this.tasksUpdatedSubject.next([...this.tasksArray]);
+      });
+    };
 
-      // Notify components that tasks have been updated
-      this.tasksUpdatedSubject.next([...this.tasksArray]);
+    const attachUnfilteredListener = () => {
+      fallbackActive = true;
+      if (this.myTasks) {
+        this.myTasks();
+      }
+      this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
+        applySnapshot(snapshot);
+      });
+    };
+
+    if (!ownerFilterEnabled) {
+      this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
+        applySnapshot(snapshot);
+      });
+      return;
+    }
+
+    this.myTasks = onSnapshot(filteredQuery, (snapshot) => {
+      if (!fallbackActive && snapshot.empty) {
+        attachUnfilteredListener();
+        return;
+      }
+      applySnapshot(snapshot);
+    }, () => {
+      if (!fallbackActive) {
+        attachUnfilteredListener();
+      }
     });
   }
 
   async createTask(task: ITask) {
-    await addDoc(this.tasksCollection, task);
+    let ownerId = this.auth.currentUser?.uid || null;
+    if (!ownerId) {
+      await new Promise<void>((resolve) => {
+        const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+          ownerId = user?.uid || null;
+          unsubscribe();
+          resolve();
+        });
+      });
+    }
+
+    ownerId = ownerId || this.getCurrentUserId() || 'guest';
+    await addDoc(this.tasksCollection, { ...task, ownerId });
   }
 
   async deleteTask(taskId?: string | undefined) {

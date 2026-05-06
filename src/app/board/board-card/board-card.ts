@@ -12,6 +12,7 @@ import { ITask } from '../../interfaces/i-task';
 export class BoardCard {
 
   @Input() card!: ITask;
+  @Input() displayIndex: number = 0;
   @Output() cardClick = new EventEmitter<ITask>();
 
   onCardClick(): void {
