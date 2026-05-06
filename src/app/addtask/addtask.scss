@@ -15,6 +15,13 @@
     padding: 80px 96px 40px;
     background-color: var(--bg);
     border-radius: 0;
+    font-family: Inter, system-ui, Arial, sans-serif;
+
+    input,
+    textarea,
+    button {
+        font-family: inherit;
+    }
 
     .content {
         height: 100%;
@@ -41,9 +48,13 @@
                 .page-title {
                     width: auto;
                     height: auto;
+                    font-family: Inter, sans-serif;
+                    font-style: normal;
                     font-size: 61px;
+                    line-height: 1.2;
                     font-weight: 700;
-                    color: #2a3647;
+                    letter-spacing: 0;
+                    color: #000;
                     margin: 0 0 40px 0;
                 }
 
