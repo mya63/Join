@@ -3,17 +3,17 @@
 }
 
 .board {
-    padding-left: 232px;
+    padding-left: 0;
     padding-top: 96px;
 }
 
 .task-table {
     // border: 1px solid blue;
     max-width: calc(1440px);
-    width: calc(100% - 232px);
+    width: 100%;
     height: calc(100dvh - 100px - 232px);
     flex: 1;
-    margin-left: 232px;
+    margin-left: 0;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
