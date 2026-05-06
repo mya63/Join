@@ -11,6 +11,7 @@ import { AppShell } from './shared/layout/app-shell/app-shell';
 import { LegalNotice } from './legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './legal/privacy-policy/privacy-policy';
 import { Summary } from './summary/summary';
+import { Help } from './help/help';
 
 export const routes: Routes = [
 
@@ -18,6 +19,7 @@ export const routes: Routes = [
    { path: 'login', component: Login },
    { path: 'sign-up', component: SignUp },
    { path: 'summary', component: Summary },
+   { path: 'help', component: Help },
    { path: 'contacts', component: Contacts },
    { path: 'board', component: Board },
    { path: 'add-task', component: Tasktest },

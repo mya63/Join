@@ -1,6 +1,35 @@
-<main class="legal-page">
-  <section class="legal-card">
-    <h1>Legal Notice</h1>
+<main class="legal-page" [class.external-mode]="isExternal()">
+  @if (isExternal()) {
+    <aside class="external-sidebar">
+      <div class="external-logo-wrap">
+        <img src="assets/img/shared/sidenav/logo_join.svg" alt="Join logo" class="external-logo" />
+      </div>
+
+      <nav class="external-menu">
+        <button class="external-menu-item" type="button" (click)="goLogin()">
+          <img class="login-icon" src="assets/img/login/Icons.png" alt="" aria-hidden="true" />
+          <span class="external-item-label">Log In</span>
+        </button>
+      </nav>
+
+      <div class="external-legal-nav">
+        <button class="external-legal-link" type="button" (click)="goPrivacy()"><span>Privacy Policy</span></button>
+        <button class="external-legal-link active" type="button" (click)="goLegal()"><span>Legal notice</span></button>
+      </div>
+    </aside>
+
+    <header class="external-topbar">
+      <span>Kanban Project Management Tool</span>
+    </header>
+  }
+
+  <section class="legal-content">
+    <div class="page-head">
+      <h1>Legal Notice</h1>
+      <button class="back-btn" type="button" aria-label="Go back" (click)="goBack()">
+        <img class="back-icon" src="assets/img/shared/backarrow.png" alt="" aria-hidden="true" />
+      </button>
+    </div>
 
     <h2>Imprint</h2>
     <p>
@@ -55,7 +84,9 @@
       correctness, completeness or availability of the application. The use is at your own risk.
     </p>
   </section>
-  <auth-footer-nav></auth-footer-nav>
+  @if (isExternal()) {
+    <auth-footer-nav></auth-footer-nav>
+  }
 </main>
-  
+
 

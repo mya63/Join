@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Auth, onAuthStateChanged } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, signOut } from '@angular/fire/auth';
 
 @Component({
   selector: 'figma-header',
@@ -9,6 +9,10 @@ import { Auth, onAuthStateChanged } from '@angular/fire/auth';
   templateUrl: './figma-header.html',
   styleUrls: ['./figma-header.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onResize()',
+    '(document:click)': 'onDocumentClick()'
+  }
 })
 export class FigmaHeader implements OnInit {
   private auth = inject(Auth);
@@ -16,23 +20,75 @@ export class FigmaHeader implements OnInit {
 
   userInitials = signal('G');
   dropdownOpen = signal(false);
+  isDesktop = signal(false);
 
   ngOnInit() {
+    this.onResize();
+
     onAuthStateChanged(this.auth, (user) => {
       if (user?.displayName) {
-        const parts = user.displayName.trim().split(/\s+/);
-        const initials = parts.length >= 2
-          ? parts[0][0] + parts[parts.length - 1][0]
-          : parts[0].slice(0, 2);
-        this.userInitials.set(initials.toUpperCase());
+        this.userInitials.set(this.getInitialsFromDisplayName(user.displayName));
       } else if (user?.email) {
-        this.userInitials.set(user.email[0].toUpperCase());
+        this.userInitials.set(this.getInitialsFromEmail(user.email));
       } else {
         this.userInitials.set('G');
       }
     });
   }
 
-  toggle() { this.dropdownOpen.set(!this.dropdownOpen()); }
-  logout() { this.router.navigate(['/login']); }
+  private getInitialsFromDisplayName(displayName: string): string {
+    const parts = displayName.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+
+    return parts[0]?.slice(0, 2).toUpperCase() || 'GU';
+  }
+
+  private getInitialsFromEmail(email: string): string {
+    const localPart = email.split('@')[0] ?? '';
+    const chunks = localPart.split(/[._-]+/).filter(Boolean);
+
+    if (chunks.length >= 2) {
+      return `${chunks[0][0]}${chunks[1][0]}`.toUpperCase();
+    }
+
+    const lettersOnly = localPart.replace(/[^a-zA-Z0-9]/g, '');
+    return (lettersOnly.slice(0, 2) || 'GU').toUpperCase();
+  }
+
+  onResize(): void {
+    this.isDesktop.set(window.innerWidth >= 1350);
+  }
+
+  toggle(event: MouseEvent): void {
+    event.stopPropagation();
+    this.dropdownOpen.set(!this.dropdownOpen());
+  }
+
+  onDocumentClick(): void {
+    if (this.dropdownOpen()) {
+      this.dropdownOpen.set(false);
+    }
+  }
+
+  navigateTo(path: '/legal-notice' | '/privacy-policy'): void {
+    this.dropdownOpen.set(false);
+    this.router.navigate([path]);
+  }
+
+  onHelpClick(): void {
+    this.dropdownOpen.set(false);
+    this.router.navigate(['/help']);
+  }
+
+  async logout(): Promise<void> {
+    this.dropdownOpen.set(false);
+    try {
+      await signOut(this.auth);
+    } catch {
+      // Keep navigation fallback even if sign-out fails.
+    }
+    this.router.navigate(['/login']);
+  }
 }

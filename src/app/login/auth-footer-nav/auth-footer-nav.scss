@@ -60,6 +60,15 @@
   color: #ffffff;
 }
 
+.auth-footer-item.is-active {
+  background: #091931;
+  color: #ffffff;
+}
+
+.auth-footer-item.is-active .auth-footer-label {
+  color: #ffffff;
+}
+
 @media (max-width: 768px) {
   .auth-footer-nav {
     display: block;

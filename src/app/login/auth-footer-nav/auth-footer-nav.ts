@@ -12,6 +12,10 @@ import { Router } from '@angular/router';
 export class AuthFooterNav {
   private router = inject(Router);
 
+  isRoute(path: '/login' | '/privacy-policy' | '/legal-notice'): boolean {
+    return this.router.url.startsWith(path);
+  }
+
   goLogin(): void { this.router.navigate(['/login']);}
   goPrivacy(): void { this.router.navigate(['/privacy-policy']); }
   goLegal(): void { this.router.navigate(['/legal-notice']); }

@@ -4,6 +4,7 @@ import { FigmaHeader } from './shared/layout/figma-header/figma-header';
 import { FigmaSidenav } from './shared/layout/figma-sidenav/figma-sidenav';
 import { FigmaBottomNav } from './shared/layout/figma-bottom-nav/figma-bottom-nav';
 import { Location } from '@angular/common';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 
 
 @Component({
@@ -16,10 +17,21 @@ import { Location } from '@angular/common';
 export class App {
   protected readonly title = signal('join2');
   private location = inject(Location);
+  private auth = inject(Auth);
+  protected readonly isAuthenticated = signal(!!this.auth.currentUser);
+
+  ngOnInit(): void {
+    onAuthStateChanged(this.auth, (user) => {
+      this.isAuthenticated.set(!!user);
+    });
+  }
 
   goOn() {
     const currentPath = this.location.path().split('?')[0];
-    const goOn = ["", "/", "/login", "/sign-up", "/privacy-policy", "/legal-notice"].includes(currentPath)
+    const publicRoutes = ["", "/", "/login", "/sign-up"];
+    const authSensitiveRoutes = ["/privacy-policy", "/legal-notice", "/help"];
+    const goOn = publicRoutes.includes(currentPath) ||
+      (!this.isAuthenticated() && authSensitiveRoutes.includes(currentPath));
     return goOn;
   };
 

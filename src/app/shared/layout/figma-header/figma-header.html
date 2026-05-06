@@ -10,14 +10,27 @@
 
   <!-- Rechts: Help + User -->
   <div class="right">
-    <button class="help" aria-label="Help">
+    <button class="help" aria-label="Help" (click)="onHelpClick()">
       <span class="help-dot">?</span>
     </button>
 
     <div class="user">
-      <div class="circle">
-        <span class="initials">{{ userInitials() }}</span>
-      </div>
+      <button class="user-trigger" type="button" (click)="toggle($event)" aria-label="Open user menu" [attr.aria-expanded]="dropdownOpen()">
+        <div class="circle">
+          <span class="initials">{{ userInitials() }}</span>
+        </div>
+      </button>
+
+      @if (dropdownOpen()) {
+        <div class="submenu" (click)="$event.stopPropagation()">
+          @if (!isDesktop()) {
+            <button class="submenu-item" type="button" (click)="onHelpClick()">Help</button>
+          }
+          <button class="submenu-item" type="button" (click)="navigateTo('/legal-notice')">Legal Notice</button>
+          <button class="submenu-item" type="button" (click)="navigateTo('/privacy-policy')">Privacy Policy</button>
+          <button class="submenu-item" type="button" (click)="logout()">Log out</button>
+        </div>
+      }
     </div>
   </div>
   </div>

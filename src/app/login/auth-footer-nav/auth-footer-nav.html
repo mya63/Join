@@ -1,7 +1,7 @@
 
 <footer class="auth-footer-nav">
   <nav class="auth-footer-menu">
-    <button type="button" class="auth-footer-item is-login" (click)="goLogin()">
+    <button type="button" class="auth-footer-item is-login" [class.is-active]="isRoute('/login')" (click)="goLogin()">
       <span class="auth-footer-icon">
         <img
           src="assets/img/login/Icons.png"
@@ -11,11 +11,11 @@
       <span class="auth-footer-label">Log In</span>
     </button>
 
-    <button type="button" class="auth-footer-item" (click)="goPrivacy()">
+    <button type="button" class="auth-footer-item" [class.is-active]="isRoute('/privacy-policy')" (click)="goPrivacy()">
       <span class="auth-footer-label">Privacy Policy</span>
     </button>
 
-    <button type="button" class="auth-footer-item" (click)="goLegal()">
+    <button type="button" class="auth-footer-item" [class.is-active]="isRoute('/legal-notice')" (click)="goLegal()">
       <span class="auth-footer-label">Legal Notice</span>
     </button>
   </nav>
