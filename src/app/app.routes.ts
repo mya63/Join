@@ -12,6 +12,7 @@ import { LegalNotice } from './legal/legal-notice/legal-notice';
 import { PrivacyPolicy } from './legal/privacy-policy/privacy-policy';
 import { Summary } from './summary/summary';
 import { Help } from './help/help';
+import { AddTask } from './addtask/addtask';
 
 export const routes: Routes = [
 
@@ -22,8 +23,10 @@ export const routes: Routes = [
    { path: 'help', component: Help },
    { path: 'contacts', component: Contacts },
    { path: 'board', component: Board },
-   { path: 'add-task', component: Tasktest },
+   { path: 'add-task', component: AddTask },
+   { path: 'addtask', component: AddTask },
    { path: 'crud', component: crud },
+   { path: 'tasktest', component: Tasktest },
    // { path: 'addc', component: AddContactComponent },
    { path: 'legal-notice', component: LegalNotice },
    { path: 'privacy-policy', component: PrivacyPolicy },

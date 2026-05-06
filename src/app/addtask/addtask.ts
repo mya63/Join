@@ -1,0 +1,311 @@
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { FbService } from '../services/fb-service';
+import { FbTaskService } from '../services/fb-task-service';
+import { ITask } from '../interfaces/i-task';
+import { IContact } from '../interfaces/i-contact';
+import { Router } from '@angular/router';
+
+
+@Component({
+  selector: 'app-add-task',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './addtask.html',
+  styleUrl: './addtask.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AddTask implements OnInit {
+  private router = inject(Router);
+
+  create() {
+    this.addTask(this.task);
+    this.router.navigate(['/board']);
+  }
+
+  clearForm() {
+    this.initTaskState();
+  }
+
+  injectedFbService = inject(FbService);
+  FbService: FbService = this.injectedFbService;
+
+  injectedfbTaskService = inject(FbTaskService);
+  fbTaskService: FbTaskService = this.injectedfbTaskService;
+
+  task: ITask = {} as ITask;
+  currentTask: ITask = {} as ITask;
+  showAssignDropdown = { task: false, currentTask: false };
+  showCategoryDropdown = { task: false, currentTask: false };
+  filterAssignedUsers: string = '';
+  currentCategory: string = 'Select task category';
+  categoryOptions: { category: number, categoryProperties: { name: string; color: string }[] } =
+    {
+      category: -1,
+      categoryProperties: [
+        { name: 'User Story', color: '#0038FF' },
+        { name: 'Technical Task', color: '#1FD7C1' },
+      ]
+    };
+  subtask: { title: string; completed: boolean; onEdit: boolean } = { title: '', completed: false, onEdit: false };
+  showCalendar: boolean = false;
+  calendarTarget: 'task' | 'currentTask' = 'task';
+  currentMonth: number = new Date().getMonth();
+  currentYear: number = new Date().getFullYear();
+  selectedDate: Date | null = null;
+  today: Date = new Date();
+
+
+  ngOnInit(): void {
+    this.initTaskState();
+  }
+
+  private initTaskState(): void {
+    this.task = this.fbTaskService.newTask;
+    this.currentTask = this.fbTaskService.newTask;
+    this.task.status = 'to-do';
+    this.task.title = '';
+    this.task.description = '';
+    this.task.priority = 'medium';
+    this.task.assignTo = [];
+    this.task.dueDate = '';
+    this.task.category.categoryProperties[0].color = this.categoryOptions.categoryProperties[0].color;
+    this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[0].name;
+    this.task.category.category = -1;
+    this.task.subTasks = [];
+    this.currentTask = this.task;
+    this.currentCategory = 'Select task category';
+    this.filterAssignedUsers = '';
+    this.showAssignDropdown = { task: false, currentTask: false };
+    this.showCategoryDropdown = { task: false, currentTask: false };
+    this.subtask = { title: '', completed: false, onEdit: false };
+    this.showCalendar = false;
+  }
+
+  addTask(newTask: ITask) {
+    this.fbTaskService.createTask(newTask);
+    this.task.assignTo = [];
+    this.task.priority = 'medium';
+    this.task.category.category = -1;
+    this.task.subTasks = [];
+  }
+
+  whichPriority(priority: string): boolean {
+    return this.task.priority === priority;
+  }
+
+  setPriority(priority: string): void {
+    this.task.priority = priority;
+    this.currentTask.priority = priority
+  }
+
+
+
+
+  getUserForTask() {
+    return this.FbService.contactsArray.filter(user =>
+      user.name.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
+      user.surname.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
+      user.email.toLowerCase().includes(this.filterAssignedUsers.toLowerCase())
+    )
+  }
+
+  isUserAssigned(user: IContact, assignedUsers: IContact[]): boolean {
+    if (!assignedUsers || !Array.isArray(assignedUsers)) {
+      return false;
+    }
+    return assignedUsers.some(assignedUser =>
+      assignedUser.id === user.id
+    );
+  }
+
+  toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
+    if (!assignedUsers) {
+      assignedUsers = [];
+    }
+
+    const index = assignedUsers.findIndex(assignedUser =>
+      assignedUser.id === user.id
+    );
+
+    if (index > -1) {
+      // User ist bereits zugewiesen, entfernen
+      assignedUsers.splice(index, 1);
+    } else {
+      // User ist nicht zugewiesen, hinzufügen
+      assignedUsers.push(user);
+    }
+  }
+
+  toggleAssignDropdown(target: 'task' | 'currentTask'): void {
+    this.showAssignDropdown[target] = !this.showAssignDropdown[target];
+  }
+
+  toggleCategoryDropdown(target: 'task' | 'currentTask'): void {
+    this.showCategoryDropdown[target] = !this.showCategoryDropdown[target];
+  }
+
+
+  dataIsSet() {
+    return (this.currentCategory != 'Select task category');
+  }
+
+  closeAssignDropdown(event: Event) {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const isInsideAssign = !!target.closest('.field-assign-to');
+    const isInsideCategory = !!target.closest('.field-category');
+
+    if (!isInsideAssign) {
+      this.showAssignDropdown = { task: false, currentTask: false };
+    }
+
+    if (!isInsideCategory) {
+      this.showCategoryDropdown = { task: false, currentTask: false };
+    }
+  }
+
+  setCategory(categoryName: string): void {
+    this.currentCategory = categoryName;
+    const categoryIndex = this.categoryOptions.categoryProperties.findIndex(category => category.name === categoryName);
+    if (categoryIndex !== -1) {
+      this.task.category.category = 0;
+      this.task.category.categoryProperties[0].color = this.categoryOptions.categoryProperties[categoryIndex].color;
+      this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[categoryIndex].name;
+      this.showCategoryDropdown.currentTask = false;
+    }
+  }
+
+  addSubtask(myTask: ITask) {
+    if (!myTask || this.subtask.title.trim() === '') {
+      return;
+    }
+    myTask.subTasks.push({ subtaskTitle: this.subtask.title, subtaskCompleted: false, onEdit: false });
+    this.subtask = { title: '', completed: false, onEdit: false };
+  }
+
+  editSubtask(subtaskTitle: string, newTitle: string, myTask: ITask) {
+    const subtask = myTask.subTasks.find(st => st.subtaskTitle === subtaskTitle);
+
+    if (subtask) {
+      subtask.subtaskTitle = newTitle;
+      subtask.onEdit = false;
+    }
+  }
+
+  deleteSubtask(subtaskTitle: string, myTask: ITask) {
+    myTask.subTasks = myTask.subTasks.filter(st => st.subtaskTitle !== subtaskTitle);
+    myTask.subTasks = [...myTask.subTasks];
+  }
+
+
+  alowAddTask(): boolean {
+    return this.task.title !== '' && this.task.title.trim() !== '';
+  }
+
+  alowAddTaskCalender(): boolean {
+    const myDate = new Date();
+    const curentDate = new Date(`${this.task.dueDate.substring(6,10)}-${this.task.dueDate.substring(3,5)}-${this.task.dueDate.substring(0,2)}T00:00:00.000Z`);
+    const dateDifference: number = curentDate.getTime() - myDate.getTime();
+    return this.task.dueDate.length === 0 || dateDifference >= 0;
+  }
+
+
+
+  
+  openCalendar(target: 'task' | 'currentTask') {
+    this.calendarTarget = target;
+    this.showCalendar = true;
+  }
+
+  closeCalendar() {
+    this.showCalendar = false;
+  }
+
+  selectDate(date: Date) {
+    if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
+      return; // Verhindere Auswahl von Terminen in der Vergangenheit
+    }
+
+    // Formatiere Datum korrekt ohne Zeitzonenproblem
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const dateString = `${day}/${month}/${year}`;
+
+    if (this.calendarTarget === 'task') {
+      this.task.dueDate = dateString;
+    } else {
+      this.currentTask.dueDate = dateString;
+    }
+
+    this.closeCalendar();
+  }
+
+  getDaysInMonth(month: number, year: number): number {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  getFirstDayOfMonth(month: number, year: number): number {
+    return new Date(year, month, 1).getDay();
+  }
+
+  getCalendarDays(): (number | null)[] {
+    const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
+    const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
+    const days: (number | null)[] = [];
+
+    // Füge leere Zellen für die Tage vor dem ersten Tag des Monats hinzu
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    // Füge die Tage des Monats hinzu
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(day);
+    }
+
+    return days;
+  }
+
+  previousMonth() {
+    if (this.currentMonth === 0) {
+      this.currentMonth = 11;
+      this.currentYear--;
+    } else {
+      this.currentMonth--;
+    }
+  }
+
+  nextMonth() {
+    if (this.currentMonth === 11) {
+      this.currentMonth = 0;
+      this.currentYear++;
+    } else {
+      this.currentMonth++;
+    }
+  }
+
+  getMonthName(month: number): string {
+    const months = [
+      'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+      'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+    ];
+    return months[month];
+  }
+
+  isDayInPast(day: number): boolean {
+    const date = new Date(this.currentYear, this.currentMonth, day);
+    return date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+  }
+
+  onDayClick(day: number) {
+    if (!this.isDayInPast(day)) {
+      this.selectDate(new Date(this.currentYear, this.currentMonth, day));
+    }
+  }
+
+
+
+}
