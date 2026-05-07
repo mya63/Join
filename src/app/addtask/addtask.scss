@@ -450,7 +450,7 @@
                             .subtask-input {
                                 width: 100%;
                                 height: 100%;
-                                border: 1px solid #d1d1d1;
+                                border: 1px solid transparent;
                                 border-radius: 10px;
                                 height: 48px;
                                 background-color: white;
@@ -832,7 +832,7 @@
 }
 
 .out {
-    border: 1px solid #d1d1d1;
+    border: 1px solid transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;
