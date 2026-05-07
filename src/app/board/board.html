@@ -18,7 +18,7 @@
                 <img src="assets/img/board/board-header/add-task-column.svg" alt="Add task to To do">
             </button>
         </div>
-        @for (item of todoTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
+        @for (item of todoTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item" [cdkDragDisabled]="isDragDisabled()"
             (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" class="cell"><app-board-card
             [card]=item [displayIndex]="idx + 1"></app-board-card></div>} </div>
 
@@ -37,7 +37,7 @@
                 <img src="assets/img/board/board-header/add-task-column.svg" alt="Add task to In progress">
             </button>
         </div>
-        @for (item of inProgressTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
+        @for (item of inProgressTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item" [cdkDragDisabled]="isDragDisabled()"
             (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" class="cell"><app-board-card
             [card]=item [displayIndex]="idx + 1"></app-board-card></div>} </div>
 
@@ -56,7 +56,7 @@
                 <img src="assets/img/board/board-header/add-task-column.svg" alt="Add task to Await feedback">
             </button>
         </div>
-        @for (item of awaitFeedbackTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
+        @for (item of awaitFeedbackTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item" [cdkDragDisabled]="isDragDisabled()"
             (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" class="cell"><app-board-card
             [card]=item [displayIndex]="idx + 1"></app-board-card></div>} </div>
 
@@ -71,7 +71,7 @@
                 <img src="assets/img/board/board-header/add-task-column.svg" alt="Add task to Done">
             </button>
         </div>
-        @for (item of doneTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
+        @for (item of doneTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item" [cdkDragDisabled]="isDragDisabled()"
             (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" class="cell"><app-board-card
             [card]=item [displayIndex]="idx + 1"></app-board-card></div>} </div>
 

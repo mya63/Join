@@ -9,7 +9,7 @@
               <label class="label">Title<span [style.color]="'red'">*</span></label>
               <div class="input">
                 <input type="text" #title placeholder="Enter a title" name="title" [(ngModel)]="this.task.title" />
-                <div [class.dNone]="alowAddTask()"><span [style.color]="'red'">*This field is required</span>
+                <div [class.dNone]="!submitAttempted || alowAddTask()"><span [style.color]="'red'">*This field is required</span>
                 </div>
               </div>
             </div>
@@ -31,7 +31,7 @@
                   required> <img src="assets/img/board/calendar.svg" alt="Calendar" (click)="openCalendar('task')"
                   class="calendar-icon"></span>
 
-              <span [class.dNone]="alowAddTaskCalender()"><span [style.color]="'red'">*Date must be today or later
+              <span [class.dNone]="!submitAttempted || alowAddTaskCalender()"><span [style.color]="'red'">*Date is required and must be today or later
                   (dd/mm/yyyy)</span>
               </span>
             </div>
@@ -170,6 +170,7 @@
                   }
                 </span>
               </div>
+              <div [class.dNone]="!submitAttempted || dataIsSet()"><span [style.color]="'red'">*This field is required</span></div>
             </div>
 
             <div class="field-subtasks">

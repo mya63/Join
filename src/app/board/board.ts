@@ -67,6 +67,10 @@ export class Board implements OnInit, OnDestroy {
 
   private isDragging = false;
 
+  isDragDisabled(): boolean {
+    return window.innerWidth <= 1350;
+  }
+
   ngOnDestroy() {
     this.tasksSubscription.unsubscribe();
   }
