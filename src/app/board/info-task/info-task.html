@@ -1,0 +1,86 @@
+<div class="backdrop" (click)="onClose()"></div>
+
+<div class="panel">
+  <!-- Category + Close -->
+  <div class="panel-top">
+    <span class="category-badge" [style.background]="task().category.categoryProperties[0].color">
+      {{ task().category.categoryProperties[0].name }}
+    </span>
+    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close">
+      <div class="vorHover">
+        <img src="assets/img/contacts/add-desktop/x-vector-icon-only.svg" alt="Close">
+      </div>
+    </button>
+  </div>
+
+  <!-- Title -->
+  <h2 class="task-title">{{ task().title }}</h2>
+
+  <!-- Description -->
+  @if (task().description) {
+    <p class="task-description">{{ task().description }}</p>
+  }
+
+  <!-- Due Date -->
+  <div class="info-row">
+    <span class="info-label">Due date:</span>
+    <span class="info-value">{{ task().dueDate }}</span>
+  </div>
+
+  <!-- Priority -->
+  <div class="info-row">
+    <span class="info-label">Priority:</span>
+    <span class="info-value priority-value">
+      {{ getPriorityLabel() }}
+      <img [src]="getPriorityIcon()" alt="priority icon" class="prio-icon">
+    </span>
+  </div>
+
+  <!-- Assigned To -->
+  @if (task().assignTo && task().assignTo!.length > 0) {
+    <div class="section">
+      <span class="section-label">Assigned To:</span>
+      <div class="assigned-list">
+        @for (user of task().assignTo!; track user.id) {
+          <div class="assigned-row">
+            <div class="avatar" [style.background]="user.color">
+              {{ user.name.charAt(0) + user.surname.charAt(0) }}
+            </div>
+            <span>{{ user.name }} {{ user.surname }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Subtasks -->
+  @if (task().subTasks && task().subTasks!.length > 0) {
+    <div class="section">
+      <span class="section-label">Subtasks</span>
+      <div class="subtasks-list">
+        @for (subtask of task().subTasks!; track $index; let i = $index) {
+          <label class="subtask-row" (click)="toggleSubtask(i)">
+            <img [src]="subtask.subtaskCompleted
+              ? 'assets/img/board/add-card/cube-check-checkedIn.svg'
+              : 'assets/img/board/add-card/cube-check.svg'"
+              alt="checkbox" class="subtask-check">
+            <span>{{ subtask.subtaskTitle }}</span>
+          </label>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Footer Actions -->
+  <div class="panel-footer">
+    <button type="button" class="footer-btn delete-btn" (click)="onDelete()">
+      <img src="assets/img/board/add-card/delete.svg" alt="Delete">
+      <span>Delete</span>
+    </button>
+    <span class="footer-divider"></span>
+    <button type="button" class="footer-btn edit-btn" (click)="onEdit()">
+      <img src="assets/img/board/add-card/edit.svg" alt="Edit">
+      <span>Edit</span>
+    </button>
+  </div>
+</div>

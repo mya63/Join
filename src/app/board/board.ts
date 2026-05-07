@@ -6,13 +6,15 @@ import { FbTaskService } from '../services/fb-task-service';
 import { ITask } from '../interfaces/i-task';
 import { BoardCard } from './board-card/board-card';
 import { AddCard } from './add-card/add-card';
+import { InfoTask } from './info-task/info-task';
+import { EditTask } from './edit-task/edit-task';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList, } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 
 
 @Component({
   selector: 'app-board',
-  imports: [BoardHeader, FormsModule, BoardCard, AddCard, CdkDropList, CdkDrag, CommonModule],
+  imports: [BoardHeader, FormsModule, BoardCard, AddCard, InfoTask, EditTask, CdkDropList, CdkDrag, CommonModule],
   templateUrl: './board.html',
   styleUrl: './board.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,13 @@ export class Board implements OnInit, OnDestroy {
   // Overlay properties
   showAddCardOverlay: boolean = false;
   selectedColumn: string = '';
+
+  // Info task overlay
+  showInfoTask: boolean = false;
+  selectedTask: ITask | null = null;
+
+  // Edit task overlay
+  showEditTask: boolean = false;
   
   // Search properties
   searchTerm: string = '';
@@ -280,5 +289,34 @@ export class Board implements OnInit, OnDestroy {
   closeAddCardOverlay(): void {
     this.showAddCardOverlay = false;
     this.selectedColumn = '';
+  }
+
+  openInfoTask(task: ITask): void {
+    this.selectedTask = task;
+    this.showInfoTask = true;
+    this.cdr.markForCheck();
+  }
+
+  closeInfoTask(): void {
+    this.showInfoTask = false;
+    this.selectedTask = null;
+    this.cdr.markForCheck();
+  }
+
+  openEditTask(): void {
+    this.showEditTask = true;
+    this.cdr.markForCheck();
+  }
+
+  closeEditTask(): void {
+    this.showEditTask = false;
+    this.cdr.markForCheck();
+  }
+
+  onEditSaved(): void {
+    this.showEditTask = false;
+    this.showInfoTask = false;
+    this.selectedTask = null;
+    this.cdr.markForCheck();
   }
 }

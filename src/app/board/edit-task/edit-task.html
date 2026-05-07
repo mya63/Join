@@ -1,0 +1,203 @@
+<div class="backdrop" (click)="onClose()"></div>
+
+<div class="panel" (click)="closeDropdowns($event)">
+
+  <!-- Header -->
+  <div class="panel-top">
+    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close">
+      <div class="vorHover">
+        <img src="assets/img/contacts/add-desktop/x-vector-icon-only.svg" alt="Close">
+      </div>
+    </button>
+  </div>
+
+  <div class="panel-body">
+
+  <!-- Title -->
+  <div class="field-group">
+    <label class="field-label">Title<span class="required">*</span></label>
+    <input type="text" class="field-input" placeholder="Enter a title" [(ngModel)]="editedTask.title" name="title">
+    <span class="error-hint" [class.dNone]="!submitAttempted || hasValidTitle()">
+      <span class="red">*This field is required</span>
+    </span>
+  </div>
+
+  <!-- Description -->
+  <div class="field-group">
+    <label class="field-label">Description</label>
+    <textarea class="field-textarea" placeholder="Enter a Description" [(ngModel)]="editedTask.description" name="description"></textarea>
+  </div>
+
+  <!-- Due Date -->
+  <div class="field-group">
+    <label class="field-label">Due date<span class="required">*</span></label>
+    <div class="date-input-wrap">
+      <input type="text" class="field-input" placeholder="dd/mm/yyyy" [(ngModel)]="editedTask.dueDate" name="dueDate">
+      <img src="assets/img/board/calendar.svg" alt="Calendar" class="calendar-icon" (click)="openCalendar()">
+    </div>
+    <span class="error-hint" [class.dNone]="!submitAttempted || hasValidDueDate()">
+      <span class="red">*Date is required and must be today or later (dd/mm/yyyy)</span>
+    </span>
+
+    @if (showCalendar) {
+      <div class="calendar-overlay" (click)="closeCalendar()">
+        <div class="calendar-widget" (click)="$event.stopPropagation()">
+          <div class="calendar-header">
+            <button type="button" (click)="previousMonth()" class="nav-btn">‹</button>
+            <span class="month-year">{{ getMonthName(currentMonth) }} {{ currentYear }}</span>
+            <button type="button" (click)="nextMonth()" class="nav-btn">›</button>
+          </div>
+          <div class="calendar-grid">
+            <div class="day-header">So</div>
+            <div class="day-header">Mo</div>
+            <div class="day-header">Di</div>
+            <div class="day-header">Mi</div>
+            <div class="day-header">Do</div>
+            <div class="day-header">Fr</div>
+            <div class="day-header">Sa</div>
+            @for (day of getCalendarDays(); track $index) {
+              @if (day === null) {
+                <div class="calendar-day empty"></div>
+              } @else {
+                <div class="calendar-day"
+                  [class.past]="isDayInPast(day)"
+                  [class.today]="currentYear === today.getFullYear() && currentMonth === today.getMonth() && day === today.getDate()"
+                  (click)="onDayClick(day)">{{ day }}</div>
+              }
+            }
+          </div>
+          <button type="button" (click)="closeCalendar()" class="close-cal-btn">Schließen</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Priority -->
+  <div class="field-group">
+    <label class="field-label">Priority</label>
+    <div class="priority-buttons">
+      <button type="button" class="priority-btn urgent" [class.selected]="whichPriority('urgent')" (click)="setPriority('urgent')">
+        <span>Urgent</span>
+        <img [class.dNone]="whichPriority('urgent')"  src="assets/img/board/board-card/prio-urgent.svg" alt="">
+        <img [class.dNone]="!whichPriority('urgent')" src="assets/img/board/board-card/prio-urgent-white.svg" alt="">
+      </button>
+      <button type="button" class="priority-btn medium" [class.selected]="whichPriority('medium')" (click)="setPriority('medium')">
+        <span>Medium</span>
+        <img [class.dNone]="whichPriority('medium')"  src="assets/img/board/board-card/prio-medium.svg" alt="">
+        <img [class.dNone]="!whichPriority('medium')" src="assets/img/board/board-card/prio-medium-white.svg" alt="">
+      </button>
+      <button type="button" class="priority-btn low" [class.selected]="whichPriority('low')" (click)="setPriority('low')">
+        <span>Low</span>
+        <img [class.dNone]="whichPriority('low')"  src="assets/img/board/board-card/prio-low.svg" alt="">
+        <img [class.dNone]="!whichPriority('low')" src="assets/img/board/board-card/prio-low-white.svg" alt="">
+      </button>
+    </div>
+  </div>
+
+  <!-- Assigned To -->
+  <div class="field-group">
+    <label class="field-label">Assigned to</label>
+    <div class="assign-dropdown-wrap">
+      <div class="dropdown-header" (click)="toggleAssignDropdown()">
+        <input class="assign-input" [(ngModel)]="filterAssignedUsers" placeholder="Select contacts to assign" name="assigned-to-input">
+        <span class="dropdown-arrow-icons">
+          <img [class.dNone]="showAssignDropdown"  src="assets/img/board/add-card/assigned-to-arrow-drop-down-open.svg" alt="">
+          <img [class.dNone]="!showAssignDropdown" src="assets/img/board/add-card/assigned-to-arrow-drop-down-close.svg" alt="">
+        </span>
+      </div>
+      @if (showAssignDropdown) {
+        <div class="assign-list">
+          @for (user of getUserForTask(); track user.id) {
+            <label class="user-checkbox" [class.checkedIn]="isUserAssigned(user)">
+              <span class="user-checkbox-label">
+                <div class="avatar" [style.background]="user.color">{{ user.name.charAt(0) + user.surname.charAt(0) }}</div>
+                {{ user.name }} {{ user.surname }}
+              </span>
+              <img [class.dNone]="isUserAssigned(user)"  src="assets/img/board/add-card/cube-check.svg" alt="">
+              <img [class.dNone]="!isUserAssigned(user)" src="assets/img/board/add-card/cube-check-checkedIn.svg" alt="">
+              <input class="dNone" type="checkbox" [checked]="isUserAssigned(user)" (change)="toggleUserAssignment(user)">
+            </label>
+          }
+        </div>
+      }
+    </div>
+    <div class="avatars">
+      @for (u of editedTask.assignTo; track u.id) {
+        <div class="avatar" [style.background]="u.color">{{ u.name.charAt(0) + u.surname.charAt(0) }}</div>
+      }
+    </div>
+  </div>
+
+  <!-- Category -->
+  <div class="field-group">
+    <label class="field-label">Category<span class="required">*</span></label>
+    <div class="category-wrap" (click)="toggleCategoryDropdown()">
+      <span class="category-placeholder" [class.dataIsSet]="dataIsSet()">{{ currentCategory }}</span>
+      <span class="dropdown-arrow-icons">
+        <img [class.dNone]="showCategoryDropdown"  src="assets/img/board/add-card/assigned-to-arrow-drop-down-open.svg" alt="">
+        <img [class.dNone]="!showCategoryDropdown" src="assets/img/board/add-card/assigned-to-arrow-drop-down-close.svg" alt="">
+      </span>
+    </div>
+    @if (showCategoryDropdown) {
+      <div class="category-list">
+        @for (cat of categoryOptions; track cat.name) {
+          <div class="category-item" (click)="setCategory(cat.name)">{{ cat.name }}</div>
+        }
+      </div>
+    }
+    <span class="error-hint" [class.dNone]="!submitAttempted || dataIsSet()">
+      <span class="red">*This field is required</span>
+    </span>
+  </div>
+
+  <!-- Subtasks -->
+  <div class="field-group">
+    <label class="field-label">Subtasks</label>
+    <div class="subtask-input-row">
+      <input type="text" class="field-input" placeholder="Add new subtask" [(ngModel)]="subtaskInput" name="subtaskNew" (keydown.enter)="addSubtask()">
+      <span class="subtask-icons">
+        <span class="subtask-icon-btn" (click)="subtaskInput = ''"><img src="assets/img/board/add-card/close.svg" alt="clear"></span>
+        <span class="subtask-icon-btn" (click)="addSubtask()"><img src="assets/img/board/add-card/check.svg" alt="add"></span>
+      </span>
+    </div>
+    <div class="subtasks-list">
+      @for (st of editedTask.subTasks; track $index) {
+        <div class="subtask-item">
+          @if (st.onEdit) {
+            <div class="subtask-edit-row">
+              <input #stInput type="text" [value]="st.subtaskTitle" (keydown.enter)="editSubtask(st.subtaskTitle, stInput.value)" class="subtask-edit-input">
+              <span class="subtask-icons">
+                <span class="subtask-icon-btn" (click)="deleteSubtask(st.subtaskTitle)"><img src="assets/img/board/add-card/delete.svg" alt="delete"></span>
+                <span class="subtask-icon-btn" (click)="editSubtask(st.subtaskTitle, stInput.value)"><img src="assets/img/board/add-card/check.svg" alt="save"></span>
+              </span>
+            </div>
+          } @else {
+            <div class="subtask-view-row" (dblclick)="st.onEdit = true">
+              &bull; {{ st.subtaskTitle }}
+              <span class="subtask-icons">
+                <span class="subtask-icon-btn" (click)="st.onEdit = true"><img src="assets/img/board/add-card/edit.svg" alt="edit"></span>
+                <span class="subtask-icon-btn" (click)="deleteSubtask(st.subtaskTitle)"><img src="assets/img/board/add-card/delete.svg" alt="delete"></span>
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  </div><!-- /.panel-body -->
+
+  <!-- Footer -->
+  <div class="panel-footer">
+    @if (submitAttempted && !canSave()) {
+      <span class="error-hint red">{{ getSaveErrorHint() }}</span>
+    }
+    <button type="button" class="btn-cancel" (click)="onClose()">
+      Cancel
+      <img src="assets/img/board/add-card/x-vector-icon-only.svg" alt="">
+    </button>
+    <button type="button" class="btn-save" (click)="onSave()">
+      Ok <img src="assets/img/board/add-card/check-icon-only.svg" alt="">
+    </button>
+  </div>
+</div>
