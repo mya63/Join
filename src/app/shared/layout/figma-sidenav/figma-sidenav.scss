@@ -7,7 +7,7 @@
   background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
   padding: 64px 0;
   z-index: var(--z-sidenav);
@@ -25,13 +25,12 @@
 /* Logo */
 .logo {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 92px;
-  margin-bottom: 12px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding-left: 65.98px;
 }
 .logo-img {
-  width: 80px;
+  width: 100px;
   height: auto;
   object-fit: contain;
 }
@@ -41,10 +40,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  flex: 1;
-  width: 100%;
-  padding-top: 80px;
+  justify-content: flex-start;
+  width: 232px;
+  height: 229px;
+  margin-top: 114px;
   gap: 15px;
   box-sizing: border-box;
 }
@@ -52,10 +51,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 14px;
-  width: 100%;
-  height: 42px;
-  padding: 0 24px 0 46px;
+  gap: 8px;
+  width: 232px;
+  height: 46px;
+  padding: 8px 56px;
   box-sizing: border-box;
   color: #cdcdcd;
   text-decoration: none;
@@ -73,10 +72,10 @@
 
 /* Icon */
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  filter: brightness(0) saturate(100%) invert(86%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(90%);
 }
 .item.active .icon {
   filter: none;
@@ -84,9 +83,13 @@
 
 /* Label */
 .label {
-  font-size: 14px;
+  height: 19px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 120%;
+  letter-spacing: 0;
   color: #cdcdcd;
-  letter-spacing: 0.2px;
 }
 .item.active .label {
   color: #fff;
@@ -96,26 +99,27 @@
 .legal {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 100%;
-  padding: 130px 16px 18px 52px;
+  gap: 8px;
+  align-items: flex-start;
+  width: 232px;
+  margin-top: auto;
+  padding: 0 0 32px 56px;
   box-sizing: border-box;
 }
 .link {
-  display: block;
-  width: 232px;
-  height: 35px;
+  display: flex;
+  align-items: center;
   color: #a8a8a8;
   text-decoration: none;
-  font-size: 13px;
-  letter-spacing: 0.1px;
-  border-radius: 6px;
-  transition: background 0.15s;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 120%;
+  letter-spacing: 0;
+  transition: color 0.15s;
 }
 .link:hover {
   color: #29abe2;
-  text-decoration: none;
-  transform: scale(1.02);
 }
 
 @media (max-width: 1350px) {

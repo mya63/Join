@@ -1,20 +1,17 @@
 <div class="board">
     <app-board-header (addTaskToColumn)="openAddCardOverlay($event)" (searchTasks)="onSearchTasks($event)"></app-board-header>
-</div>
-
-<!-- Add-Card Overlay -->
-@if (showAddCardOverlay) {
-  <div class="overlay" (click)="closeAddCardOverlay()">
-    <div class="overlay-content" (click)="$event.stopPropagation()">
-      <app-add-card [selectedColumn]="selectedColumn" (closeOverlay)="closeAddCardOverlay()"></app-add-card>
-    </div>
-  </div>
-}
 
 <div class="task-table">
 
     <div id="getTaskCollumnOne" cdkDropList [cdkDropListData]="todoTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        <div class="column-title">
+            <span>To do</span>
+            <button type="button" class="column-add-btn" (click)="openAddCardOverlay('to-do')">
+                <img class="activeOff" src="assets/img/board/board-header/add-task-column.svg" alt="Add task" />
+                <img class="activeOn" src="assets/img/board/board-header/add-task-column-blue.svg" alt="Add task" />
+            </button>
+        </div>
         <div class="mobile-column-header">
             <span>To do</span>
             <button type="button" class="mobile-column-add" (click)="openAddCardOverlay('to-do')">
@@ -27,6 +24,13 @@
 
     <div id="getTaskCollumnTwo" cdkDropList [cdkDropListData]="inProgressTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        <div class="column-title">
+            <span>In progress</span>
+            <button type="button" class="column-add-btn" (click)="openAddCardOverlay('in-progress')">
+                <img class="activeOff" src="assets/img/board/board-header/add-task-column.svg" alt="Add task" />
+                <img class="activeOn" src="assets/img/board/board-header/add-task-column-blue.svg" alt="Add task" />
+            </button>
+        </div>
         <div class="mobile-column-header">
             <span>In progress</span>
             <button type="button" class="mobile-column-add" (click)="openAddCardOverlay('in-progress')">
@@ -39,6 +43,13 @@
 
     <div id="getTaskCollumnThree" cdkDropList [cdkDropListData]="awaitFeedbackTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        <div class="column-title">
+            <span>Await feedback</span>
+            <button type="button" class="column-add-btn" (click)="openAddCardOverlay('await-feedback')">
+                <img class="activeOff" src="assets/img/board/board-header/add-task-column.svg" alt="Add task" />
+                <img class="activeOn" src="assets/img/board/board-header/add-task-column-blue.svg" alt="Add task" />
+            </button>
+        </div>
         <div class="mobile-column-header">
             <span>Await feedback</span>
             <button type="button" class="mobile-column-add" (click)="openAddCardOverlay('await-feedback')">
@@ -51,6 +62,9 @@
 
     <div id="getTaskCollumnFour" cdkDropList [cdkDropListData]="doneTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        <div class="column-title">
+            <span>Done</span>
+        </div>
         <div class="mobile-column-header">
             <span>Done</span>
             <button type="button" class="mobile-column-add" (click)="openAddCardOverlay('done')">
@@ -60,3 +74,15 @@
         @for (item of doneTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()" (cdkDragEnded)="onDragEnded()" class="cell"><app-board-card
             [card]=item [displayIndex]="idx + 1"></app-board-card></div>} </div>
+
+</div><!-- /.task-table -->
+</div><!-- /.board -->
+
+<!-- Add-Card Overlay -->
+@if (showAddCardOverlay) {
+  <div class="overlay" (click)="closeAddCardOverlay()">
+    <div class="overlay-content" (click)="$event.stopPropagation()">
+      <app-add-card [selectedColumn]="selectedColumn" (closeOverlay)="closeAddCardOverlay()"></app-add-card>
+    </div>
+  </div>
+}
