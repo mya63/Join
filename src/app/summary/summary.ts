@@ -1,5 +1,6 @@
 import { Component, ChangeDetectorRef, inject, Injector, runInInjectionContext, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
 import { FbTaskService } from '../services/fb-task-service';
@@ -18,6 +19,11 @@ export class Summary implements OnInit, OnDestroy {
   private fbTaskService = inject(FbTaskService);
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
+  private router = inject(Router);
+
+  goToBoard() {
+    this.router.navigate(['/board']);
+  }
   
   currentUserName = '';
   isGuest = false;

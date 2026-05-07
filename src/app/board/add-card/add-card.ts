@@ -28,6 +28,10 @@ export class AddCard implements OnInit {
       return;
     }
 
+    const columnTasks = this.fbTaskService.tasksArray.filter(t => t.status === this.task.status);
+    const maxIndex = columnTasks.reduce((max, t) => Math.max(max, t.positionIndex ?? 0), -1);
+    this.task.positionIndex = maxIndex + 1;
+
     this.addTask(this.task);
     this.onClose();
   }

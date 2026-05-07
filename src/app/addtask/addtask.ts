@@ -25,6 +25,10 @@ export class AddTask implements OnInit {
       return;
     }
 
+    this.task.status = 'to-do';
+    const todoTasks = this.fbTaskService.tasksArray.filter(t => t.status === 'to-do');
+    const maxIndex = todoTasks.reduce((max, t) => Math.max(max, t.positionIndex ?? 0), -1);
+    this.task.positionIndex = maxIndex + 1;
     this.addTask(this.task);
     this.router.navigate(['/board']);
   }

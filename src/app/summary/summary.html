@@ -11,7 +11,7 @@
     <div class="summary-content">
       <section class="summary-board" aria-label="Summary metrics">
         <div class="cards-row cards-row-two">
-          <article class="metric-card compact-card">
+          <article class="metric-card compact-card" (click)="goToBoard()" style="cursor:pointer">
             <div class="metric-main">
               <span class="metric-icon todo-icon" aria-hidden="true">
                 <img src="assets/img/contacts/mobile-menu/edit-icon-only.svg" alt="" />
@@ -21,7 +21,7 @@
             <p class="metric-caption">To-do</p>
           </article>
 
-          <article class="metric-card compact-card">
+          <article class="metric-card compact-card" (click)="goToBoard()" style="cursor:pointer">
             <div class="metric-main">
               <span class="metric-icon done-icon" aria-hidden="true">
                 <img src="assets/img/board/check.svg" alt="" />
@@ -32,7 +32,7 @@
           </article>
         </div>
 
-        <article class="metric-card urgent-deadline-card">
+        <article class="metric-card urgent-deadline-card" (click)="goToBoard()" style="cursor:pointer">
           <div class="urgent-main">
             <span class="metric-icon urgent-icon" aria-hidden="true">
               <img src="assets/img/board/board-card/prio-urgent-white.svg" alt="" />
@@ -57,17 +57,17 @@
         </article>
 
         <div class="cards-row cards-row-three">
-          <article class="metric-card info-card">
+          <article class="metric-card info-card" (click)="goToBoard()" style="cursor:pointer">
             <p class="info-number">{{ tasksInBoard }}</p>
             <p class="info-label">Tasks in<br>Board</p>
           </article>
 
-          <article class="metric-card info-card">
+          <article class="metric-card info-card" (click)="goToBoard()" style="cursor:pointer">
             <p class="info-number">{{ tasksInProgress }}</p>
             <p class="info-label">Tasks In<br>Progress</p>
           </article>
 
-          <article class="metric-card info-card">
+          <article class="metric-card info-card" (click)="goToBoard()" style="cursor:pointer">
             <p class="info-number">{{ awaitingFeedback }}</p>
             <p class="info-label">Awaiting<br>Feedback</p>
           </article>
