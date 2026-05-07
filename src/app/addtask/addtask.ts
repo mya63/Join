@@ -19,6 +19,12 @@ export class AddTask implements OnInit {
   private router = inject(Router);
 
   create() {
+    this.submitAttempted = true;
+
+    if (!this.canCreateTask()) {
+      return;
+    }
+
     this.addTask(this.task);
     this.router.navigate(['/board']);
   }
@@ -54,9 +60,11 @@ export class AddTask implements OnInit {
   currentYear: number = new Date().getFullYear();
   selectedDate: Date | null = null;
   today: Date = new Date();
+  submitAttempted: boolean = false;
 
 
   ngOnInit(): void {
+    this.submitAttempted = false;
     this.initTaskState();
   }
 
@@ -199,21 +207,53 @@ export class AddTask implements OnInit {
     myTask.subTasks = [...myTask.subTasks];
   }
 
-
   alowAddTask(): boolean {
-    return this.task.title !== '' && this.task.title.trim() !== '';
+    return this.hasValidTitle();
   }
 
   alowAddTaskCalender(): boolean {
-    const myDate = new Date();
-    const curentDate = new Date(`${this.task.dueDate.substring(6,10)}-${this.task.dueDate.substring(3,5)}-${this.task.dueDate.substring(0,2)}T00:00:00.000Z`);
-    const dateDifference: number = curentDate.getTime() - myDate.getTime();
-    return this.task.dueDate.length === 0 || dateDifference >= 0;
+    return this.hasValidDueDate();
   }
 
+  canCreateTask(): boolean {
+    return this.hasValidTitle() && this.hasValidDueDate() && this.hasValidCategory();
+  }
 
+  private hasValidTitle(): boolean {
+    return !!this.task.title && this.task.title.trim().length > 0;
+  }
 
-  
+  private hasValidCategory(): boolean {
+    return this.task.category.category !== -1;
+  }
+
+  private hasValidDueDate(): boolean {
+    const raw = (this.task.dueDate ?? '').trim();
+
+    if (!raw) {
+      return false;
+    }
+
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(raw);
+    if (!match) {
+      return false;
+    }
+
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    const year = Number(match[3]);
+
+    const parsed = new Date(year, month - 1, day);
+    const isRealDate = parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day;
+
+    if (!isRealDate) {
+      return false;
+    }
+
+    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return parsed >= todayStart;
+  }
+
   openCalendar(target: 'task' | 'currentTask') {
     this.calendarTarget = target;
     this.showCalendar = true;
