@@ -14,7 +14,7 @@
 #main-content {
 	margin-left: var(--sidebar-w);
 	width: calc(100% - var(--sidebar-w));
-	max-width: calc(1440px - var(--sidebar-w));
+	max-width: calc(var(--content-max-width, 1920px) - var(--sidebar-w));
 	min-height: 100dvh;
 	padding-top: var(--header-h);
 }

@@ -1,13 +1,13 @@
 .summary-page {
   min-height: calc(100dvh - var(--header-h));
-  padding: 56px clamp(20px, 4vw, 72px) 32px;
+  padding: var(--page-gutter-y, 56px) var(--page-gutter-x, 96px) 32px;
   background: var(--bg);
   font-family: Inter, system-ui, Arial, sans-serif;
 }
 
 .summary-shell {
   max-width: 1120px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .summary-top {

@@ -4,37 +4,33 @@
 
 .board {
     padding-left: 0;
-    padding-top: 96px;
+    padding-top: var(--page-gutter-y, 56px);
 }
 
 .task-table {
     // border: 1px solid blue;
-    max-width: calc(1440px);
+    max-width: var(--content-max-width, 1920px);
     width: 100%;
-    height: calc(100dvh - 100px - 232px);
+    height: calc(100dvh - var(--header-h, 96px) - var(--page-gutter-y, 56px) - 232px);
     flex: 1;
     margin-left: 0;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
-    padding-inline: 64px;
+    padding-inline: var(--page-gutter-x, 96px);
     gap: 16px;
 }
 
 .collumn {
-    max-width: 244px;
     min-height: 195px;
     width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 10px;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
+    border: 1px solid transparent;
 
 }
 
@@ -49,7 +45,7 @@
     width: 100%;
     cursor: pointer;
     display: flex;
-    justify-content: center;
+    justify-content: stretch;
     align-items: center;
 
 }
@@ -138,7 +134,7 @@
     .task-table {
         margin-left: 0px;
         width: calc(100%);
-        height: calc(100dvh - 100px - 232px - 75px);
+        height: auto;
     }
 
     .overlay {

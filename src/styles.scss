@@ -9,6 +9,9 @@
 
   --header-h: 96px;
   --sidebar-w: 232px;
+  --content-max-width: 1920px;
+  --page-gutter-x: 96px;
+  --page-gutter-y: 56px;
 
   --z-sidenav: 2000;
   --z-header: 1500;
@@ -24,6 +27,7 @@
   :root {
     --sidebar-w: 0px;
     --header-h: 80px;
+    --page-gutter-x: 24px;
   }
 }
 

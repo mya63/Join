@@ -2,7 +2,7 @@
   position: fixed;
   top: 0;
   left: var(--sidebar-w, 232px);
-  width: calc(min(100%, 1440px) - var(--sidebar-w, 232px));
+  width: calc(min(100%, var(--content-max-width, 1920px)) - var(--sidebar-w, 232px));
   height: var(--header-h, 96px);
   z-index: var(--z-header, 1500);
 }
@@ -162,7 +162,7 @@
 @media (max-width: 1350px) {
   :host {
     left: 0;
-    width: min(100%, 1440px);
+    width: min(100%, var(--content-max-width, 1920px));
     height: var(--header-h-mobile, 80px);
   }
   .wrap {

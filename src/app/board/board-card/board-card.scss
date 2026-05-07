@@ -1,5 +1,6 @@
 :host {
   display: block;
+  width: 100%;
 }
 
 .card-wrap {
@@ -8,10 +9,12 @@
   justify-content: flex-start;
   align-items: center;
   bottom: 64px;
+  width: 100%;
 }
 
 .card {
-  width: 252px;
+  width: 100%;
+  min-width: 252px;
   min-height: 196px;
   padding: 16px;
   gap: 10px;
