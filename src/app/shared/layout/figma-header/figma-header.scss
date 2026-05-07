@@ -2,7 +2,7 @@
   position: fixed;
   top: 0;
   left: var(--sidebar-w, 232px);
-  width: calc(min(100%, var(--content-max-width, 1920px)) - var(--sidebar-w, 232px));
+  right: 0;
   height: var(--header-h, 96px);
   z-index: var(--z-header, 1500);
 }
@@ -12,6 +12,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  max-width: calc(var(--content-max-width, 1920px) - var(--sidebar-w, 232px));
   width: 100%;
   padding-left: 24px;
   padding-right: 24px;
@@ -24,7 +25,7 @@
   background: var(--topbar-bg, #fff);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
   font-family: Inter, system-ui, Arial, sans-serif;
@@ -162,7 +163,7 @@
 @media (max-width: 1350px) {
   :host {
     left: 0;
-    width: min(100%, var(--content-max-width, 1920px));
+    right: 0;
     height: var(--header-h-mobile, 80px);
   }
   .wrap {
