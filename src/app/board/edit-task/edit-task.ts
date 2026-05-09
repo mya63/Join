@@ -63,10 +63,19 @@ export class EditTask implements OnInit {
       ...t,
       assignTo: t.assignTo ? [...t.assignTo] : [],
       subTasks: t.subTasks ? t.subTasks.map(s => ({ ...s })) : [],
-      category: {
-        category: t.category.category,
-        categoryProperties: t.category.categoryProperties.map(p => ({ ...p })),
-      },
+      category: this.buildCategoryCopy(t.category),
+    };
+  }
+
+  /**
+   * Creates an immutable copy of task category data.
+   * @param {ITask['category']} category - Source category object.
+   * @returns {ITask['category']} Deep-copied category object.
+   */
+  private buildCategoryCopy(category: ITask['category']): ITask['category'] {
+    return {
+      category: category.category,
+      categoryProperties: category.categoryProperties.map((property) => ({ ...property })),
     };
   }
 

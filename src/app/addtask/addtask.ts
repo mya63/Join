@@ -27,17 +27,29 @@ export class AddTask implements OnInit {
    */
   create() {
     this.submitAttempted = true;
-
-    if (!this.canCreateTask()) {
-      return;
-    }
-
-    this.task.status = 'to-do';
-    const todoTasks = this.fbTaskService.tasksArray.filter(t => t.status === 'to-do');
-    const maxIndex = todoTasks.reduce((max, t) => Math.max(max, t.positionIndex ?? 0), -1);
-    this.task.positionIndex = maxIndex + 1;
+    if (!this.canCreateTask()) return;
+    this.prepareTaskForCreate();
     this.addTask(this.task);
     this.router.navigate(['/board']);
+  }
+
+  /**
+   * Sets status and next position index before task creation.
+   * @returns {void} No return value.
+   */
+  private prepareTaskForCreate(): void {
+    this.task.status = 'to-do';
+    this.task.positionIndex = this.getNextTodoPositionIndex();
+  }
+
+  /**
+   * Calculates the next available position index for to-do tasks.
+   * @returns {number} Next position index.
+   */
+  private getNextTodoPositionIndex(): number {
+    const todoTasks = this.fbTaskService.tasksArray.filter((task) => task.status === 'to-do');
+    const maxIndex = todoTasks.reduce((max, task) => Math.max(max, task.positionIndex ?? 0), -1);
+    return maxIndex + 1;
   }
 
   /**
@@ -199,11 +211,20 @@ export class AddTask implements OnInit {
    * @returns {IContact[]} Filtered contact list for assignment.
    */
   getUserForTask() {
-    return this.FbService.contactsArray.filter(user =>
-      user.name.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
-      user.surname.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
-      user.email.toLowerCase().includes(this.filterAssignedUsers.toLowerCase())
-    )
+    const normalizedTerm = this.filterAssignedUsers.toLowerCase();
+    return this.FbService.contactsArray.filter(user => this.matchesAssignmentTerm(user, normalizedTerm));
+  }
+
+  /**
+   * Checks whether a user matches the normalized assignment search term.
+   * @param {IContact} user - Contact candidate.
+   * @param {string} normalizedTerm - Lower-cased search term.
+   * @returns {boolean} True when any searchable field matches.
+   */
+  private matchesAssignmentTerm(user: IContact, normalizedTerm: string): boolean {
+    return user.name.toLowerCase().includes(normalizedTerm)
+      || user.surname.toLowerCase().includes(normalizedTerm)
+      || user.email.toLowerCase().includes(normalizedTerm);
   }
 
   /**
@@ -293,14 +314,28 @@ export class AddTask implements OnInit {
     const target = event.target as HTMLElement | null;
     if (!target) return;
 
-    const isInsideAssign = !!target.closest('.field-assign-to');
-    const isInsideCategory = !!target.closest('.field-category');
+    this.closeAssignIfOutside(target);
+    this.closeCategoryIfOutside(target);
+  }
 
-    if (!isInsideAssign) {
+  /**
+   * Closes assignment dropdown when click target is outside assignment field.
+   * @param {HTMLElement} target - Click target element.
+   * @returns {void} No return value.
+   */
+  private closeAssignIfOutside(target: HTMLElement): void {
+    if (!target.closest('.field-assign-to')) {
       this.showAssignDropdown = { task: false, currentTask: false };
     }
+  }
 
-    if (!isInsideCategory) {
+  /**
+   * Closes category dropdown when click target is outside category field.
+   * @param {HTMLElement} target - Click target element.
+   * @returns {void} No return value.
+   */
+  private closeCategoryIfOutside(target: HTMLElement): void {
+    if (!target.closest('.field-category')) {
       this.showCategoryDropdown = { task: false, currentTask: false };
     }
   }
@@ -314,11 +349,21 @@ export class AddTask implements OnInit {
     this.currentCategory = categoryName;
     const categoryIndex = this.categoryOptions.categoryProperties.findIndex(category => category.name === categoryName);
     if (categoryIndex !== -1) {
-      this.task.category.category = 0;
-      this.task.category.categoryProperties[0].color = this.categoryOptions.categoryProperties[categoryIndex].color;
-      this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[categoryIndex].name;
-      this.showCategoryDropdown.currentTask = false;
+      this.applyCategoryAtIndex(categoryIndex);
     }
+  }
+
+  /**
+   * Applies category metadata from the configured category options.
+   * @param {number} categoryIndex - Index in category options.
+   * @returns {void} No return value.
+   */
+  private applyCategoryAtIndex(categoryIndex: number): void {
+    const category = this.categoryOptions.categoryProperties[categoryIndex];
+    this.task.category.category = 0;
+    this.task.category.categoryProperties[0].color = category.color;
+    this.task.category.categoryProperties[0].name = category.name;
+    this.showCategoryDropdown.currentTask = false;
   }
 
   /**
@@ -531,14 +576,30 @@ export class AddTask implements OnInit {
   getCalendarDays(): (number | null)[] {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
-    const days: (number | null)[] = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
+    const days = this.buildLeadingEmptyDays(firstDay);
+    this.appendMonthDays(days, daysInMonth);
+    return days;
+  }
+
+  /**
+   * Creates leading empty cells before the first weekday.
+   * @param {number} firstDay - Index of first weekday.
+   * @returns {(number | null)[]} Array containing leading empty cells.
+   */
+  private buildLeadingEmptyDays(firstDay: number): (number | null)[] {
+    return Array.from({ length: firstDay }, () => null);
+  }
+
+  /**
+   * Appends day numbers to a mutable calendar cell array.
+   * @param {(number | null)[]} days - Target days array.
+   * @param {number} daysInMonth - Number of month days.
+   * @returns {void} No return value.
+   */
+  private appendMonthDays(days: (number | null)[], daysInMonth: number): void {
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    return days;
   }
 
   /**

@@ -400,17 +400,23 @@ export class FbAuthService {
     name: string,
     surname: string
   ): Promise<void> {
+    const contactPayload = this.buildSelfContactPayload(user, name, surname);
+    await addDoc(contactsCollection, contactPayload);
+  }
+
+  /**
+   * Builds the contact payload for the authenticated user.
+   * @param {User} user - Authenticated Firebase user.
+   * @param {string} name - Preferred first name.
+   * @param {string} surname - Preferred surname.
+   * @returns {Record<string, unknown>} Firestore payload for self-contact creation.
+   */
+  private buildSelfContactPayload(user: User, name: string, surname: string): Record<string, unknown> {
     const fallbackName = this.getFallbackName(user.email || '');
-    await addDoc(contactsCollection, {
-      ownerId: user.uid,
-      uid: user.uid,
-      date: new Date(),
-      color: this.getRandomColor(),
-      name: name || fallbackName,
-      surname: surname || '',
-      email: user.email || '',
-      phone: ''
-    });
+    return {
+      ownerId: user.uid, uid: user.uid, date: new Date(), color: this.getRandomColor(),
+      name: name || fallbackName, surname: surname || '', email: user.email || '', phone: ''
+    };
   }
 
   /**
@@ -422,52 +428,88 @@ export class FbAuthService {
   private async ensureDailyTestContacts(user: User): Promise<void> {
     try {
       const contactsCollection = collection(this.db, 'contacts');
-      const ownerContactsQuery = query(contactsCollection, where('ownerId', '==', user.uid));
-      const ownerContacts = await getDocs(ownerContactsQuery);
-      const todayKey = this.getTodayKey();
-      const knownTestEmails = new Set(this.testContacts.map((contact) => contact.email.toLowerCase()));
-      const legacyTestEmails = new Set(
-        this.testContacts.map((contact) => contact.email.toLowerCase().replace('@join.local', '@test.join.local'))
-      );
-      const managedTestContacts = ownerContacts.docs.filter((docItem) => {
-        const data = docItem.data();
-        const email = String(data['email'] ?? '').toLowerCase();
-        return knownTestEmails.has(email) || legacyTestEmails.has(email);
-      });
-      const existingEmails = new Set(
-        managedTestContacts
-          .map((docItem) => String(docItem.data()['email'] ?? '').toLowerCase())
-          .filter(Boolean)
-      );
-
-      const isCompleteForToday =
-        managedTestContacts.length === this.testContacts.length &&
-        managedTestContacts.every((docItem) => this.getDayKeyFromUnknown(docItem.data()['date']) === todayKey) &&
-        this.testContacts.every((contact) => existingEmails.has(contact.email.toLowerCase()));
-
-      if (isCompleteForToday) {
-        return;
-      }
-
-      await Promise.all(managedTestContacts.map((docItem) => deleteDoc(docItem.ref)));
-
-      const createTestContactsJobs = this.testContacts.map((contact) =>
-        addDoc(contactsCollection, {
-          ownerId: user.uid,
-          uid: user.uid,
-          date: new Date(),
-          color: contact.color,
-          name: contact.name,
-          surname: contact.surname,
-          email: contact.email,
-          phone: contact.phone
-        })
-      );
-      await Promise.all(createTestContactsJobs);
+      const managedDocs = await this.loadManagedTestContactDocs(contactsCollection, user.uid);
+      if (this.isDailyTestContactsComplete(managedDocs)) return;
+      await this.recreateManagedTestContacts(contactsCollection, managedDocs, user.uid);
     } catch (error) {
       console.error('Error ensuring daily test contacts:', error);
       throw error;
     }
+  }
+
+  /**
+   * Loads contact documents that belong to the managed test-contact set.
+   * @param {ReturnType<typeof collection>} contactsCollection - Firestore contacts collection reference.
+   * @param {string} ownerId - Owner id used to scope contacts.
+   * @returns {Promise<Awaited<ReturnType<typeof getDocs>>['docs']>} Managed test-contact documents.
+   */
+  private async loadManagedTestContactDocs(
+    contactsCollection: ReturnType<typeof collection>,
+    ownerId: string
+  ): Promise<Awaited<ReturnType<typeof getDocs>>['docs']> {
+    const ownerContacts = await getDocs(query(contactsCollection, where('ownerId', '==', ownerId)));
+    return ownerContacts.docs.filter((docItem) => this.isManagedTestContactDoc(docItem.data()));
+  }
+
+  /**
+   * Checks whether a contact document belongs to configured test contacts.
+   * @param {Record<string, unknown>} data - Firestore contact data.
+   * @returns {boolean} True when the contact is a managed test contact.
+   */
+  private isManagedTestContactDoc(data: Record<string, unknown>): boolean {
+    const email = String(data['email'] ?? '').toLowerCase();
+    return this.isKnownOrLegacyTestEmail(email);
+  }
+
+  /**
+   * Checks whether an email belongs to known or legacy test-contact domains.
+   * @param {string} email - Lower-cased email.
+   * @returns {boolean} True when email belongs to a managed test contact.
+   */
+  private isKnownOrLegacyTestEmail(email: string): boolean {
+    const knownEmails = new Set(this.testContacts.map((contact) => contact.email.toLowerCase()));
+    const legacyEmails = new Set(this.testContacts.map((c) => c.email.toLowerCase().replace('@join.local', '@test.join.local')));
+    return knownEmails.has(email) || legacyEmails.has(email);
+  }
+
+  /**
+   * Validates whether managed test contacts are complete and dated for today.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Managed test-contact documents.
+   * @returns {boolean} True when test contacts are complete for the current day.
+   */
+  private isDailyTestContactsComplete(docs: Awaited<ReturnType<typeof getDocs>>['docs']): boolean {
+    const todayKey = this.getTodayKey();
+    const existingEmails = new Set(docs.map((docItem) => String(this.toRecord(docItem.data())['email'] ?? '').toLowerCase()).filter(Boolean));
+    const hasTodayDates = docs.every((docItem) => this.getDayKeyFromUnknown(this.toRecord(docItem.data())['date']) === todayKey);
+    const hasAllEmails = this.testContacts.every((contact) => existingEmails.has(contact.email.toLowerCase()));
+    return docs.length === this.testContacts.length && hasTodayDates && hasAllEmails;
+  }
+
+  /**
+   * Replaces managed test contacts with today's canonical fixtures.
+   * @param {ReturnType<typeof collection>} contactsCollection - Firestore contacts collection reference.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} managedDocs - Existing managed test-contact documents.
+   * @param {string} ownerId - Owner id for newly created test contacts.
+   * @returns {Promise<void>} Promise resolved after recreation completes.
+   */
+  private async recreateManagedTestContacts(
+    contactsCollection: ReturnType<typeof collection>,
+    managedDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    ownerId: string
+  ): Promise<void> {
+    await Promise.all(managedDocs.map((docItem) => deleteDoc(docItem.ref)));
+    const createJobs = this.testContacts.map((contact) => addDoc(contactsCollection, this.buildTestContactPayload(contact, ownerId)));
+    await Promise.all(createJobs);
+  }
+
+  /**
+   * Builds Firestore payload for a test contact document.
+   * @param {TestContactTemplate} contact - Test contact template.
+   * @param {string} ownerId - Owner id to assign.
+   * @returns {Record<string, unknown>} Firestore payload object.
+   */
+  private buildTestContactPayload(contact: TestContactTemplate, ownerId: string): Record<string, unknown> {
+    return { ownerId, uid: ownerId, date: new Date(), color: contact.color, name: contact.name, surname: contact.surname, email: contact.email, phone: contact.phone };
   }
 
   /**
@@ -479,54 +521,73 @@ export class FbAuthService {
   private async ensureDailyTestTasks(user: User): Promise<void> {
     try {
       const tasksCollection = collection(this.db, 'tasks');
-      const ownerTasksQuery = query(tasksCollection, where('ownerId', '==', user.uid));
-      const ownerTasks = await getDocs(ownerTasksQuery);
-      const todayKey = this.getTodayKey();
-      const knownTestTitles = new Set(this.testTasks.map((task) => task.title));
-      const managedTestTasks = ownerTasks.docs.filter((docItem) => {
-        const data = docItem.data();
-        const title = String(data['title'] ?? '');
-        return knownTestTitles.has(title);
-      });
-      const existingTitles = new Set(
-        managedTestTasks
-          .map((docItem) => String(docItem.data()['title'] ?? ''))
-          .filter(Boolean)
-      );
-
-      const isCompleteForToday =
-        managedTestTasks.length === this.testTasks.length &&
-        managedTestTasks.every((docItem) => this.getDayKeyFromUnknown(docItem.data()['createDate']) === todayKey) &&
-        this.testTasks.every((task) => existingTitles.has(task.title));
-
-      if (isCompleteForToday) {
-        return;
-      }
-
-      await Promise.all(managedTestTasks.map((docItem) => deleteDoc(docItem.ref)));
-
-      const createTaskJobs = this.testTasks.map((taskTemplate, index) =>
-        addDoc(tasksCollection, {
-          createDate: new Date().toISOString(),
-          ownerId: user.uid,
-          completed: taskTemplate.status === 'done',
-          dueDate: this.getIsoDateWithOffset(taskTemplate.dueOffsetDays),
-          status: taskTemplate.status,
-          positionIndex: index,
-          category: taskTemplate.category,
-          title: taskTemplate.title,
-          description: taskTemplate.description,
-          assignTo: [],
-          priority: taskTemplate.priority,
-          subTasks: taskTemplate.subTasks
-        })
-      );
-
-      await Promise.all(createTaskJobs);
+      const managedDocs = await this.loadManagedTestTaskDocs(tasksCollection, user.uid);
+      if (this.isDailyTestTasksComplete(managedDocs)) return;
+      await this.recreateManagedTestTasks(tasksCollection, managedDocs, user.uid);
     } catch (error) {
       console.error('Error ensuring daily test tasks:', error);
       throw error;
     }
+  }
+
+  /**
+   * Loads task documents that belong to the managed test-task set.
+   * @param {ReturnType<typeof collection>} tasksCollection - Firestore tasks collection reference.
+   * @param {string} ownerId - Owner id used to scope tasks.
+   * @returns {Promise<Awaited<ReturnType<typeof getDocs>>['docs']>} Managed test-task documents.
+   */
+  private async loadManagedTestTaskDocs(
+    tasksCollection: ReturnType<typeof collection>,
+    ownerId: string
+  ): Promise<Awaited<ReturnType<typeof getDocs>>['docs']> {
+    const ownerTasks = await getDocs(query(tasksCollection, where('ownerId', '==', ownerId)));
+    const knownTitles = new Set(this.testTasks.map((task) => task.title));
+    return ownerTasks.docs.filter((docItem) => knownTitles.has(String(docItem.data()['title'] ?? '')));
+  }
+
+  /**
+   * Validates whether managed test tasks are complete and dated for today.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Managed test-task documents.
+   * @returns {boolean} True when test tasks are complete for the current day.
+   */
+  private isDailyTestTasksComplete(docs: Awaited<ReturnType<typeof getDocs>>['docs']): boolean {
+    const todayKey = this.getTodayKey();
+    const existingTitles = new Set(docs.map((docItem) => String(this.toRecord(docItem.data())['title'] ?? '')).filter(Boolean));
+    const hasTodayDates = docs.every((docItem) => this.getDayKeyFromUnknown(this.toRecord(docItem.data())['createDate']) === todayKey);
+    const hasAllTitles = this.testTasks.every((task) => existingTitles.has(task.title));
+    return docs.length === this.testTasks.length && hasTodayDates && hasAllTitles;
+  }
+
+  /**
+   * Replaces managed test tasks with today's canonical fixtures.
+   * @param {ReturnType<typeof collection>} tasksCollection - Firestore tasks collection reference.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} managedDocs - Existing managed test-task documents.
+   * @param {string} ownerId - Owner id for newly created test tasks.
+   * @returns {Promise<void>} Promise resolved after recreation completes.
+   */
+  private async recreateManagedTestTasks(
+    tasksCollection: ReturnType<typeof collection>,
+    managedDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    ownerId: string
+  ): Promise<void> {
+    await Promise.all(managedDocs.map((docItem) => deleteDoc(docItem.ref)));
+    const createJobs = this.testTasks.map((taskTemplate, index) => addDoc(tasksCollection, this.buildTestTaskPayload(taskTemplate, ownerId, index)));
+    await Promise.all(createJobs);
+  }
+
+  /**
+   * Builds Firestore payload for a test task document.
+   * @param {TestTaskTemplate} taskTemplate - Test task template.
+   * @param {string} ownerId - Owner id to assign.
+   * @param {number} index - Position index in seeded list.
+   * @returns {Record<string, unknown>} Firestore payload object.
+   */
+  private buildTestTaskPayload(taskTemplate: TestTaskTemplate, ownerId: string, index: number): Record<string, unknown> {
+    return {
+      createDate: new Date().toISOString(), ownerId, completed: taskTemplate.status === 'done', dueDate: this.getIsoDateWithOffset(taskTemplate.dueOffsetDays),
+      status: taskTemplate.status, positionIndex: index, category: taskTemplate.category, title: taskTemplate.title,
+      description: taskTemplate.description, assignTo: [], priority: taskTemplate.priority, subTasks: taskTemplate.subTasks
+    };
   }
 
   /**
@@ -573,35 +634,80 @@ export class FbAuthService {
     await runInInjectionContext(this.injector, async () => {
       const contactsCollection = collection(this.db, 'contacts');
       const tasksCollection = collection(this.db, 'tasks');
-
-      const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
-      const testTitles = this.testTasks.map((task) => task.title);
-
-      const [matchingContacts, matchingTasks] = await Promise.all([
-        getDocs(query(contactsCollection, where('email', 'in', testEmails))),
-        getDocs(query(tasksCollection, where('title', 'in', testTitles)))
-      ]);
-
-      const deleteJobs: Array<Promise<void>> = [];
-
-      matchingContacts.docs.forEach((docItem) => {
-        const ownerId = String(docItem.data()['ownerId'] ?? '');
-        if (ownerId && ownerId !== currentOwnerId) {
-          deleteJobs.push(deleteDoc(docItem.ref));
-        }
-      });
-
-      matchingTasks.docs.forEach((docItem) => {
-        const ownerId = String(docItem.data()['ownerId'] ?? '');
-        if (ownerId && ownerId !== currentOwnerId) {
-          deleteJobs.push(deleteDoc(docItem.ref));
-        }
-      });
-
+      const [matchingContacts, matchingTasks] = await this.loadMatchingTestFixtures(contactsCollection, tasksCollection);
+      const deleteJobs = this.collectForeignFixtureDeleteJobs(matchingContacts.docs, matchingTasks.docs, currentOwnerId);
       if (deleteJobs.length > 0) {
         await Promise.all(deleteJobs);
       }
     });
+  }
+
+  /**
+   * Loads contact and task documents that match known test fixture identifiers.
+   * @param {ReturnType<typeof collection>} contactsCollection - Contacts collection reference.
+   * @param {ReturnType<typeof collection>} tasksCollection - Tasks collection reference.
+   * @returns {Promise<[Awaited<ReturnType<typeof getDocs>>, Awaited<ReturnType<typeof getDocs>>]>} Matching docs tuple.
+   */
+  private loadMatchingTestFixtures(
+    contactsCollection: ReturnType<typeof collection>,
+    tasksCollection: ReturnType<typeof collection>
+  ): Promise<[Awaited<ReturnType<typeof getDocs>>, Awaited<ReturnType<typeof getDocs>>]> {
+    const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
+    const testTitles = this.testTasks.map((task) => task.title);
+    return Promise.all([
+      getDocs(query(contactsCollection, where('email', 'in', testEmails))),
+      getDocs(query(tasksCollection, where('title', 'in', testTitles)))
+    ]);
+  }
+
+  /**
+   * Collects delete jobs for fixture documents that belong to other owners.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} contactDocs - Matching contact documents.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} taskDocs - Matching task documents.
+   * @param {string} currentOwnerId - Owner id that should be retained.
+   * @returns {Array<Promise<void>>} Delete jobs for foreign-owner fixtures.
+   */
+  private collectForeignFixtureDeleteJobs(
+    contactDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    taskDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    currentOwnerId: string
+  ): Array<Promise<void>> {
+    return [...this.collectForeignOwnerDeletes(contactDocs, currentOwnerId), ...this.collectForeignOwnerDeletes(taskDocs, currentOwnerId)];
+  }
+
+  /**
+   * Collects delete jobs for documents owned by users other than current owner.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Matching fixture documents.
+   * @param {string} currentOwnerId - Owner id that should be retained.
+   * @returns {Array<Promise<void>>} Delete jobs for foreign-owner documents.
+   */
+  private collectForeignOwnerDeletes(
+    docs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    currentOwnerId: string
+  ): Array<Promise<void>> {
+    return docs
+      .filter((docItem) => this.isForeignOwner(this.toRecord(docItem.data()), currentOwnerId))
+      .map((docItem) => deleteDoc(docItem.ref));
+  }
+
+  /**
+   * Converts unknown Firestore data into a record for safe keyed access.
+   * @param {unknown} value - Unknown Firestore payload.
+   * @returns {Record<string, unknown>} Record view of payload data.
+   */
+  private toRecord(value: unknown): Record<string, unknown> {
+    return (value ?? {}) as Record<string, unknown>;
+  }
+
+  /**
+   * Checks whether the document data belongs to a different owner.
+   * @param {Record<string, unknown>} data - Firestore document data.
+   * @param {string} currentOwnerId - Owner id that should be retained.
+   * @returns {boolean} True when the document belongs to another owner.
+   */
+  private isForeignOwner(data: Record<string, unknown>, currentOwnerId: string): boolean {
+    const ownerId = String(data['ownerId'] ?? '');
+    return !!ownerId && ownerId !== currentOwnerId;
   }
 
   /**
@@ -692,32 +798,54 @@ export class FbAuthService {
    * @returns {string | null} Date key or null when value cannot be parsed.
    */
   private getDayKeyFromUnknown(value: unknown): string | null {
-    let parsedDate: Date | null = null;
+    const parsedDate = this.parseUnknownDate(value);
+    return parsedDate ? this.toDayKey(parsedDate) : null;
+  }
 
-    if (value instanceof Date) {
-      parsedDate = value;
-    } else if (typeof value === 'string') {
-      const candidate = new Date(value);
-      if (!Number.isNaN(candidate.getTime())) {
-        parsedDate = candidate;
-      }
-    } else if (value && typeof value === 'object' && 'toDate' in (value as Record<string, unknown>)) {
-      const timestampLike = value as { toDate?: () => Date };
-      if (typeof timestampLike.toDate === 'function') {
-        const candidate = timestampLike.toDate();
-        if (candidate instanceof Date && !Number.isNaN(candidate.getTime())) {
-          parsedDate = candidate;
-        }
-      }
-    }
+  /**
+   * Parses unknown date-like values into a valid Date instance.
+   * @param {unknown} value - Unknown date source.
+   * @returns {Date | null} Parsed date or null when unsupported.
+   */
+  private parseUnknownDate(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') return this.parseDateString(value);
+    return this.parseTimestampLike(value);
+  }
 
-    if (!parsedDate) {
-      return null;
-    }
+  /**
+   * Parses an ISO-like date string into Date when valid.
+   * @param {string} value - Date string.
+   * @returns {Date | null} Parsed date or null when invalid.
+   */
+  private parseDateString(value: string): Date | null {
+    const candidate = new Date(value);
+    return Number.isNaN(candidate.getTime()) ? null : candidate;
+  }
 
-    const year = parsedDate.getFullYear();
-    const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(parsedDate.getDate()).padStart(2, '0');
+  /**
+   * Parses Firestore timestamp-like objects into Date when available.
+   * @param {unknown} value - Timestamp-like object.
+   * @returns {Date | null} Parsed date or null when unavailable.
+   */
+  private parseTimestampLike(value: unknown): Date | null {
+    if (!value || typeof value !== 'object') return null;
+    if (!('toDate' in (value as Record<string, unknown>))) return null;
+    const timestampLike = value as { toDate?: () => Date };
+    if (typeof timestampLike.toDate !== 'function') return null;
+    const candidate = timestampLike.toDate();
+    return candidate instanceof Date && !Number.isNaN(candidate.getTime()) ? candidate : null;
+  }
+
+  /**
+   * Converts a Date instance to YYYY-MM-DD local key format.
+   * @param {Date} date - Date to convert.
+   * @returns {string} Day key string.
+   */
+  private toDayKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 

@@ -114,20 +114,16 @@ export class Login implements OnInit {
    * @returns {string} Localized error message for display.
    */
   private getFirebaseErrorMessage(error: any): string {
-    switch (error.code) {
-      case 'auth/invalid-credential':
-      case 'auth/user-not-found':
-      case 'auth/wrong-password':
-        return 'Falsche E-Mail oder falsches Passwort.';
-      case 'auth/invalid-email':
-        return 'Bitte eine gültige E-Mail-Adresse eingeben.';
-      case 'auth/user-disabled':
-        return 'Dieses Konto wurde deaktiviert.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your connection.';
-      default:
-        return 'Login fehlgeschlagen. Bitte erneut versuchen.';
-    }
+    const code = String(error?.code || '');
+    const groupedInvalidCredentials = new Set(['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password']);
+    if (groupedInvalidCredentials.has(code)) return 'Falsche E-Mail oder falsches Passwort.';
+
+    const messages: Record<string, string> = {
+      'auth/invalid-email': 'Bitte eine gültige E-Mail-Adresse eingeben.',
+      'auth/user-disabled': 'Dieses Konto wurde deaktiviert.',
+      'auth/network-request-failed': 'Network error. Please check your connection.'
+    };
+    return messages[code] || 'Login fehlgeschlagen. Bitte erneut versuchen.';
   }
 
   /**

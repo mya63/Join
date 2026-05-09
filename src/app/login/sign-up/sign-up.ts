@@ -224,22 +224,14 @@ export class SignUp {
    */
   private handleFirebaseError(error: any): void {
     console.error('Sign-up failed:', error);
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        this.signUpErrors.firebase = 'This email is already registered.';
-        break;
-      case 'auth/weak-password':
-        this.signUpErrors.firebase = 'Password should be at least 6 characters.';
-        break;
-      case 'auth/invalid-email':
-        this.signUpErrors.firebase = 'Please enter a valid email address.';
-        break;
-      case 'auth/network-request-failed':
-        this.signUpErrors.firebase = 'Network error. Please check your connection.';
-        break;
-      default:
-        this.signUpErrors.firebase = 'An error occurred during sign-up. Please try again.';
-    }
+    const code = String(error?.code || '');
+    const messages: Record<string, string> = {
+      'auth/email-already-in-use': 'This email is already registered.',
+      'auth/weak-password': 'Password should be at least 6 characters.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/network-request-failed': 'Network error. Please check your connection.'
+    };
+    this.signUpErrors.firebase = messages[code] || 'An error occurred during sign-up. Please try again.';
   }
 
   /**

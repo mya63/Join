@@ -95,8 +95,6 @@ export class Contacts {
    */
   updatePositionIndex(id: string, field: string, value: number) {
     this.fbService.i.push(value);
-    //if (Math.min(...this.fbService.i) === value) this.fbService.updateOneField(id, field, value);
-    //console.log(id, field, Math.min(...this.fbService.i));
   }
 
   /**
@@ -209,10 +207,9 @@ export class Contacts {
   onEdit() {
     this.fbService.contactlistHidden = true;
     this.showOptions = false;
-    this.fbService.showEditContact = true; // Enable flag so the edit component becomes visible.
-    // this.edit.emit();
+    this.fbService.showEditContact = true;
   }
-  // Mobile flow: delete the contact and keep the details card state in sync.
+
   /**
    * Deletes the selected contact and shows an error state if deletion fails.
    * @returns {void} No return value.
@@ -228,8 +225,6 @@ export class Contacts {
         this.deleteError.set(true);
       }
     }
-    // this.delete.emit();
-    // this.goBack();
   }
 
 

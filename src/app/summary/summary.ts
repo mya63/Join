@@ -98,7 +98,6 @@ export class Summary implements OnInit, OnDestroy {
         return 'User';
       });
     } catch {
-      // Keep fallback generic if Firestore fetch fails.
     }
     return 'User';
   }

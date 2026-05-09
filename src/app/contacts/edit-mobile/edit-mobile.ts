@@ -53,7 +53,6 @@ export class EditMobile {
    */
   closeOverlayWithAnimation() {
     this.isClosing = true;
-    // Animation time before actually closing
     setTimeout(() => {
       this.onClose();
       this.isClosing = false;
@@ -66,11 +65,9 @@ export class EditMobile {
    * @returns {void} No return value.
    */
   upContact(form?: any) {
-    // Run validation before saving.
     if (form && !this.isFormValid(form)) {
-      // Mark all fields as touched to show validation messages.
       this.markAllFieldsAsTouched(form);
-      return; // Abort save when validation fails.
+      return;
     }
 
     this.fbService.updateContact(this.fbService.id, this.editedContact);
@@ -115,7 +112,7 @@ export class EditMobile {
    */
   hasInvalidCapitalization(name: string | undefined): boolean {
     if (!name || name.length === 0) {
-      return false; // Empty input is not treated as capitalization error.
+      return false;
     }
     return !/^[A-ZÄÖÜ]/.test(name);
   }
@@ -139,15 +136,13 @@ export class EditMobile {
    */
   hasInvalidEmailFormat(email: string | undefined): boolean {
     if (!email || email.length === 0) {
-      return false; // Empty input is handled by required validator.
+      return false;
     }
 
-    // Reject emails that end with a trailing dot.
     if (email.endsWith('.')) {
       return true;
     }
 
-    // Extended regex: local part, domain, dot, and at least 2 chars TLD.
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
     return !emailRegex.test(email);
   }
@@ -159,10 +154,9 @@ export class EditMobile {
    */
   hasInvalidPhoneFormat(phone: string | undefined): boolean {
     if (!phone || phone.length === 0) {
-      return false; // Empty input is valid because phone is optional.
+      return false;
     }
 
-    // Regex: optional + prefix followed by at least 6 digits.
     const phoneRegex = /^\+?[0-9]{6,}$/;
     return !phoneRegex.test(phone);
   }

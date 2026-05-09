@@ -4,7 +4,6 @@ import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { IContact } from '../interfaces/i-contact';
 import { environment } from '../../environments/environment';
-//import { EditDesktop } from '../contacts/edit-desktop/edit-desktop';
 import { Contacts } from '../contacts/contacts';
 import { FbAuthService } from './fb-auth-service';
 
@@ -20,7 +19,6 @@ export class FbService {
   contact: IContact;
   currentContact: IContact;
   contactsCollection = collection(this.db, 'contacts');
-  //contactsCollectionFiltered = query(this.contactsCollection, where('ownerId', '==', this.getCurrentUserId()));
   contactsCollectionSorted = query(this.contactsCollection, orderBy('date', 'desc'));
   dataCollection = collection(this.db, 'data');
 
@@ -100,7 +98,6 @@ export class FbService {
       email: email,
       phone: phone
     };
-    //console.log(this.contact);
     this.addContact(this.contact);
   }
 
@@ -141,9 +138,6 @@ export class FbService {
    */
   async updateOneField(id: string, field: string, value: number) {
     console.log(id, field, value);
-    // this.i = this.i + 1;
-    //if (this.i > this.contactsArray.length + 1) { this.i = 0; } console.log(this.i, `Updating contact ${id}, setting ${field} to ${value}`);
-    //await updateDoc(doc(this.contactsCollection, this.contactsArray[id].id), { [field]: value });
   }
 
   /**
@@ -212,13 +206,17 @@ export class FbService {
     const g = Math.floor(Math.random() * 222);
     const b = Math.floor(Math.random() * 222);
 
-    const toHex = (c: number) => {
-      const hex = c.toString(16);
-      return hex.length === 1 ? "0" + hex : hex;
-    };
+    return `#${this.toHexColorComponent(r)}${this.toHexColorComponent(g)}${this.toHexColorComponent(b)}`;
+  }
 
-    const color = `#${toHex(r)}${toHex(g)}${toHex(b)}`
-    return color;
+  /**
+   * Converts a color channel value to a two-character hex representation.
+   * @param {number} value - Color channel value.
+   * @returns {string} Two-character hexadecimal channel value.
+   */
+  private toHexColorComponent(value: number): string {
+    const hex = value.toString(16);
+    return hex.length === 1 ? `0${hex}` : hex;
   }
 
   /**
@@ -282,27 +280,56 @@ export class FbService {
    * @returns {void} No return value.
    */
   private resolveCurrentContact(): void {
-    if (this.contactsArray.length === 0) {
-      this.id = 0;
-      this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
+    if (this.hasNoContacts()) {
+      this.resetCurrentContact();
       return;
     }
-
-    if (this.pendingNewContactEmail) {
-      const newIdx = this.contactsArray.findIndex(c => c.email === this.pendingNewContactEmail);
-      if (newIdx !== -1) {
-        this.id = newIdx;
-        this.currentContact = this.contactsArray[newIdx];
-        this.pendingNewContactEmail = '';
-        return;
-      }
+    if (this.tryApplyPendingNewContact()) {
+      return;
     }
+    this.ensureValidCurrentIndex();
+    this.currentContact = this.contactsArray[this.id];
+  }
 
+  /**
+   * Checks whether the filtered contacts collection is empty.
+   * @returns {boolean} True when no contacts are available.
+   */
+  private hasNoContacts(): boolean {
+    return this.contactsArray.length === 0;
+  }
+
+  /**
+   * Resets selected contact state to an empty fallback contact.
+   * @returns {void} No return value.
+   */
+  private resetCurrentContact(): void {
+    this.id = 0;
+    this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
+  }
+
+  /**
+   * Selects a newly created contact when pending email metadata is available.
+   * @returns {boolean} True when pending contact was applied.
+   */
+  private tryApplyPendingNewContact(): boolean {
+    if (!this.pendingNewContactEmail) return false;
+    const newIdx = this.contactsArray.findIndex(c => c.email === this.pendingNewContactEmail);
+    if (newIdx === -1) return false;
+    this.id = newIdx;
+    this.currentContact = this.contactsArray[newIdx];
+    this.pendingNewContactEmail = '';
+    return true;
+  }
+
+  /**
+   * Clamps selected contact index into the filtered contacts array bounds.
+   * @returns {void} No return value.
+   */
+  private ensureValidCurrentIndex(): void {
     if (this.id < 0 || this.id >= this.contactsArray.length) {
       this.id = 0;
     }
-
-    this.currentContact = this.contactsArray[this.id];
   }
 
   /**

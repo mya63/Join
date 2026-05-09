@@ -30,24 +30,19 @@ export class Board implements OnInit, OnDestroy {
   columnIndex: number = 0;
   collumns: string[] = ['getTaskCollumnOne', 'getTaskCollumnTwo', 'getTaskCollumnThree', 'getTaskCollumnFour'];
 
-  // Cached column arrays to maintain references for CDK
   todoTasks: ITask[] = [];
   inProgressTasks: ITask[] = [];
   awaitFeedbackTasks: ITask[] = [];
   doneTasks: ITask[] = [];
 
-  // Overlay properties
   showAddCardOverlay: boolean = false;
   selectedColumn: string = '';
 
-  // Info task overlay
   showInfoTask: boolean = false;
   selectedTask: ITask | null = null;
 
-  // Edit task overlay
   showEditTask: boolean = false;
-  
-  // Search properties
+
   searchTerm: string = '';
 
   private tasksSubscription: Subscription = new Subscription();
@@ -64,16 +59,13 @@ export class Board implements OnInit, OnDestroy {
    * @returns {void} No return value.
    */
   ngOnInit() {
-    // Subscribe to task updates from the service only for external changes
     this.tasksSubscription = this.fbTaskService.tasksUpdated$.subscribe(tasks => {
-      // Only update if we're not in the middle of a drag operation
       if (!this.isDragging) {
         this.updateColumnArrays();
         this.cdr.markForCheck();
       }
     });
 
-    // Initial update
     this.updateColumnArrays();
     this.cdr.markForCheck();
   }
@@ -190,17 +182,13 @@ export class Board implements OnInit, OnDestroy {
   async drop(event: CdkDragDrop<ITask[]>): Promise<void> {
     const draggedTask = event.item.data as ITask;
     if (!draggedTask) return;
-
     this.isDragging = true;
-
     if (event.previousContainer === event.container) {
       await this.handleSameColumnDrop(event);
     } else {
       await this.handleCrossColumnDrop(event, draggedTask);
     }
-
-    this.isDragging = false;
-    this.cdr.markForCheck();
+    this.finalizeDragState();
   }
 
   /**
@@ -221,10 +209,29 @@ export class Board implements OnInit, OnDestroy {
    */
   private async handleCrossColumnDrop(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
     this.transferTaskBetweenColumns(event);
+    await this.updateDraggedTaskStatus(event, draggedTask);
+    await this.updateColumnPositionsAfterMove(event);
+  }
+
+  /**
+   * Persists the moved task status and index in the new column.
+   * @param {CdkDragDrop<ITask[]>} event - Drop event containing target metadata.
+   * @param {ITask} draggedTask - Task being moved.
+   * @returns {Promise<void>} Promise resolved after status persistence.
+   */
+  private async updateDraggedTaskStatus(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
     const newStatus = this.getStatusFromContainerId(event.container.id);
     draggedTask.status = newStatus;
     await this.fbTaskService.updateTask(draggedTask.dbid, { status: newStatus, positionIndex: event.currentIndex });
-    await this.updateColumnPositionsAfterMove(event);
+  }
+
+  /**
+   * Resets drag state and triggers change detection after drop handling.
+   * @returns {void} No return value.
+   */
+  private finalizeDragState(): void {
+    this.isDragging = false;
+    this.cdr.markForCheck();
   }
 
   /**
@@ -297,7 +304,7 @@ export class Board implements OnInit, OnDestroy {
    * @returns {boolean} Always returns true in the current implementation.
    */
   evenPredicate(item: CdkDrag<number>) {
-    return true; //item.data % 2 === 0;
+    return true;
   }
 
   /**
@@ -322,7 +329,6 @@ export class Board implements OnInit, OnDestroy {
    */
   onDragStarted() {
     this.isDragging = true;
-    //console.log('Drag started');
   }
 
   /**
@@ -330,11 +336,8 @@ export class Board implements OnInit, OnDestroy {
    * @returns {void} No return value.
    */
   onDragEnded() {
-    //console.log('Drag ended');
-    // Don't set isDragging to false here, let the drop method handle it
   }
 
-  // Search methods
   /**
    * Applies a text filter and rebuilds visible task columns.
    * @param {string} searchTerm - Raw search term entered by the user.
@@ -362,7 +365,6 @@ export class Board implements OnInit, OnDestroy {
     });
   }
 
-  // Overlay-Methoden
   /**
    * Opens the add-task overlay for a specific target column.
    * @param {string} columnType - Target status/column key.

@@ -53,10 +53,9 @@ export class AddDesktop {
    */
   closeOverlay() {
     this.isClosing = true;
-    // Wait for animation end before closing the overlay.
     setTimeout(() => {
       this.close.emit();
-    }, 400); // 400ms matches the animation duration.
+    }, 400);
   }
 
   /**
@@ -64,7 +63,6 @@ export class AddDesktop {
    * @returns {void} No return value.
    */
   onSubmit() {
-    // Run full validation before creating a contact.
     if (this.validateAllFields()) {
       this.addContact();
       this.created.emit();
@@ -77,10 +75,8 @@ export class AddDesktop {
    * @returns {boolean} True when all fields are valid.
    */
   validateAllFields(): boolean {
-    // Mark all fields as touched so validation messages become visible.
     this.markAllFieldsAsTouched();
-    
-    // Verify whether all validations pass.
+
     const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
     const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);
@@ -108,7 +104,7 @@ export class AddDesktop {
    */
   hasInvalidCapitalization(name: string | undefined): boolean {
     if (!name || name.length === 0) {
-      return false; // Empty input is not treated as capitalization error.
+      return false;
     }
     return !/^[A-ZÄÖÜ]/.test(name);
   }
@@ -131,15 +127,13 @@ export class AddDesktop {
    */
   hasInvalidEmailFormat(email: string | undefined): boolean {
     if (!email || email.length === 0) {
-      return false; // Empty input is handled by required validator.
+      return false;
     }
-    
-    // Reject emails that end with a trailing dot.
+
     if (email.endsWith('.')) {
       return true;
     }
-    
-    // Extended regex: local part, domain, dot, and at least 2 chars TLD.
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
     return !emailRegex.test(email);
   }
@@ -151,10 +145,9 @@ export class AddDesktop {
    */
   hasInvalidPhoneFormat(phone: string | undefined): boolean {
     if (!phone || phone.length === 0) {
-      return false; // Empty input is valid because phone is optional.
+      return false;
     }
-    
-    // Regex: optional + prefix followed by at least 6 digits.
+
     const phoneRegex = /^\+?[0-9]{6,}$/;
     return !phoneRegex.test(phone);
   }
@@ -176,12 +169,10 @@ export class AddDesktop {
    * @returns {boolean} True when form data is valid.
    */
   isFormValid(form: any): boolean {
-    // Standard Angular form validation.
     if (form.invalid) {
       return false;
     }
-    
-    // Reuse the same business validation logic as in validateAllFields.
+
     const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
     const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);

@@ -17,7 +17,7 @@ export class EditDesktop {
 
 contact: IContact = { name: '', surname: '', email: '', phone: '' };
 editedContact: IContact = { ...this.contact };
-isClosing = false;  // Used for slide-out animation state.
+isClosing = false;
 
 /**
  * Closes the desktop edit overlay with exit animation.
@@ -112,7 +112,7 @@ return this.fbService.showEditContact;
  */
 hasInvalidCapitalization(name: string | undefined): boolean {
 if (!name || name.length === 0) {
-return false; // Empty input is not treated as capitalization error.
+return false;
 }
 return !/^[A-ZÄÖÜ]/.test(name);
 }
@@ -136,15 +136,13 @@ return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
  */
 hasInvalidEmailFormat(email: string | undefined): boolean {
 if (!email || email.length === 0) {
-return false; // Empty input is handled by required validator.
+return false;
 }
 
-// Reject emails that end with a trailing dot.
 if (email.endsWith('.')) {
 return true;
 }
 
-// Extended regex: local part, domain, dot, and at least 2 chars TLD.
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 return !emailRegex.test(email);
 }
@@ -156,10 +154,9 @@ return !emailRegex.test(email);
  */
 hasInvalidPhoneFormat(phone: string | undefined): boolean {
 if (!phone || phone.length === 0) {
-return false; // Empty input is valid because phone is optional.
+return false;
 }
 
-// Regex: optional + prefix followed by at least 6 digits.
 const phoneRegex = /^\+?[0-9]{6,}$/;
 return !phoneRegex.test(phone);
 }

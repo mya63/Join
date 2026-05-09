@@ -28,7 +28,6 @@ export const routes: Routes = [
    { path: 'addtask', component: AddTask, canActivate: [authGuard] },
    { path: 'crud', component: crud, canActivate: [authGuard] },
    { path: 'tasktest', component: Tasktest, canActivate: [authGuard] },
-   // { path: 'addc', component: AddContactComponent },
    { path: 'legal-notice', component: LegalNotice },
    { path: 'privacy-policy', component: PrivacyPolicy },
 

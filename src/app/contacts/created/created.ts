@@ -9,5 +9,5 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Created {
-  @Input() show = false; // Sichtbarkeit durch [show]="toastOpen"
+  @Input() show = false;
 }

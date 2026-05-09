@@ -334,7 +334,6 @@ export class AddCard implements OnInit {
     return this.hasValidDueDate();
   }
 
-  // Backward-compatible aliases for existing template bindings.
   /**
    * Backward-compatible alias for title validation.
    * @returns {boolean} True when title validation passes.
@@ -343,7 +342,6 @@ export class AddCard implements OnInit {
     return this.allowAddTask();
   }
 
-  // Backward-compatible alias for existing template bindings.
   /**
    * Backward-compatible alias for due-date validation.
    * @returns {boolean} True when due-date validation passes.
@@ -509,14 +507,30 @@ export class AddCard implements OnInit {
   getCalendarDays(): (number | null)[] {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
-    const days: (number | null)[] = [];
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
+    const days = this.buildLeadingEmptyDays(firstDay);
+    this.appendMonthDays(days, daysInMonth);
+    return days;
+  }
+
+  /**
+   * Creates leading empty cells before the first weekday.
+   * @param {number} firstDay - Index of first weekday.
+   * @returns {(number | null)[]} Array containing leading empty cells.
+   */
+  private buildLeadingEmptyDays(firstDay: number): (number | null)[] {
+    return Array.from({ length: firstDay }, () => null);
+  }
+
+  /**
+   * Appends day numbers to a mutable calendar cell array.
+   * @param {(number | null)[]} days - Target days array.
+   * @param {number} daysInMonth - Number of month days.
+   * @returns {void} No return value.
+   */
+  private appendMonthDays(days: (number | null)[], daysInMonth: number): void {
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    return days;
   }
 
   /**

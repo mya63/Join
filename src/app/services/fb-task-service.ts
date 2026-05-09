@@ -23,10 +23,6 @@ export class FbTaskService {
   newTask: ITask;
   currentTask: ITask;
   tasksArray: ITask[];
-  //collumnsHeaders: string[] = ['to-do', 'in-progress', 'await-feedback', 'done'];
-  //collumns: number[][] = [[], [], [], []];
-
-  // Subject to notify components when tasks change
   private tasksUpdatedSubject = new BehaviorSubject<ITask[]>([]);
   readonly tasksUpdated$ = this.tasksUpdatedSubject.asObservable();
 
@@ -239,7 +235,6 @@ export class FbTaskService {
       updatedData.status == 'done' ? updatedData.completed = true : updatedData.completed = false;
     }
     const taskDoc = doc(this.tasksCollection, taskId);
-    //console.log('Updating task:', taskId, updatedData);
     await updateDoc(taskDoc, updatedData);
   }
 
@@ -302,19 +297,6 @@ export class FbTaskService {
       return Promise.resolve();
     });
   }
-
-  // Behalte die alte Methode für Kompatibilität, aber mache sie optional
-  /*   setPositionInCollumn() {
-      let n = 0;
-      this.collumnsHeaders.forEach(header => {
-        this.collumns[n] = [];
-        const myArry = this.tasksArray.filter(task => task.status === header).sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0))
-        myArry.forEach(element => {
-          this.collumns[n].push(element.positionIndex ?? 0);
-        });
-        n++;
-      });
-    } */
 
 
   /**
