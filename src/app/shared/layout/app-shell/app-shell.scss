@@ -18,6 +18,13 @@
   padding-left: var(--sidenav-w);
 }
 
+@media (max-width: 1350px) {
+  .main {
+    padding-top: var(--header-h-mobile);
+    padding-left: 0;
+  }
+}
+
 /* @media (max-width: 950px){
   .sidenav{ display: none; }
   .main{
