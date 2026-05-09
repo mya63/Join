@@ -1,5 +1,5 @@
 import { Injectable, inject, NgZone, Injector, runInInjectionContext } from '@angular/core';
-import { Firestore, collection, doc, onSnapshot, query, where } from '@angular/fire/firestore';
+import { Firestore, Query, collection, doc, onSnapshot, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { ITask } from '../interfaces/i-task';

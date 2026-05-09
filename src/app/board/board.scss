@@ -232,7 +232,8 @@
 
     .cell {
         display: inline-flex;
-        width: auto;
+        width: 252px;
+        max-width: 252px;
         min-height: auto;
         justify-content: flex-start;
         vertical-align: top;
@@ -244,7 +245,7 @@
     }
 
     .cell app-board-card {
-        width: auto;
+        width: 100%;
     }
 
     .mobile-column-header {
