@@ -73,7 +73,7 @@ export class Summary implements OnInit, OnDestroy {
       } else {
         await this.fbAuthService.forceSyncDailyTestDataForCurrentUser();
         this.isGuest = false;
-        this.currentUserName = await this.loadDisplayName(user.uid);
+        this.currentUserName = await this.loadDisplayName(user.uid, user.email || '');
       }
       this.cdr.detectChanges();
     }));
@@ -84,23 +84,45 @@ export class Summary implements OnInit, OnDestroy {
    * @param {string} uid - Authenticated user id.
    * @returns {Promise<string>} Resolved display name or fallback value.
    */
-  private async loadDisplayName(uid: string): Promise<string> {
+  private async loadDisplayName(uid: string, email: string): Promise<string> {
     try {
       return await runInInjectionContext(this.injector, async () => {
         const contactsRef = collection(this.db, 'contacts');
-        const contactByUid = query(contactsRef, where('uid', '==', uid));
-        const contactByUidSnapshot = await getDocs(contactByUid);
-        if (!contactByUidSnapshot.empty) {
-          const data = contactByUidSnapshot.docs[0].data();
+        const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
+        const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
+        if (!contactByOwnerIdSnapshot.empty) {
+          const preferredByEmail = contactByOwnerIdSnapshot.docs.find((docItem) => {
+            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
+            return !!contactEmail && contactEmail === email.trim().toLowerCase();
+          });
+
+          const preferredNonTest = contactByOwnerIdSnapshot.docs.find((docItem) => {
+            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
+            return !!contactEmail && !contactEmail.endsWith('@join.local') && !contactEmail.endsWith('@test.join.local');
+          });
+
+          const preferredDoc = preferredByEmail || preferredNonTest || contactByOwnerIdSnapshot.docs[0];
+          const data = preferredDoc.data();
           const name = data['name'] || '';
           const surname = data['surname'] || '';
           if (name || surname) return `${name} ${surname}`.trim();
         }
 
-        const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
-        const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
-        if (!contactByOwnerIdSnapshot.empty) {
-          const data = contactByOwnerIdSnapshot.docs[0].data();
+        const contactByUid = query(contactsRef, where('uid', '==', uid));
+        const contactByUidSnapshot = await getDocs(contactByUid);
+        if (!contactByUidSnapshot.empty) {
+          const preferredByEmail = contactByUidSnapshot.docs.find((docItem) => {
+            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
+            return !!contactEmail && contactEmail === email.trim().toLowerCase();
+          });
+
+          const preferredNonTest = contactByUidSnapshot.docs.find((docItem) => {
+            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
+            return !!contactEmail && !contactEmail.endsWith('@join.local') && !contactEmail.endsWith('@test.join.local');
+          });
+
+          const preferredDoc = preferredByEmail || preferredNonTest || contactByUidSnapshot.docs[0];
+          const data = preferredDoc.data();
           const name = data['name'] || '';
           const surname = data['surname'] || '';
           if (name || surname) return `${name} ${surname}`.trim();

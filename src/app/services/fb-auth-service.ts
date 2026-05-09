@@ -489,17 +489,19 @@ export class FbAuthService {
    * @returns {Promise<boolean>} True when at least one today's test contact exists.
    */
   private async hasAnyTodayTestContact(ownerId: string): Promise<boolean> {
-    const contactsCollection = collection(this.db, 'contacts');
-    const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
-    const matches = await getDocs(
-      query(
-        contactsCollection,
-        where('ownerId', '==', ownerId),
-        where('email', 'in', testEmails)
-      )
-    );
-    const todayKey = this.getTodayKey();
-    return matches.docs.some((docItem) => this.getDayKeyFromUnknown(docItem.data()['date']) === todayKey);
+    return runInInjectionContext(this.injector, async () => {
+      const contactsCollection = collection(this.db, 'contacts');
+      const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
+      const matches = await getDocs(
+        query(
+          contactsCollection,
+          where('ownerId', '==', ownerId),
+          where('email', 'in', testEmails)
+        )
+      );
+      const todayKey = this.getTodayKey();
+      return matches.docs.some((docItem) => this.getDayKeyFromUnknown(docItem.data()['date']) === todayKey);
+    });
   }
 
   /**
@@ -508,36 +510,38 @@ export class FbAuthService {
    * @returns {Promise<void>} Promise resolved after duplicate fixture cleanup.
    */
   private async cleanupTestDataForOtherOwners(currentOwnerId: string): Promise<void> {
-    const contactsCollection = collection(this.db, 'contacts');
-    const tasksCollection = collection(this.db, 'tasks');
+    await runInInjectionContext(this.injector, async () => {
+      const contactsCollection = collection(this.db, 'contacts');
+      const tasksCollection = collection(this.db, 'tasks');
 
-    const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
-    const testTitles = this.testTasks.map((task) => task.title);
+      const testEmails = this.testContacts.map((contact) => contact.email.toLowerCase());
+      const testTitles = this.testTasks.map((task) => task.title);
 
-    const [matchingContacts, matchingTasks] = await Promise.all([
-      getDocs(query(contactsCollection, where('email', 'in', testEmails))),
-      getDocs(query(tasksCollection, where('title', 'in', testTitles)))
-    ]);
+      const [matchingContacts, matchingTasks] = await Promise.all([
+        getDocs(query(contactsCollection, where('email', 'in', testEmails))),
+        getDocs(query(tasksCollection, where('title', 'in', testTitles)))
+      ]);
 
-    const deleteJobs: Array<Promise<void>> = [];
+      const deleteJobs: Array<Promise<void>> = [];
 
-    matchingContacts.docs.forEach((docItem) => {
-      const ownerId = String(docItem.data()['ownerId'] ?? '');
-      if (ownerId && ownerId !== currentOwnerId) {
-        deleteJobs.push(deleteDoc(docItem.ref));
+      matchingContacts.docs.forEach((docItem) => {
+        const ownerId = String(docItem.data()['ownerId'] ?? '');
+        if (ownerId && ownerId !== currentOwnerId) {
+          deleteJobs.push(deleteDoc(docItem.ref));
+        }
+      });
+
+      matchingTasks.docs.forEach((docItem) => {
+        const ownerId = String(docItem.data()['ownerId'] ?? '');
+        if (ownerId && ownerId !== currentOwnerId) {
+          deleteJobs.push(deleteDoc(docItem.ref));
+        }
+      });
+
+      if (deleteJobs.length > 0) {
+        await Promise.all(deleteJobs);
       }
     });
-
-    matchingTasks.docs.forEach((docItem) => {
-      const ownerId = String(docItem.data()['ownerId'] ?? '');
-      if (ownerId && ownerId !== currentOwnerId) {
-        deleteJobs.push(deleteDoc(docItem.ref));
-      }
-    });
-
-    if (deleteJobs.length > 0) {
-      await Promise.all(deleteJobs);
-    }
   }
 
   /**
