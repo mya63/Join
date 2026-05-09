@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, User } from '@angular/fire/auth';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, User, onAuthStateChanged } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Firestore, collection, addDoc, query, where, getDocs } from '@angular/fire/firestore';
 
@@ -7,9 +7,54 @@ import { Firestore, collection, addDoc, query, where, getDocs } from '@angular/f
   providedIn: 'root',
 })
 export class FbAuthService {
+  private readonly loginStateStorageKey = 'join.loggedIn';
   private auth = inject(Auth);
   private router = inject(Router);
   private db = inject(Firestore);
+
+  /**
+   * Stores local login marker used for startup routing decisions.
+   * @param {boolean} loggedIn - True when user session should be treated as active.
+   * @returns {void} No return value.
+   */
+  private setLocalLoginState(loggedIn: boolean): void {
+    localStorage.setItem(this.loginStateStorageKey, loggedIn ? '1' : '0');
+  }
+
+  /**
+   * Returns whether local storage marks the user as logged in.
+   * @returns {boolean} True when local login marker is active.
+   */
+  isLocallyLoggedIn(): boolean {
+    return localStorage.getItem(this.loginStateStorageKey) === '1';
+  }
+
+  /**
+   * Resolves startup target route based on local marker and Firebase auth state.
+   * @returns {Promise<'/summary' | '/login'>} Target route for app startup.
+   */
+  async resolveStartupRoute(): Promise<'/summary' | '/login'> {
+    if (!this.isLocallyLoggedIn()) {
+      return '/login';
+    }
+
+    if (this.auth.currentUser) {
+      return '/summary';
+    }
+
+    return new Promise((resolve) => {
+      const unsub = onAuthStateChanged(this.auth, (user) => {
+        unsub();
+        if (user) {
+          this.setLocalLoginState(true);
+          resolve('/summary');
+        } else {
+          this.setLocalLoginState(false);
+          resolve('/login');
+        }
+      });
+    });
+  }
 
   /**
    * Registers a new user account and initializes the corresponding self-contact.
@@ -24,6 +69,7 @@ export class FbAuthService {
       const result = await createUserWithEmailAndPassword(this.auth, email, password);
       await this.ensureSelfContact(result.user, name, surname);
       await signOut(this.auth);
+      this.setLocalLoginState(false);
       this.router.navigate(['/login'], { queryParams: { email, password, signupSuccess: '1' } });
     } catch (error) {
       console.error('Sign-up error:', error);
@@ -41,6 +87,7 @@ export class FbAuthService {
     try {
       const result = await signInWithEmailAndPassword(this.auth, email, password);
       await this.ensureSelfContact(result.user);
+      this.setLocalLoginState(true);
       this.router.navigate(['/summary']);
     } catch (error) {
       console.error('Login error:', error);
@@ -55,6 +102,7 @@ export class FbAuthService {
   async logout() {
     try {
       await signOut(this.auth);
+      this.setLocalLoginState(false);
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Logout error:', error);
@@ -78,11 +126,13 @@ export class FbAuthService {
     if (!user) return;
     try {
       await deleteUser(user);
+      this.setLocalLoginState(false);
       this.router.navigate(['/login']);
     } catch (error: any) {
       if (error.code === 'auth/requires-recent-login') {
         // Session is too old; user must authenticate again.
         await signOut(this.auth);
+        this.setLocalLoginState(false);
         this.router.navigate(['/login']);
       } else {
         console.error('Error deleting user account:', error);

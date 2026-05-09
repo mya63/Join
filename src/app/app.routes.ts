@@ -13,20 +13,21 @@ import { PrivacyPolicy } from './legal/privacy-policy/privacy-policy';
 import { Summary } from './summary/summary';
 import { Help } from './help/help';
 import { AddTask } from './addtask/addtask';
+import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
 
    { path: '', component: Intro },
    { path: 'login', component: Login },
    { path: 'sign-up', component: SignUp },
-   { path: 'summary', component: Summary },
-   { path: 'help', component: Help },
-   { path: 'contacts', component: Contacts },
-   { path: 'board', component: Board },
-   { path: 'add-task', component: AddTask },
-   { path: 'addtask', component: AddTask },
-   { path: 'crud', component: crud },
-   { path: 'tasktest', component: Tasktest },
+   { path: 'summary', component: Summary, canActivate: [authGuard] },
+   { path: 'help', component: Help, canActivate: [authGuard] },
+   { path: 'contacts', component: Contacts, canActivate: [authGuard] },
+   { path: 'board', component: Board, canActivate: [authGuard] },
+   { path: 'add-task', component: AddTask, canActivate: [authGuard] },
+   { path: 'addtask', component: AddTask, canActivate: [authGuard] },
+   { path: 'crud', component: crud, canActivate: [authGuard] },
+   { path: 'tasktest', component: Tasktest, canActivate: [authGuard] },
    // { path: 'addc', component: AddContactComponent },
    { path: 'legal-notice', component: LegalNotice },
    { path: 'privacy-policy', component: PrivacyPolicy },

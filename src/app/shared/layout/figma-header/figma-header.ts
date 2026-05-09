@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Auth, onAuthStateChanged, signOut } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged } from '@angular/fire/auth';
+import { FbAuthService } from '../../../services/fb-auth-service';
 
 @Component({
   selector: 'figma-header',
@@ -17,6 +18,7 @@ import { Auth, onAuthStateChanged, signOut } from '@angular/fire/auth';
 export class FigmaHeader implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
+  private authService = inject(FbAuthService);
 
   userInitials = signal('G');
   dropdownOpen = signal(false);
@@ -124,11 +126,6 @@ export class FigmaHeader implements OnInit {
    */
   async logout(): Promise<void> {
     this.dropdownOpen.set(false);
-    try {
-      await signOut(this.auth);
-    } catch {
-      // Keep navigation fallback even if sign-out fails.
-    }
-    this.router.navigate(['/login']);
+    await this.authService.logout();
   }
 }
