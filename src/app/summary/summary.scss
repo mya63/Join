@@ -431,3 +431,225 @@
     font-size: 47px;
   }
 }
+
+@media (max-width: 340px) {
+  .summary-page {
+    padding: 24px 12px 16px;
+  }
+
+  .summary-board {
+    gap: 16px;
+  }
+
+  .cards-row {
+    gap: 12px;
+  }
+
+  .cards-row-three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .compact-card {
+    min-height: 104px;
+    padding: 16px 10px 14px;
+    border-radius: 24px;
+  }
+
+  .metric-main {
+    gap: 8px;
+  }
+
+  .metric-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .metric-icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .urgent-icon img {
+    width: 16px;
+    height: 12px;
+  }
+
+  .metric-number,
+  .info-number {
+    font-size: 38px;
+  }
+
+  .metric-caption,
+  .info-label,
+  .deadline-label {
+    font-size: 12px;
+  }
+
+  .urgent-deadline-card {
+    min-height: 112px;
+    padding: 14px 12px;
+    gap: 8px;
+  }
+
+  .urgent-main {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .urgent-separator {
+    height: 56px;
+  }
+
+  .deadline-box {
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .deadline-date {
+    font-size: 14px;
+  }
+
+  .info-card {
+    min-height: 100px;
+    min-width: 0;
+    padding: 12px 4px;
+  }
+}
+
+@media (max-width: 320px) {
+  .summary-page {
+    padding: 20px 10px 16px;
+  }
+
+  .cards-row {
+    gap: 10px;
+  }
+
+  .compact-card {
+    padding: 14px 8px 12px;
+    align-items: center;
+  }
+
+  .metric-main {
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .metric-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .metric-icon img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .urgent-icon img {
+    width: 14px;
+    height: 10px;
+  }
+
+  .metric-number,
+  .info-number {
+    font-size: 34px;
+  }
+
+  .metric-caption,
+  .info-label,
+  .deadline-label {
+    font-size: 11px;
+  }
+
+  .metric-caption {
+    text-align: center;
+  }
+
+  .urgent-deadline-card {
+    padding: 12px 10px;
+    gap: 6px;
+  }
+
+  .urgent-main {
+    gap: 8px;
+  }
+
+  .deadline-date {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 310px) {
+  .summary-page {
+    padding: 20px 8px 16px;
+  }
+
+  .cards-row {
+    gap: 8px;
+  }
+
+  .compact-card {
+    min-height: 92px;
+    padding: 12px 6px 10px;
+  }
+
+  .metric-main {
+    gap: 4px;
+  }
+
+  .metric-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+
+  .metric-icon img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .urgent-icon img {
+    width: 12px;
+    height: 9px;
+  }
+
+  .metric-number,
+  .info-number {
+    font-size: 30px;
+  }
+
+  .metric-caption,
+  .info-label,
+  .deadline-label {
+    font-size: 10px;
+  }
+
+  .urgent-deadline-card {
+    min-height: 104px;
+    padding: 10px 8px;
+    gap: 4px;
+  }
+
+  .urgent-main {
+    gap: 6px;
+  }
+
+  .urgent-separator {
+    height: 48px;
+  }
+
+  .deadline-box {
+    gap: 6px;
+  }
+
+  .deadline-date {
+    font-size: 12px;
+  }
+
+  .info-card {
+    min-height: 92px;
+    padding: 10px 3px;
+  }
+}
