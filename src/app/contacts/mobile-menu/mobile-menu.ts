@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FbService } from '../../services/fb-service';
 
@@ -15,7 +15,7 @@ export class MobileMenu {
 
   @Input() contactId!: string;
   @Input() inline = false;
-  /**
+
   @Output() edit = new EventEmitter<string>();
   @Output() delete = new EventEmitter<string>();
   @Output() close = new EventEmitter<void>();

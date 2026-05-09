@@ -145,11 +145,13 @@ export class Login implements OnInit {
   }
 
   /**
-   * Navigates directly to the app in guest mode.
+   * Signs in using configured test-user credentials.
    * @returns {void} No return value.
    */
   onGuestLogin(): void {
-    this.router.navigate(['contacts']);
+    this.authService.loginAsTestUser().catch((error) => {
+      this.handleFirebaseError(error);
+    });
   }
 
   /**

@@ -4,6 +4,9 @@ export interface ITask {
     dbid?: string;
     createDate: string;
     ownerId: string;
+    isTestTask?: boolean;
+    testTaskDay?: string;
+    testTaskKey?: string;
     completed: boolean;
     dueDate: string;
     status: string | 'to-do' | 'in-progress' | 'await-feedback' | 'done';

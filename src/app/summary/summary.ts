@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Firestore, collection, query, where, getDocs } from '@angular/fire/firestore';
 import { FbTaskService } from '../services/fb-task-service';
+import { FbAuthService } from '../services/fb-auth-service';
 import { ITask } from '../interfaces/i-task';
 import { Subscription } from 'rxjs';
 
@@ -17,6 +18,7 @@ export class Summary implements OnInit, OnDestroy {
   private auth = inject(Auth);
   private db = inject(Firestore);
   private fbTaskService = inject(FbTaskService);
+  private fbAuthService = inject(FbAuthService);
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   private router = inject(Router);
@@ -69,6 +71,7 @@ export class Summary implements OnInit, OnDestroy {
         this.isGuest = true;
         this.currentUserName = '';
       } else {
+        await this.fbAuthService.forceSyncDailyTestDataForCurrentUser();
         this.isGuest = false;
         this.currentUserName = await this.loadDisplayName(user.uid);
       }

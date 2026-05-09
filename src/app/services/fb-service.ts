@@ -133,11 +133,18 @@ export class FbService {
     const contact = this.contactsArray[id];
     if (!contact) return false;
     const currentUserId = this.getCurrentUserId();
+    const currentUserEmail = (this.authService.getCurrentUserEmail() || '').trim().toLowerCase();
+    const contactEmail = (contact.email || '').trim().toLowerCase();
+    const isSelfAccountContact =
+      Boolean(contact.uid) &&
+      contact.uid === currentUserId &&
+      !!currentUserEmail &&
+      contactEmail === currentUserEmail;
     // Registered foreign user: deletion is not allowed.
     if (contact.uid && contact.uid !== currentUserId) return false;
     await deleteDoc(doc(this.contactsCollection, contact.id));
     // Own account: also remove authenticated account data.
-    if (contact.uid && contact.uid === currentUserId) {
+    if (isSelfAccountContact) {
       await this.authService.deleteCurrentUserAccount();
     }
     this.id = this.firstConnect();
