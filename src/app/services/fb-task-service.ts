@@ -119,25 +119,48 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private attachFilteredListener(userId: string): void {
-    let fallbackActive = false;
+    const state = { fallbackActive: false };
+    const filteredQuery = this.buildFilteredQuery(userId);
+    this.myTasks = onSnapshot(filteredQuery, (snapshot) => this.handleFilteredSnapshot(snapshot, state), () => this.handleFilteredSnapshotError(state));
+  }
 
-    const filteredQuery = userId === 'guest'
+  /**
+   * Constructs a Firestore query to filter tasks by owner id.
+   * @param {string} userId - User id to filter by.
+   * @returns {Query} Firestore query targeting the user's tasks and guest tasks.
+   */
+  private buildFilteredQuery(userId: string): Query {
+    return userId === 'guest'
       ? query(this.tasksCollection, where('ownerId', '==', 'guest'))
       : query(this.tasksCollection, where('ownerId', 'in', [userId, 'guest']));
+  }
 
-    this.myTasks = onSnapshot(filteredQuery, (snapshot) => {
-      if (!fallbackActive && snapshot.empty) {
-        fallbackActive = true;
-        this.attachUnfilteredListener();
-        return;
-      }
-      this.applyTaskSnapshot(snapshot);
-    }, () => {
-      if (!fallbackActive) {
-        fallbackActive = true;
-        this.attachUnfilteredListener();
-      }
-    });
+  /**
+   * Processes a successful snapshot from the filtered listener.
+   * Falls back to unfiltered mode if the result set is empty.
+   * @param {any} snapshot - Firestore query snapshot.
+   * @param {{fallbackActive: boolean}} state - Mutable state object tracking fallback.
+   * @returns {void} No return value.
+   */
+  private handleFilteredSnapshot(snapshot: any, state: { fallbackActive: boolean }): void {
+    if (!state.fallbackActive && snapshot.empty) {
+      state.fallbackActive = true;
+      this.attachUnfilteredListener();
+      return;
+    }
+    this.applyTaskSnapshot(snapshot);
+  }
+
+  /**
+   * Handles errors from the filtered listener by falling back to unfiltered mode.
+   * @param {{fallbackActive: boolean}} state - Mutable state object tracking fallback.
+   * @returns {void} No return value.
+   */
+  private handleFilteredSnapshotError(state: { fallbackActive: boolean }): void {
+    if (!state.fallbackActive) {
+      state.fallbackActive = true;
+      this.attachUnfilteredListener();
+    }
   }
 
   /**
@@ -248,20 +271,36 @@ export class FbTaskService {
    * @param {string} status - Target status column key.
    * @returns {void} No return value.
    */
-  async fixPositionsInColumn(status: string) {
-    const tasksInColumn = this.tasksArray
+  async fixPositionsInColumn(status: string): Promise<void> {
+    const tasksInColumn = this.getTasksForStatus(status);
+    const updates = this.buildPositionUpdatesForTasks(tasksInColumn);
+    await Promise.all(updates);
+  }
+
+  /**
+   * Retrieves and sorts all tasks with the specified status.
+   * @param {string} status - Task status to filter by.
+   * @returns {ITask[]} Sorted tasks in that status column.
+   */
+  private getTasksForStatus(status: string): ITask[] {
+    return this.tasksArray
       .filter(task => task.status === status)
       .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
+  }
 
-    const updates = tasksInColumn.map((task, index) => {
+  /**
+   * Builds Firestore update promises for tasks that have incorrect position indices.
+   * @param {ITask[]} tasks - Tasks to verify and update.
+   * @returns {Promise<void>[]} Array of update promises.
+   */
+  private buildPositionUpdatesForTasks(tasks: ITask[]): Promise<void>[] {
+    return tasks.map((task, index) => {
       if (task.positionIndex !== index) {
         task.positionIndex = index;
         return this.updateTask(task.dbid, { positionIndex: index });
       }
       return Promise.resolve();
     });
-
-    await Promise.all(updates);
   }
 
   // Behalte die alte Methode für Kompatibilität, aber mache sie optional

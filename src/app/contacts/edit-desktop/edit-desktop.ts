@@ -25,10 +25,9 @@ isClosing = false;  // Used for slide-out animation state.
  */
 onClose() {
 this.isClosing = true;
-// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms matches the animation duration.
+}, 400);
 }
 
 /**
@@ -50,10 +49,9 @@ delContact() {
 this.fbService.contactsArray.length > 0 && this.fbService.contactsGroups.length > 0 &&
 this.fbService.contactsArray.length > this.fbService.id ? this.fbService.delContact(this.fbService.id) : null;
 this.isClosing = true;
-// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms matches the animation duration.
+}, 400);
 }
 
 /**

@@ -184,19 +184,33 @@ export class AddCard implements OnInit {
    * @returns {void} No return value.
    */
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
-    if (!assignedUsers) return;
-
-    const index = assignedUsers.findIndex(assignedUser =>
-      assignedUser.id === user.id
-    );
-
+    if (!assignedUsers) assignedUsers = [];
+    const index = assignedUsers.findIndex(assignedUser => assignedUser.id === user.id);
     if (index > -1) {
-      // User is already assigned, remove from list.
-      assignedUsers.splice(index, 1);
+      this.removeUserFromAssignment(assignedUsers, index);
     } else {
-      // User is not assigned yet, add to list.
-      assignedUsers.push(user);
+      this.addUserToAssignment(assignedUsers, user);
     }
+  }
+
+  /**
+   * Removes a contact from the assigned users list by index.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {number} index - Index of the contact to remove.
+   * @returns {void} No return value.
+   */
+  private removeUserFromAssignment(assignedUsers: IContact[], index: number): void {
+    assignedUsers.splice(index, 1);
+  }
+
+  /**
+   * Appends a contact to the assigned users list.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {IContact} user - Contact to add.
+   * @returns {void} No return value.
+   */
+  private addUserToAssignment(assignedUsers: IContact[], user: IContact): void {
+    assignedUsers.push(user);
   }
 
   /**
@@ -496,17 +510,12 @@ export class AddCard implements OnInit {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
     const days: (number | null)[] = [];
-
-    // Add leading empty cells before the first weekday.
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
-
-    // Add all days for the current month.
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-
     return days;
   }
 

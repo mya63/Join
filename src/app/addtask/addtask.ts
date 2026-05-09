@@ -117,17 +117,33 @@ export class AddTask implements OnInit {
   private resetTaskModel(): void {
     this.task = this.fbTaskService.newTask;
     this.currentTask = this.fbTaskService.newTask;
+    this.resetTaskFields();
+    this.resetCategoryDefaults();
+    this.currentTask = this.task;
+  }
+
+  /**
+   * Clears core task fields to empty states.
+   * @returns {void} No return value.
+   */
+  private resetTaskFields(): void {
     this.task.status = 'to-do';
     this.task.title = '';
     this.task.description = '';
     this.task.priority = 'medium';
     this.task.assignTo = [];
     this.task.dueDate = '';
+    this.task.subTasks = [];
+  }
+
+  /**
+   * Resets category properties to their default placeholder values.
+   * @returns {void} No return value.
+   */
+  private resetCategoryDefaults(): void {
     this.task.category.categoryProperties[0].color = this.categoryOptions.categoryProperties[0].color;
     this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[0].name;
     this.task.category.category = -1;
-    this.task.subTasks = [];
-    this.currentTask = this.task;
   }
 
   /**
@@ -212,21 +228,33 @@ export class AddTask implements OnInit {
    * @returns {void} No return value.
    */
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
-    if (!assignedUsers) {
-      assignedUsers = [];
-    }
-
-    const index = assignedUsers.findIndex(assignedUser =>
-      assignedUser.id === user.id
-    );
-
+    if (!assignedUsers) assignedUsers = [];
+    const index = assignedUsers.findIndex(assignedUser => assignedUser.id === user.id);
     if (index > -1) {
-      // User is already assigned, remove from list.
-      assignedUsers.splice(index, 1);
+      this.removeUserFromAssignment(assignedUsers, index);
     } else {
-      // User is not assigned yet, add to list.
-      assignedUsers.push(user);
+      this.addUserToAssignment(assignedUsers, user);
     }
+  }
+
+  /**
+   * Removes a contact from the assigned users list by index.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {number} index - Index of the contact to remove.
+   * @returns {void} No return value.
+   */
+  private removeUserFromAssignment(assignedUsers: IContact[], index: number): void {
+    assignedUsers.splice(index, 1);
+  }
+
+  /**
+   * Appends a contact to the assigned users list.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {IContact} user - Contact to add.
+   * @returns {void} No return value.
+   */
+  private addUserToAssignment(assignedUsers: IContact[], user: IContact): void {
+    assignedUsers.push(user);
   }
 
   /**
@@ -504,17 +532,12 @@ export class AddTask implements OnInit {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
     const days: (number | null)[] = [];
-
-    // Add leading empty cells before the first weekday.
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
-
-    // Füge die Tage des Monats hinzu
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-
     return days;
   }
 

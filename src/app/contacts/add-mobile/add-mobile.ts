@@ -28,14 +28,10 @@ export class AddMobile {
    * @returns {void} No return value.
    */
   onCreateContactClick(form: any) {
-    // Mark all fields as touched to show validation errors.
     this.markAllFieldsAsTouched(form);
-
-    // Persist only when form is valid.
     if (this.isFormValid(form)) {
       this.addContact();
     }
-    // If invalid, validation messages remain visible due to touched state.
   }
 
   /**
@@ -88,7 +84,6 @@ export class AddMobile {
    */
   closeOverlayWithAnimation() {
     this.isClosing = true;
-    // Animation time before actually closing
     setTimeout(() => {
       this.close.emit();
       this.isClosing = false;

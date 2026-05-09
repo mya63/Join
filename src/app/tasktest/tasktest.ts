@@ -214,17 +214,12 @@ export class Tasktest {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
     const days: (number | null)[] = [];
-
-    // Add leading empty cells before the first weekday.
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
-
-    // Add all days of the current month.
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-
     return days;
   }
 

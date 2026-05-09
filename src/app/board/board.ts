@@ -220,21 +220,28 @@ export class Board implements OnInit, OnDestroy {
    * @returns {Promise<void>} Promise resolved after all Firestore updates complete.
    */
   private async handleCrossColumnDrop(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex
-    );
-
+    this.transferTaskBetweenColumns(event);
     const newStatus = this.getStatusFromContainerId(event.container.id);
     draggedTask.status = newStatus;
+    await this.fbTaskService.updateTask(draggedTask.dbid, { status: newStatus, positionIndex: event.currentIndex });
+    await this.updateColumnPositionsAfterMove(event);
+  }
 
-    await this.fbTaskService.updateTask(draggedTask.dbid, {
-      status: newStatus,
-      positionIndex: event.currentIndex
-    });
+  /**
+   * Transfers a task between container arrays using CDK utilities.
+   * @param {CdkDragDrop<ITask[]>} event - Drop event with source and destination containers.
+   * @returns {void} No return value.
+   */
+  private transferTaskBetweenColumns(event: CdkDragDrop<ITask[]>): void {
+    transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+  }
 
+  /**
+   * Updates position indices in both source and destination columns after a cross-column move.
+   * @param {CdkDragDrop<ITask[]>} event - Drop event with container references.
+   * @returns {Promise<void>} Promise resolved after all Firestore position updates complete.
+   */
+  private async updateColumnPositionsAfterMove(event: CdkDragDrop<ITask[]>): Promise<void> {
     await Promise.all([
       ...this.buildPositionUpdates(event.previousContainer.data),
       ...this.buildPositionUpdates(event.container.data)
