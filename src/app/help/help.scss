@@ -6,9 +6,9 @@
 }
 
 .help-card {
-  max-width: 1060px;
+  max-width: 1014px;
   margin: 0 auto;
-  color: #000000;
+  color: #000;
 }
 
 .help-top {
@@ -22,7 +22,7 @@
 h1 {
   margin: 0;
   font-size: 61px;
-  line-height: 1.2;
+  line-height: 120%;
   font-weight: 700;
 }
 
@@ -58,16 +58,16 @@ h1 {
 }
 
 h2 {
-  margin: 24px 0 12px;
-  font-size: 33px;
-  line-height: 1.2;
+  margin: 32px 0 16px;
+  font-size: 27px;
+  line-height: 120%;
   font-weight: 700;
 }
 
 p {
-  margin: 0 0 18px;
-  font-size: 20px;
-  line-height: 1.25;
+  margin: 0 0 16px;
+  font-size: 16px;
+  line-height: 120%;
   font-weight: 400;
 }
 
@@ -75,6 +75,7 @@ p {
   color: #29abe2;
 }
 
+/* GEÄNDERT: Help-Liste näher an Figma */
 ol {
   margin: 0;
   padding: 0;
@@ -85,28 +86,37 @@ ol {
 ol li {
   counter-increment: step;
   display: grid;
-  grid-template-columns: 42px 1fr;
-  column-gap: 20px;
+  grid-template-columns: 28px 1fr;
+  column-gap: 24px;
+  margin-bottom: 24px;
   align-items: start;
-  margin-bottom: 20px;
 }
+
+ol li > * {
+  min-width: 0;
+}
+
 
 ol li::before {
   content: counter(step) ".";
   font-size: 27px;
-  line-height: 1;
+  line-height: 120%;
   font-weight: 700;
 }
 
 ol li strong {
   display: block;
-  font-size: 27px;
-  line-height: 1.2;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+  font-size: 20px;
+  line-height: 120%;
+  font-weight: 700;
 }
 
 ol li p {
   margin: 0;
+  font-size: 16px;
+  line-height: 120%;
+  font-weight: 400;
 }
 
 @media (max-width: 1350px) {
@@ -149,9 +159,8 @@ ol li p {
   }
 
   ol li {
-    grid-template-columns: 32px 1fr;
-    column-gap: 12px;
-    margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 16px;
   }
 
   ol li::before {

@@ -12,9 +12,9 @@
 
 .legal-page.external-mode {
   min-height: 100dvh;
-  padding-top: 152px;
-  padding-left: calc(232px + clamp(24px, 5vw, 92px));
-  padding-right: clamp(20px, 4vw, 72px);
+  padding-top: 0;
+  padding-left: 232px;
+  padding-right: 0;
 }
 
 .legal-page.external-mode .external-sidebar {
@@ -130,28 +130,34 @@
 }
 
 .external-topbar span {
-  font-size: 27px;
-  line-height: 1.2;
+  font-size: 20px;
+  line-height: 120%;
 }
 
 .legal-content {
-  max-width: 1014px;
-  margin: 0 auto;
+  width: 1016px;
+  max-width: 1016px;
+  margin: 0;
   color: #000;
+}
+
+.legal-page.external-mode .legal-content {
+  margin-left: 96px;
+  margin-top: 159px;
 }
 
 .page-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
-  margin-bottom: 28px;
+  margin-bottom: 50px;
 }
 
 h1 {
   margin: 0;
   font-size: 61px;
-  line-height: 1.2;
+  line-height: 120%;
   font-weight: 700;
 }
 
@@ -162,9 +168,6 @@ h1 {
   padding: 0;
   appearance: none;
   background: transparent;
-  color: inherit;
-  font-size: 0;
-  line-height: 0;
   cursor: pointer;
   border-radius: 50%;
   display: inline-flex;
@@ -173,13 +176,10 @@ h1 {
 }
 
 .back-icon {
-  width: auto;
-  height: auto;
   max-width: 37px;
   max-height: 37px;
   object-fit: contain;
   display: block;
-  flex-shrink: 0;
 }
 
 .back-btn:hover {
@@ -187,26 +187,26 @@ h1 {
 }
 
 h2 {
-  margin: 24px 0 8px;
-  font-size: 33px;
-  line-height: 1.2;
+  margin: 0 0 10px;
+  font-size: 27px;
+  line-height: 120%;
   font-weight: 700;
 }
 
 p {
-  margin: 0 0 14px;
-  font-size: 27px;
-  line-height: 1.2;
+  margin: 0 0 35px;
+  font-size: 16px;
+  line-height: 120%;
 }
 
 ul {
-  margin: 0 0 14px;
+  margin: -25px 0 35px;
   padding-left: 24px;
 }
 
 li {
-  font-size: 27px;
-  line-height: 1.2;
+  font-size: 16px;
+  line-height: 120%;
 }
 
 strong {

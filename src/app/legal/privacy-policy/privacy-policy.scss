@@ -12,9 +12,9 @@
 
 .legal-page.external-mode {
   min-height: 100dvh;
-  padding-top: 152px;
-  padding-left: calc(232px + clamp(24px, 5vw, 92px));
-  padding-right: clamp(20px, 4vw, 72px);
+  padding-top: 0;
+  padding-left: 232px;
+  padding-right: 0;
 }
 
 .legal-page.external-mode .external-sidebar {
@@ -130,28 +130,40 @@
 }
 
 .external-topbar span {
-  font-size: 27px;
-  line-height: 1.2;
+  font-size: 20px;
+  line-height: 120%;
 }
 
 .legal-content {
-  max-width: 1014px;
-  margin: 0 auto;
+  width: 1016px;
+  max-width: 1016px;
+  margin: 0;
   color: #000;
+}
+
+.legal-page.external-mode .legal-content {
+  margin-left: 96px;
+  margin-top: 159px;
 }
 
 .page-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 24px;
-  margin-bottom: 28px;
+  margin-bottom: 50px;
+}
+
+.page-head h1 {
+  font-size: 61px !important;
+  font-weight: 700;
+  line-height: 120%;
 }
 
 h1 {
   margin: 0;
   font-size: 61px;
-  line-height: 1.2;
+  line-height: 120%;
   font-weight: 700;
 }
 
@@ -160,11 +172,7 @@ h1 {
   height: 37px;
   border: 0;
   padding: 0;
-  appearance: none;
   background: transparent;
-  color: inherit;
-  font-size: 0;
-  line-height: 0;
   cursor: pointer;
   border-radius: 50%;
   display: inline-flex;
@@ -173,40 +181,33 @@ h1 {
 }
 
 .back-icon {
-  width: auto;
-  height: auto;
   max-width: 37px;
   max-height: 37px;
   object-fit: contain;
   display: block;
-  flex-shrink: 0;
-}
-
-.back-btn:hover {
-  background: rgba(41, 171, 226, 0.12);
 }
 
 h2 {
-  margin: 24px 0 8px;
-  font-size: 33px;
-  line-height: 1.2;
+  margin: 0 0 10px;
+  font-size: 27px;
+  line-height: 120%;
   font-weight: 700;
 }
 
 p {
-  margin: 0 0 14px;
-  font-size: 27px;
-  line-height: 1.2;
+  margin: 0 0 35px;
+  font-size: 16px;
+  line-height: 120%;
 }
 
 ul {
-  margin: 0 0 14px;
+  margin: -25px 0 35px;
   padding-left: 24px;
 }
 
 li {
-  font-size: 27px;
-  line-height: 1.2;
+  font-size: 16px;
+  line-height: 120%;
 }
 
 strong {
@@ -214,13 +215,12 @@ strong {
 }
 
 @media (max-width: 1350px) {
-  .legal-page {
-    min-height: calc(100dvh - var(--header-h-mobile, 80px));
-    padding: 24px 16px 104px;
-  }
-
+  .legal-page,
   .legal-page.external-mode {
-    padding: 112px 16px 104px;
+    min-height: 100dvh;
+    padding: 0 16px 96px;
+    background: #f6f7f8;
+    overflow-x: hidden;
   }
 
   .legal-page.external-mode .external-sidebar {
@@ -228,10 +228,18 @@ strong {
   }
 
   .legal-page.external-mode .external-topbar {
+    position: fixed;
+    top: 0;
     left: 0;
+    right: 0;
     height: 80px;
     padding: 0 16px;
-    justify-content: space-between;
+    background: #ffffff;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    z-index: 1190;
   }
 
   .legal-page.external-mode .external-topbar::before {
@@ -239,28 +247,40 @@ strong {
     width: 32px;
     height: 40px;
     background: url('/assets/img/shared/header/join_j_blue.svg') center/contain no-repeat;
-    display: inline-block;
+    display: block;
   }
 
   .legal-page.external-mode .external-topbar span {
     display: none;
   }
 
-  .legal-content {
-    max-width: 100%;
+  .legal-content,
+  .legal-page.external-mode .legal-content {
+    width: 100%;
+    max-width: 396px;
+    margin: 0 auto;
+    padding-top: 128px;
+    color: #000;
   }
 
   .page-head {
-    margin-bottom: 20px;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 35px;
   }
 
-  h1 {
-    font-size: 64px;
+  h1,
+  .page-head h1 {
+    font-size: 47px !important;
+    line-height: 120%;
+    font-weight: 700;
   }
 
   .back-btn {
     width: 32px;
     height: 32px;
+    margin-top: 4px;
+    flex-shrink: 0;
   }
 
   .back-icon {
@@ -269,13 +289,24 @@ strong {
   }
 
   h2 {
-    margin: 20px 0 8px;
-    font-size: 46px;
+    margin: 0 0 10px;
+    font-size: 27px;
+    line-height: 120%;
+    font-weight: 700;
   }
 
   p,
   li {
-    font-size: 20px;
-    line-height: 1.25;
+    font-size: 16px;
+    line-height: 120%;
+  }
+
+  p {
+    margin: 0 0 35px;
+  }
+
+  ul {
+    margin: -25px 0 35px;
+    padding-left: 22px;
   }
 }
