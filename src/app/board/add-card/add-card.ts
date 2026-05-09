@@ -23,10 +23,18 @@ export class AddCard implements OnInit {
   private readonly fbService = inject(FbService);
   private readonly fbTaskService = inject(FbTaskService);
 
+  /**
+   * Closes the add-card overlay.
+   * @returns {void} No return value.
+   */
   onClose(): void {
     this.closeOverlay.emit();
   }
 
+  /**
+   * Validates input, computes the next column index, and creates the task.
+   * @returns {void} No return value.
+   */
   create() {
     this.submitAttempted = true;
 
@@ -68,6 +76,10 @@ export class AddCard implements OnInit {
   assignPlaceholder = computed(() => this.isSmallAssignPlaceholder() ? 'contacts' : 'Select contacts to assign');
 
 
+  /**
+   * Initializes form state and applies defaults for a new task.
+   * @returns {void} No return value.
+   */
   ngOnInit(): void {
     this.submitAttempted = false;
     this.onViewportResize();
@@ -83,6 +95,10 @@ export class AddCard implements OnInit {
     this.task.subTasks = [];
   }
 
+  /**
+   * Updates responsive placeholder behavior on viewport changes.
+   * @returns {void} No return value.
+   */
   onViewportResize(): void {
     if (typeof window === 'undefined') {
       return;
@@ -90,10 +106,20 @@ export class AddCard implements OnInit {
     this.isSmallAssignPlaceholder.set(window.innerWidth < 365);
   }
 
+  /**
+   * Returns the provided status key unchanged.
+   * @param {string} status - Status key from selected column input.
+   * @returns {string} Normalized status key for task creation.
+   */
   getStatus(status: string): string {
     return status
   }
 
+  /**
+   * Persists a new task and resets mutable form-specific task fields.
+   * @param {ITask} newTask - Task payload to persist.
+   * @returns {void} No return value.
+   */
   addTask(newTask: ITask): void {
     this.fbTaskService.createTask(newTask);
     this.task.assignTo = [];
@@ -102,10 +128,20 @@ export class AddCard implements OnInit {
     this.task.subTasks = [];
   }
 
+  /**
+   * Checks whether a given priority is currently selected.
+   * @param {string} priority - Priority key to compare.
+   * @returns {boolean} True when the priority matches the current task state.
+   */
   whichPriority(priority: string): boolean {
     return this.task.priority === priority;
   }
 
+  /**
+   * Applies the selected priority to both task models.
+   * @param {string} priority - Priority key to apply.
+   * @returns {void} No return value.
+   */
   setPriority(priority: string): void {
     this.task.priority = priority;
     this.currentTask.priority = priority
@@ -114,6 +150,10 @@ export class AddCard implements OnInit {
 
 
 
+  /**
+   * Returns contacts filtered by the current assignment search term.
+   * @returns {IContact[]} Filtered contacts for assignment selection.
+   */
   getUserForTask(): IContact[] {
     return this.fbService.contactsArray.filter(user =>
       user.name.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
@@ -122,6 +162,12 @@ export class AddCard implements OnInit {
     )
   }
 
+  /**
+   * Checks whether a contact is already assigned to the task.
+   * @param {IContact} user - Contact candidate.
+   * @param {IContact[]} assignedUsers - Current assigned contacts.
+   * @returns {boolean} True when the contact is already assigned.
+   */
   isUserAssigned(user: IContact, assignedUsers: IContact[]): boolean {
     if (!assignedUsers || !Array.isArray(assignedUsers)) {
       return false;
@@ -131,6 +177,12 @@ export class AddCard implements OnInit {
     );
   }
 
+  /**
+   * Adds or removes a contact from the assigned users collection.
+   * @param {IContact} user - Contact to toggle.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts list.
+   * @returns {void} No return value.
+   */
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
     if (!assignedUsers) return;
 
@@ -139,27 +191,46 @@ export class AddCard implements OnInit {
     );
 
     if (index > -1) {
-      // User ist bereits zugewiesen, entfernen
+      // User is already assigned, remove from list.
       assignedUsers.splice(index, 1);
     } else {
-      // User ist nicht zugewiesen, hinzufügen
+      // User is not assigned yet, add to list.
       assignedUsers.push(user);
     }
   }
 
+  /**
+   * Toggles assignee dropdown visibility for a model scope.
+   * @param {'task' | 'currentTask'} target - Target task model scope.
+   * @returns {void} No return value.
+   */
   toggleAssignDropdown(target: 'task' | 'currentTask'): void {
     this.showAssignDropdown[target] = !this.showAssignDropdown[target];
   }
 
+  /**
+   * Toggles category dropdown visibility for a model scope.
+   * @param {'task' | 'currentTask'} target - Target task model scope.
+   * @returns {void} No return value.
+   */
   toggleCategoryDropdown(target: 'task' | 'currentTask'): void {
     this.showCategoryDropdown[target] = !this.showCategoryDropdown[target];
   }
 
 
+  /**
+   * Checks whether a non-placeholder category has been selected.
+   * @returns {boolean} True when category selection is valid.
+   */
   dataIsSet() {
     return (this.currentCategory != 'Select task category');
   }
 
+  /**
+   * Closes assign/category dropdowns when click occurs outside their containers.
+   * @param {Event} event - Global click event.
+   * @returns {void} No return value.
+   */
   closeAssignDropdown(event: Event): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
@@ -176,6 +247,11 @@ export class AddCard implements OnInit {
     }
   }
 
+  /**
+   * Applies selected category metadata to the current task.
+   * @param {string} categoryName - Display name of the selected category.
+   * @returns {void} No return value.
+   */
   setCategory(categoryName: string): void {
     this.currentCategory = categoryName;
     const categoryIndex = this.categoryOptions.categoryProperties.findIndex(category => category.name === categoryName);
@@ -187,6 +263,11 @@ export class AddCard implements OnInit {
     }
   }
 
+  /**
+   * Adds a new subtask when the title is not empty.
+   * @param {ITask} myTask - Task that receives the subtask.
+   * @returns {void} No return value.
+   */
   addSubtask(myTask: ITask): void {
     if (!myTask || this.subtask.title.trim() === '') {
       return;
@@ -195,6 +276,13 @@ export class AddCard implements OnInit {
     this.subtask = { title: '', completed: false, onEdit: false };
   }
 
+  /**
+   * Renames an existing subtask and exits its edit mode.
+   * @param {string} subtaskTitle - Current subtask title.
+   * @param {string} newTitle - New subtask title.
+   * @param {ITask} myTask - Task containing the subtask.
+   * @returns {void} No return value.
+   */
   editSubtask(subtaskTitle: string, newTitle: string, myTask: ITask): void {
     const subtask = myTask.subTasks.find(st => st.subtaskTitle === subtaskTitle);
 
@@ -204,42 +292,80 @@ export class AddCard implements OnInit {
     }
   }
 
+  /**
+   * Deletes a subtask by title from the target task.
+   * @param {string} subtaskTitle - Subtask title to remove.
+   * @param {ITask} myTask - Task containing the subtask.
+   * @returns {void} No return value.
+   */
   deleteSubtask(subtaskTitle: string, myTask: ITask): void {
     myTask.subTasks = myTask.subTasks.filter(st => st.subtaskTitle !== subtaskTitle);
     myTask.subTasks = [...myTask.subTasks];
   }
 
 
+  /**
+   * Validates whether title requirements are fulfilled.
+   * @returns {boolean} True when title validation passes.
+   */
   allowAddTask(): boolean {
     return this.hasValidTitle();
   }
 
+  /**
+   * Validates whether due-date requirements are fulfilled.
+   * @returns {boolean} True when due-date validation passes.
+   */
   allowAddTaskCalendar(): boolean {
     return this.hasValidDueDate();
   }
 
   // Backward-compatible aliases for existing template bindings.
+  /**
+   * Backward-compatible alias for title validation.
+   * @returns {boolean} True when title validation passes.
+   */
   alowAddTask(): boolean {
     return this.allowAddTask();
   }
 
   // Backward-compatible alias for existing template bindings.
+  /**
+   * Backward-compatible alias for due-date validation.
+   * @returns {boolean} True when due-date validation passes.
+   */
   alowAddTaskCalender(): boolean {
     return this.allowAddTaskCalendar();
   }
 
+  /**
+   * Determines whether all required task fields are valid for creation.
+   * @returns {boolean} True when title, due date, and category are valid.
+   */
   canCreateTask(): boolean {
     return this.hasValidTitle() && this.hasValidDueDate() && this.hasValidCategory();
   }
 
+  /**
+   * Checks whether title contains non-whitespace content.
+   * @returns {boolean} True when title is valid.
+   */
   private hasValidTitle(): boolean {
     return !!this.task.title && this.task.title.trim().length > 0;
   }
 
+  /**
+   * Checks whether a category has been selected.
+   * @returns {boolean} True when category is not the placeholder state.
+   */
   private hasValidCategory(): boolean {
     return this.task.category.category !== -1;
   }
 
+  /**
+   * Validates due-date format and ensures selected date is not in the past.
+   * @returns {boolean} True when due date is syntactically and semantically valid.
+   */
   private hasValidDueDate(): boolean {
     const raw = (this.task.dueDate ?? '').trim();
 
@@ -270,21 +396,35 @@ export class AddCard implements OnInit {
 
 
   
+  /**
+   * Opens the calendar for the selected model scope.
+   * @param {'task' | 'currentTask'} target - Target task model scope.
+   * @returns {void} No return value.
+   */
   openCalendar(target: 'task' | 'currentTask'): void {
     this.calendarTarget = target;
     this.showCalendar = true;
   }
 
+  /**
+   * Closes the calendar popover.
+   * @returns {void} No return value.
+   */
   closeCalendar(): void {
     this.showCalendar = false;
   }
 
+  /**
+   * Applies a selected due date if it is not in the past.
+   * @param {Date} date - Date selected in calendar.
+   * @returns {void} No return value.
+   */
   selectDate(date: Date): void {
     if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
-      return; // Verhindere Auswahl von Terminen in der Vergangenheit
+      return; // Prevent selecting dates in the past.
     }
 
-    // Formatiere Datum korrekt ohne Zeitzonenproblem
+    // Format date deterministically to avoid timezone shifts.
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -299,25 +439,41 @@ export class AddCard implements OnInit {
     this.closeCalendar();
   }
 
+  /**
+   * Returns the number of days in a month/year pair.
+   * @param {number} month - Zero-based month index.
+   * @param {number} year - Full year value.
+   * @returns {number} Number of days in the requested month.
+   */
   getDaysInMonth(month: number, year: number): number {
     return new Date(year, month + 1, 0).getDate();
   }
 
+  /**
+   * Returns weekday index of the first day in a month/year pair.
+   * @param {number} month - Zero-based month index.
+   * @param {number} year - Full year value.
+   * @returns {number} Weekday index (0-6).
+   */
   getFirstDayOfMonth(month: number, year: number): number {
     return new Date(year, month, 1).getDay();
   }
 
+  /**
+   * Builds calendar day cells including leading empty placeholders.
+   * @returns {(number | null)[]} Calendar cell values for rendering.
+   */
   getCalendarDays(): (number | null)[] {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
     const days: (number | null)[] = [];
 
-    // Füge leere Zellen für die Tage vor dem ersten Tag des Monats hinzu
+    // Add leading empty cells before the first weekday.
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Füge die Tage des Monats hinzu
+    // Add all days for the current month.
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
@@ -325,6 +481,10 @@ export class AddCard implements OnInit {
     return days;
   }
 
+  /**
+   * Moves the calendar view one month backward.
+   * @returns {void} No return value.
+   */
   previousMonth(): void {
     if (this.currentMonth === 0) {
       this.currentMonth = 11;
@@ -334,6 +494,10 @@ export class AddCard implements OnInit {
     }
   }
 
+  /**
+   * Moves the calendar view one month forward.
+   * @returns {void} No return value.
+   */
   nextMonth(): void {
     if (this.currentMonth === 11) {
       this.currentMonth = 0;
@@ -343,6 +507,11 @@ export class AddCard implements OnInit {
     }
   }
 
+  /**
+   * Returns localized month name for calendar header rendering.
+   * @param {number} month - Zero-based month index.
+   * @returns {string} Month label.
+   */
   getMonthName(month: number): string {
     const months = [
       'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -351,11 +520,21 @@ export class AddCard implements OnInit {
     return months[month];
   }
 
+  /**
+   * Checks whether a day in the current month view is before today.
+   * @param {number} day - Day number in visible month.
+   * @returns {boolean} True when the date is in the past.
+   */
   isDayInPast(day: number): boolean {
     const date = new Date(this.currentYear, this.currentMonth, day);
     return date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
   }
 
+  /**
+   * Handles day selection in the calendar grid.
+   * @param {number} day - Selected day number.
+   * @returns {void} No return value.
+   */
   onDayClick(day: number): void {
     if (!this.isDayInPast(day)) {
       this.selectDate(new Date(this.currentYear, this.currentMonth, day));

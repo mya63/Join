@@ -36,12 +36,20 @@ export class SignUp {
     firebase: '',
   };
 
+  /**
+   * Clears all sign-up validation and backend error messages.
+   * @returns {void} No return value.
+   */
   private resetErrors(): void {
     for (const key in this.signUpErrors) {
       this.signUpErrors[key] = '';
     }
   }
 
+  /**
+   * Validates the first-name input and updates error state.
+   * @returns {void} No return value.
+   */
   private validateName(): void {
     const name = this.signUpData.name.trim();
     this.signUpErrors.name = '';
@@ -62,6 +70,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Validates the surname input and updates error state.
+   * @returns {void} No return value.
+   */
   private validateSurname(): void {
     const surname = this.signUpData.surname.trim();
     this.signUpErrors.surname = '';
@@ -82,6 +94,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Performs live first-name validation while typing.
+   * @returns {void} No return value.
+   */
   onNameInput(): void {
     const name = this.signUpData.name.trim();
     if (!name) {
@@ -95,6 +111,10 @@ export class SignUp {
     this.signUpErrors.name = /^[A-ZÄÖÜ]/.test(name) ? '' : 'Please start with a capital letter.';
   }
 
+  /**
+   * Performs live surname validation while typing.
+   * @returns {void} No return value.
+   */
   onSurnameInput(): void {
     const surname = this.signUpData.surname.trim();
     if (!surname) {
@@ -110,6 +130,10 @@ export class SignUp {
       : 'Please start with a capital letter.';
   }
 
+  /**
+   * Validates email format and updates error state.
+   * @returns {void} No return value.
+   */
   private validateEmail(): void {
     const email = this.signUpData.email.trim();
     this.signUpErrors.email = '';
@@ -122,6 +146,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Performs live email validation while typing.
+   * @returns {void} No return value.
+   */
   onEmailInput(): void {
     const email = this.signUpData.email.trim();
     if (!email) {
@@ -133,6 +161,10 @@ export class SignUp {
       : 'Please enter a valid email address.';
   }
 
+  /**
+   * Validates password requirements for sign-up.
+   * @returns {void} No return value.
+   */
   private validatePassword(): void {
     const password = this.signUpData.password;
     this.signUpErrors.password = '';
@@ -145,6 +177,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Validates whether confirmation password matches the original password.
+   * @returns {void} No return value.
+   */
   private validateConfirmPassword(): void {
     const confirm = this.signUpData.confirmPassword;
     this.signUpErrors.confirmPassword = '';
@@ -157,6 +193,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Validates whether privacy policy consent is checked.
+   * @returns {void} No return value.
+   */
   private validatePrivacy(): void {
     this.signUpErrors.privacy = '';
     if (!this.signUpData.acceptPrivacy) {
@@ -164,6 +204,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Checks whether any validation or backend error is currently present.
+   * @returns {boolean} True when at least one error field is non-empty.
+   */
   private hasErrors(): boolean {
     for (const key in this.signUpErrors) {
       if (this.signUpErrors[key]) {
@@ -173,6 +217,11 @@ export class SignUp {
     return false;
   }
 
+  /**
+   * Maps Firebase sign-up errors to user-friendly UI messages.
+   * @param {any} error - Firebase auth error payload.
+   * @returns {void} No return value.
+   */
   private handleFirebaseError(error: any): void {
     console.error('Sign-up failed:', error);
     switch (error.code) {
@@ -193,6 +242,10 @@ export class SignUp {
     }
   }
 
+  /**
+   * Validates all fields, checks email uniqueness, and creates a new account.
+   * @returns {Promise<void>} Promise resolved after submit flow finishes.
+   */
   async onSubmit(): Promise<void> {
     this.resetErrors();
     this.validateName();
@@ -223,6 +276,10 @@ export class SignUp {
     });
   }
 
+  /**
+   * Navigates back to the login page.
+   * @returns {void} No return value.
+   */
   goBack(): void {
     this.router.navigate(['/login']);
   }

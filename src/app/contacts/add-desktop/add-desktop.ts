@@ -27,13 +27,19 @@ export class AddDesktop {
   id = 0;
   isClosing = false;
 
-  /** Kontakt speichern */
+  /**
+   * Persists a new contact and clears local form fields.
+   * @returns {void} No return value.
+   */
   addContact() {
     this.fbService.addContact(this.contact);
     this.clearInput();
   }
 
-  /** Formularfelder zurücksetzen */
+  /**
+   * Clears all contact input fields.
+   * @returns {void} No return value.
+   */
   clearInput() {
     this.contact.name = '';
     this.contact.surname = '';
@@ -41,18 +47,24 @@ export class AddDesktop {
     this.contact.phone = '';
   }
 
-  /** Overlay schließen mit Slide-out Animation */
+  /**
+   * Starts closing animation and emits close after animation ends.
+   * @returns {void} No return value.
+   */
   closeOverlay() {
     this.isClosing = true;
-    // Warte auf Animation-Ende bevor das Overlay geschlossen wird
+    // Wait for animation end before closing the overlay.
     setTimeout(() => {
       this.close.emit();
-    }, 400); // 400ms entspricht der Animation-Duration
+    }, 400); // 400ms matches the animation duration.
   }
 
-  /** Submit-Handler für Create Contact Button */
+  /**
+   * Validates input and creates the contact when all checks pass.
+   * @returns {void} No return value.
+   */
   onSubmit() {
-    // Führe alle Validierungsprüfungen aus bevor der Kontakt erstellt wird
+    // Run full validation before creating a contact.
     if (this.validateAllFields()) {
       this.addContact();
       this.created.emit();
@@ -60,12 +72,15 @@ export class AddDesktop {
     }
   }
 
-  /** Validiert alle Felder und triggert die Anzeige von Fehlermeldungen */
+  /**
+   * Runs all field-level custom validations for contact creation.
+   * @returns {boolean} True when all fields are valid.
+   */
   validateAllFields(): boolean {
-    // Markiere alle Felder als "touched" damit Validierungsmeldungen angezeigt werden
+    // Mark all fields as touched so validation messages become visible.
     this.markAllFieldsAsTouched();
     
-    // Prüfe ob alle Validierungen bestanden sind
+    // Verify whether all validations pass.
     const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
     const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);
@@ -74,7 +89,10 @@ export class AddDesktop {
     return isNameValid && isSurnameValid && isEmailValid && isPhoneValid;
   }
 
-  /** Markiert alle Formularfelder als touched für die Validierungsanzeige */
+  /**
+   * Marks all form controls as touched.
+   * @returns {void} No return value.
+   */
   private markAllFieldsAsTouched(): void {
     if (this.form && this.form.form) {
       Object.keys(this.form.form.controls).forEach(key => {
@@ -83,62 +101,87 @@ export class AddDesktop {
     }
   }
 
-  /** Prüft ob der erste Buchstabe eines Namens klein geschrieben ist */
+  /**
+   * Validates that a name starts with an uppercase character.
+   * @param {string | undefined} name - Name value to validate.
+   * @returns {boolean} True when capitalization is invalid.
+   */
   hasInvalidCapitalization(name: string | undefined): boolean {
     if (!name || name.length === 0) {
-      return false; // Leer ist kein Kapitalisierungsfehler
+      return false; // Empty input is not treated as capitalization error.
     }
     return !/^[A-ZÄÖÜ]/.test(name);
   }
 
-  /** Prüft ob der Name nur erlaubte Zeichen enthält */
+  /**
+   * Validates whether name contains only allowed characters.
+   * @param {string | undefined} name - Name value to validate.
+   * @returns {boolean} True when invalid characters are present.
+   */
   hasInvalidCharacters(name: string | undefined): boolean {
     if (!name || name.length === 0) {
       return false;
     }
     return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
   }
+  /**
+   * Validates email format against project constraints.
+   * @param {string | undefined} email - Email value to validate.
+   * @returns {boolean} True when email format is invalid.
+   */
   hasInvalidEmailFormat(email: string | undefined): boolean {
     if (!email || email.length === 0) {
-      return false; // Leer ist kein Format-Fehler (wird durch required behandelt)
+      return false; // Empty input is handled by required validator.
     }
     
-    // Prüfe ob Email mit Punkt endet
+    // Reject emails that end with a trailing dot.
     if (email.endsWith('.')) {
       return true;
     }
     
-    // Erweiterte Regex: mindestens 1 Zeichen vor @, dann @, dann Domain (min. 2 Buchstaben), dann Punkt, dann TLD (min. 2 Buchstaben)
+    // Extended regex: local part, domain, dot, and at least 2 chars TLD.
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
     return !emailRegex.test(email);
   }
 
-  /** Phone-Validierung: Muss numerisch sein, mindestens 6 Ziffern, optional + am Anfang */
+  /**
+   * Validates phone format against minimal numeric rules.
+   * @param {string | undefined} phone - Phone value to validate.
+   * @returns {boolean} True when phone format is invalid.
+   */
   hasInvalidPhoneFormat(phone: string | undefined): boolean {
     if (!phone || phone.length === 0) {
-      return false; // Leer ist kein Format-Fehler (Phone ist optional)
+      return false; // Empty input is valid because phone is optional.
     }
     
-    // Regex: Optional + am Anfang, dann mindestens 6 Ziffern
+    // Regex: optional + prefix followed by at least 6 digits.
     const phoneRegex = /^\+?[0-9]{6,}$/;
     return !phoneRegex.test(phone);
   }
 
-  /** Schließt bei Klick auf dunklen Hintergrund */
+  /**
+   * Closes overlay when user clicks directly on backdrop.
+   * @param {MouseEvent} event - Overlay click event.
+   * @returns {void} No return value.
+   */
   onOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       this.closeOverlay();
     }
   }
 
-  /** Prüft ob das gesamte Formular gültig ist, inkl. custom phone validation */
+  /**
+   * Validates form state using Angular and custom validation rules.
+   * @param {any} form - Template-driven form reference.
+   * @returns {boolean} True when form data is valid.
+   */
   isFormValid(form: any): boolean {
-    // Standard Form-Validierung
+    // Standard Angular form validation.
     if (form.invalid) {
       return false;
     }
     
-    // Verwende die gleiche Validierungslogik wie bei validateAllFields
+    // Reuse the same business validation logic as in validateAllFields.
     const isNameValid = !!this.contact.name && !this.hasInvalidCharacters(this.contact.name) && !this.hasInvalidCapitalization(this.contact.name);
     const isSurnameValid = !!this.contact.surname && !this.hasInvalidCharacters(this.contact.surname) && !this.hasInvalidCapitalization(this.contact.surname);
     const isEmailValid = !!this.contact.email && !this.hasInvalidEmailFormat(this.contact.email);

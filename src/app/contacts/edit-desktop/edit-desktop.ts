@@ -17,70 +17,103 @@ export class EditDesktop {
 
 contact: IContact = { name: '', surname: '', email: '', phone: '' };
 editedContact: IContact = { ...this.contact };
-isClosing = false;  // Für Slide-out Animation
+isClosing = false;  // Used for slide-out animation state.
 
+/**
+ * Closes the desktop edit overlay with exit animation.
+ * @returns {void} No return value.
+ */
 onClose() {
 this.isClosing = true;
-// Warte auf Animation-Ende bevor das Overlay geschlossen wird
+// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms entspricht der Animation-Duration
+}, 400); // 400ms matches the animation duration.
 }
 
-/** Schließt bei Klick auf dunklen Hintergrund */
+/**
+ * Closes the overlay when the backdrop itself is clicked.
+ * @param {MouseEvent} event - Overlay click event.
+ * @returns {void} No return value.
+ */
 onOverlayClick(event: MouseEvent) {
 if (event.target === event.currentTarget) {
   this.onClose();
 }
 }
 
+/**
+ * Deletes the selected contact and closes the overlay.
+ * @returns {void} No return value.
+ */
 delContact() {
 this.fbService.contactsArray.length > 0 && this.fbService.contactsGroups.length > 0 &&
 this.fbService.contactsArray.length > this.fbService.id ? this.fbService.delContact(this.fbService.id) : null;
 this.isClosing = true;
-// Warte auf Animation-Ende bevor das Overlay geschlossen wird
+// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms entspricht der Animation-Duration
+}, 400); // 400ms matches the animation duration.
 }
 
+/**
+ * Validates and persists edited contact data.
+ * @param {any} form - The form.
+ * @returns {void} No return value.
+ */
 async upContact(form: any) {
-// Markiere alle Felder als touched, damit Validierungsmeldungen angezeigt werden
+// Mark all fields as touched so validation messages become visible.
 Object.keys(form.controls).forEach(key => {
   form.controls[key].markAsTouched();
 });
 
-// Verwende die bereits vorhandene isFormValid Methode für vollständige Validierung
+// Use the existing isFormValid method for full validation.
 if (!this.isFormValid(form)) {
-  return; // Stoppe die Ausführung wenn das Formular ungültig ist
+  return; // Stop execution when form validation fails.
 }
 
 await this.fbService.updateContact(this.fbService.id, this.editedContact);
 this.isClosing = true;
-// Warte auf Animation-Ende bevor das Overlay geschlossen wird
+// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms entspricht der Animation-Duration
+}, 400); // 400ms matches the animation duration.
 }
 
+/**
+ * Returns a copy of the currently selected contact for editing.
+ * @returns {IContact} Editable contact copy.
+ */
 getCurrentContact() {
 this.editedContact = { ...this.fbService.currentContact };
 return this.editedContact;
 }
 
+/**
+ * Returns whether the desktop edit overlay is visible.
+ * @returns {boolean} True when edit mode is active.
+ */
 getShowEditContact() {
 return this.fbService.showEditContact;
 }
 
-/** Prüft ob der erste Buchstabe eines Namens klein geschrieben ist */
+/**
+ * Validates that a name starts with an uppercase character.
+ * @param {string | undefined} name - Name value to validate.
+ * @returns {boolean} True when capitalization is invalid.
+ */
 hasInvalidCapitalization(name: string | undefined): boolean {
 if (!name || name.length === 0) {
-return false; // Leer ist kein Kapitalisierungsfehler
+return false; // Empty input is not treated as capitalization error.
 }
 return !/^[A-ZÄÖÜ]/.test(name);
 }
 
-/** Prüft ob der Name nur erlaubte Zeichen enthält */
+/**
+ * Validates whether name contains only allowed characters.
+ * @param {string | undefined} name - Name value to validate.
+ * @returns {boolean} True when invalid characters are present.
+ */
 hasInvalidCharacters(name: string | undefined): boolean {
 if (!name || name.length === 0) {
 return false;
@@ -88,52 +121,64 @@ return false;
 return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
 }
 
-/** Erweiterte Email-Validierung: Domain gefolgt von Punkt und Top-Level-Domain */
+/**
+ * Validates email format against project constraints.
+ * @param {string | undefined} email - Email value to validate.
+ * @returns {boolean} True when email format is invalid.
+ */
 hasInvalidEmailFormat(email: string | undefined): boolean {
 if (!email || email.length === 0) {
-return false; // Leer ist kein Format-Fehler (wird durch required behandelt)
+return false; // Empty input is handled by required validator.
 }
 
-// Prüfe ob Email mit Punkt endet
+// Reject emails that end with a trailing dot.
 if (email.endsWith('.')) {
 return true;
 }
 
-// Erweiterte Regex: mindestens 1 Zeichen vor @, dann @, dann Domain (min. 2 Buchstaben), dann Punkt, dann TLD (min. 2 Buchstaben)
+// Extended regex: local part, domain, dot, and at least 2 chars TLD.
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 return !emailRegex.test(email);
 }
 
-/** Phone-Validierung: Muss numerisch sein, mindestens 6 Ziffern, optional + am Anfang */
+/**
+ * Validates phone format against minimal numeric rules.
+ * @param {string | undefined} phone - Phone value to validate.
+ * @returns {boolean} True when phone format is invalid.
+ */
 hasInvalidPhoneFormat(phone: string | undefined): boolean {
 if (!phone || phone.length === 0) {
-return false; // Leer ist kein Format-Fehler (Phone ist optional)
+return false; // Empty input is valid because phone is optional.
 }
 
-// Regex: Optional + am Anfang, dann mindestens 6 Ziffern
+// Regex: optional + prefix followed by at least 6 digits.
 const phoneRegex = /^\+?[0-9]{6,}$/;
 return !phoneRegex.test(phone);
 }
 
-/** Prüft ob das gesamte Formular gültig ist, inkl. custom phone validation */
+/**
+ * Runs full form validation including custom business rules.
+ * @param {any} form - Template-driven form reference.
+ * @returns {boolean} True when the form is valid.
+ */
 isFormValid(form: any): boolean {
-// Standard Form-Validierung
+// Standard Angular form validation.
 if (form.invalid) {
 return false;
 }
 
-// Custom Phone-Validierung
+// Additional phone validation.
 if (this.hasInvalidPhoneFormat(this.editedContact.phone)) {
 return false;
 }
 
-// Custom Name/Surname-Kapitalisierung
+// Additional name/surname capitalization validation.
 if (this.hasInvalidCapitalization(this.editedContact.name) ||
 this.hasInvalidCapitalization(this.editedContact.surname)) {
 return false;
 }
 
-// Custom Email-Format
+// Additional email format validation.
 if (this.hasInvalidEmailFormat(this.editedContact.email)) {
 return false;
 }

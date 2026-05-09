@@ -20,12 +20,20 @@ export class App {
   private auth = inject(Auth);
   protected readonly isAuthenticated = signal(!!this.auth.currentUser);
 
+  /**
+   * Syncs authenticated state with Firebase auth changes.
+   * @returns {void} No return value.
+   */
   ngOnInit(): void {
     onAuthStateChanged(this.auth, (user) => {
       this.isAuthenticated.set(!!user);
     });
   }
 
+  /**
+   * Determines whether shell navigation should be shown on the current route.
+   * @returns {boolean} True when app shell navigation should be visible.
+   */
   goOn() {
     const currentPath = this.location.path().split('?')[0];
     const publicRoutes = ["", "/", "/login", "/sign-up"];

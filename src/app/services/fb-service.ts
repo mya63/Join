@@ -63,6 +63,14 @@ export class FbService {
 
   }
 
+  /**
+   * Creates a contact model from primitive fields and persists it.
+   * @param {string} name - Contact first name.
+   * @param {string} surname - Contact surname.
+   * @param {string} email - Contact email address.
+   * @param {string} phone - Contact phone number.
+   * @returns {void} No return value.
+   */
   setAddContact(name: string, surname: string, email: string, phone: string) {
     this.contact = {
       name: name,
@@ -74,19 +82,41 @@ export class FbService {
     this.addContact(this.contact);
   }
 
+  /**
+   * Persists a new contact document for the current owner scope.
+   * @param {IContact} contact - Contact payload to create.
+   * @returns {Promise<void>} Promise resolved after contact creation.
+   */
   async addContact(contact: IContact) {
     this.pendingNewContactEmail = contact.email;
     await addDoc(this.contactsCollection, { ownerId: this.getCurrentUserId(), date: new Date(), color: this.getRandomColorOld(), ...contact });
   }
 
+  /**
+   * Updates an existing contact document by list index.
+   * @param {number} id - Contact index in filtered array.
+   * @param {IContact} contact - Updated contact payload.
+   * @returns {Promise<void>} Promise resolved after contact update.
+   */
   async updateContact(id: number, contact: IContact) {
     await updateDoc(doc(this.contactsCollection, this.contactsArray[id].id), { ...contact });
   }
 
+  /**
+   * Returns the lowest tracked index helper value.
+   * @returns {number} Minimum value of internal index tracker.
+   */
   firstConnect() {
     return Math.min(...this.i);
   }
 
+  /**
+   * Debug helper for tracking single-field index updates.
+   * @param {string} id - Contact id.
+   * @param {string} field - Field name.
+   * @param {number} value - Target value.
+   * @returns {Promise<void>} Promise resolved after debug flow completes.
+   */
   async updateOneField(id: string, field: string, value: number) {
     console.log(id, field, value);
     // this.i = this.i + 1;
@@ -94,15 +124,19 @@ export class FbService {
     //await updateDoc(doc(this.contactsCollection, this.contactsArray[id].id), { [field]: value });
   }
 
-  /** Gibt false zurück wenn der Kontakt ein fremder registrierter User ist (nicht löschbar). */
+  /**
+   * Deletes a contact and, when needed, the linked authenticated account.
+   * @param {number} id - Contact index in filtered array.
+   * @returns {Promise<boolean>} True when deletion succeeded.
+   */
   async delContact(id: number): Promise<boolean> {
     const contact = this.contactsArray[id];
     if (!contact) return false;
     const currentUserId = this.getCurrentUserId();
-    // Fremder registrierter User → Löschen verweigern
+    // Registered foreign user: deletion is not allowed.
     if (contact.uid && contact.uid !== currentUserId) return false;
     await deleteDoc(doc(this.contactsCollection, contact.id));
-    // Eigener Account → Auth + users-Dokument ebenfalls löschen
+    // Own account: also remove authenticated account data.
     if (contact.uid && contact.uid === currentUserId) {
       await this.authService.deleteCurrentUserAccount();
     }
@@ -110,11 +144,19 @@ export class FbService {
     return true;
   }
 
+  /**
+   * Unsubscribes active Firestore listeners.
+   * @returns {void} No return value.
+   */
   onDestroy() {
     this.myContacts();
     this.myData();
   }
 
+  /**
+   * Generates a random RGB-based color value.
+   * @returns {string} Hex color string.
+   */
   getRandomColor() {
     const r = Math.floor(Math.random() * 222);
     const g = Math.floor(Math.random() * 222);
@@ -129,20 +171,36 @@ export class FbService {
     return color;
   }
 
+  /**
+   * Returns a random color from the predefined palette.
+   * @returns {string} Hex color string.
+   */
   getRandomColorOld() {
     const colors = ['#FF7A00', '#9327FF', '#6E52FF', '#FC71FF', '#FFBB2B', '#1FD7C1', '#462F8A', '#FF4646', '#00BEE8', '#FF5EC4', '#3DFF8A'];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     return randomColor;
   }
 
+  /**
+   * Persists current contacts array in local storage.
+   * @returns {void} No return value.
+   */
   saveToLocalStorage() {
     localStorage.setItem('JoinFirebase', JSON.stringify(this.contactsArray));
   }
 
+  /**
+   * Returns current owner id, falling back to guest mode.
+   * @returns {string} Authenticated uid or guest fallback id.
+   */
   getCurrentUserId(): string {
     return this.authService.getCurrentUserId() || 'guest';
   }
 
+  /**
+   * Applies owner filtering and refreshes derived contact state.
+   * @returns {void} No return value.
+   */
   private applyOwnerFilter(): void {
     const userId = this.getCurrentUserId();
     const filterEnabled = environment.featureFlags?.enableOwnerFilter === true;
@@ -177,11 +235,20 @@ export class FbService {
     this.currentContact = this.contactsArray[this.id];
   }
 
+  /**
+   * Sets and returns the current contact by index.
+   * @param {number} id - Contact index.
+   * @returns {IContact} Selected contact or empty fallback contact.
+   */
   setCurrentContact(id: number): IContact {
     this.currentContact = this.contactsArray.length > 0 ? this.contactsArray[id] : { name: '', surname: '', email: '', phone: '' } as IContact;
     return this.currentContact;
   }
 
+  /**
+   * Triggers delayed list-state refresh for mobile/overlay flows.
+   * @returns {void} No return value.
+   */
   refreshContactList() {
     setTimeout(() => {
 

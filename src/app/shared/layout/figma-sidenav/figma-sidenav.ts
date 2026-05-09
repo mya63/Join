@@ -10,5 +10,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FigmaSidenav {
+  /**
+   * Returns a stable tracking key for repeated list rendering.
+   * @param {number} _ - Fallback index provided by Angular.
+   * @param {any} item - Current rendered item.
+   * @returns {unknown} Item id when available; otherwise fallback index.
+   */
   trackByIdx(_: number, item: any) { return item?.id ?? _; }
 }

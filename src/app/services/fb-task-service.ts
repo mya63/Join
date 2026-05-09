@@ -61,6 +61,11 @@ export class FbTaskService {
     });
   }
 
+  /**
+   * Starts and manages the task snapshot listener for the active user scope.
+   * @param {string} userId - Authenticated user identifier or guest fallback id.
+   * @returns {void} No return value.
+   */
   private startTasksListener(userId: string): void {
     if (this.myTasks) {
       this.myTasks();
@@ -114,6 +119,11 @@ export class FbTaskService {
     });
   }
 
+  /**
+   * Creates a task document and ensures a valid owner id is assigned.
+   * @param {ITask} task - Task payload to persist.
+   * @returns {void} No return value.
+   */
   async createTask(task: ITask) {
     let ownerId = this.auth.currentUser?.uid || null;
     if (!ownerId) {
@@ -130,12 +140,23 @@ export class FbTaskService {
     await addDoc(this.tasksCollection, { ...task, ownerId });
   }
 
+  /**
+   * Deletes a task document by its Firestore id.
+   * @param {string | undefined} taskId - Task document id.
+   * @returns {void} No return value.
+   */
   async deleteTask(taskId?: string | undefined) {
     if (!taskId) return;
     const taskDoc = doc(this.db, 'tasks', taskId);
     await deleteDoc(taskDoc);
   }
 
+  /**
+   * Updates selected task fields and keeps completion state in sync with status.
+   * @param {string} taskId - Task document id.
+   * @param {Partial<ITask>} updatedData - Partial task fields to update.
+   * @returns {void} No return value.
+   */
   async updateTask(taskId?: string, updatedData?: Partial<ITask>) {
     if (!taskId || !updatedData) return;
     if (updatedData.status) {
@@ -146,6 +167,13 @@ export class FbTaskService {
     await updateDoc(taskDoc, updatedData);
   }
 
+  /**
+   * Persists a task position change and optionally updates its column status.
+   * @param {ITask} task - Task to reposition.
+   * @param {number} newIndex - New zero-based position index.
+   * @param {string} status - Optional target status/column.
+   * @returns {void} No return value.
+   */
   async setNewIndex(task: ITask, newIndex: number, status?: string) {
     const updateData: Partial<ITask> = { positionIndex: newIndex };
     if (status) {
@@ -154,10 +182,19 @@ export class FbTaskService {
     await this.updateTask(task.dbid, updateData);
   }
 
+  /**
+   * Returns the current user id used for task ownership filtering.
+   * @returns {string} Current user id or guest fallback id.
+   */
   getCurrentUserId(): string {
     return this.fbService.getCurrentUserId();
   }
 
+  /**
+   * Re-normalizes position indices for all tasks in a specific status column.
+   * @param {string} status - Target status column key.
+   * @returns {void} No return value.
+   */
   async fixPositionsInColumn(status: string) {
     const tasksInColumn = this.tasksArray
       .filter(task => task.status === status)
@@ -188,6 +225,10 @@ export class FbTaskService {
     } */
 
 
+  /**
+   * Disposes the active Firestore task subscription.
+   * @returns {void} No return value.
+   */
   onDestroy() {
     if (this.myTasks) {
       this.myTasks();

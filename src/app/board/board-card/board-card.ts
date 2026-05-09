@@ -15,15 +15,27 @@ export class BoardCard {
   @Input() displayIndex: number = 0;
   @Output() cardClick = new EventEmitter<ITask>();
 
+  /**
+   * Emits the selected task when the board card is clicked.
+   * @returns {void} No return value.
+   */
   onCardClick(): void {
     this.cardClick.emit(this.card);
   }
 
+  /**
+   * Counts completed subtasks for the current task.
+   * @returns {number} Number of completed subtasks.
+   */
   getSubtaskDone(): number {
     const subTasks = this.card.subTasks ?? [];
     return subTasks.filter(subtask => subtask.subtaskCompleted === true).length;
   }
 
+  /**
+   * Calculates subtask completion progress as a percentage value.
+   * @returns {number} Progress percentage in range 0-100.
+   */
   getSubtaskProgress(): number {
     const subTasks = this.card.subTasks ?? [];
     if (subTasks.length === 0) return 0;

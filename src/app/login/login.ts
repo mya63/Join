@@ -24,6 +24,10 @@ export class Login implements OnInit {
   loginErrors: { email: string; password: string; firebase: string } = { email: '', password: '', firebase: '' };
   private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
 
+  /**
+   * Initializes login form state from optional route query parameters.
+   * @returns {void} No return value.
+   */
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
     if (params['email']) this.email = params['email'];
@@ -34,10 +38,18 @@ export class Login implements OnInit {
     }
   }
 
+  /**
+   * Clears all form-level and Firebase error messages.
+   * @returns {void} No return value.
+   */
   private resetErrors(): void {
     this.loginErrors = { email: '', password: '', firebase: '' };
   }
 
+  /**
+   * Validates email input and sets user-facing validation messages.
+   * @returns {void} No return value.
+   */
   private validateEmail(): void {
     const email = this.email.trim();
     this.loginErrors.email = '';
@@ -50,6 +62,10 @@ export class Login implements OnInit {
     }
   }
 
+  /**
+   * Revalidates email while typing and clears backend error feedback.
+   * @returns {void} No return value.
+   */
   onEmailInput(): void {
     this.loginErrors.firebase = '';
     const email = this.email.trim();
@@ -62,6 +78,10 @@ export class Login implements OnInit {
       : 'Please enter a valid email address.';
   }
 
+  /**
+   * Revalidates password field while typing and clears backend error feedback.
+   * @returns {void} No return value.
+   */
   onPasswordInput(): void {
     this.loginErrors.firebase = '';
     if (this.password) {
@@ -69,10 +89,19 @@ export class Login implements OnInit {
     }
   }
 
+  /**
+   * Navigates to the sign-up page.
+   * @returns {void} No return value.
+   */
   goToSignUp(): void {
     this.router.navigate(['sign-up']);
   }
 
+  /**
+   * Maps Firebase authentication errors to localized UI messages.
+   * @param {any} error - Firebase auth error payload.
+   * @returns {void} No return value.
+   */
   private handleFirebaseError(error: any): void {
     console.error('Login failed:', error);
     switch (error.code) {
@@ -88,7 +117,7 @@ export class Login implements OnInit {
         this.loginErrors.firebase = 'Dieses Konto wurde deaktiviert.';
         break;
       case 'auth/network-request-failed':
-        this.loginErrors.firebase = 'Netzwerkfehler. Bitte Verbindung prüfen.';
+        this.loginErrors.firebase = 'Network error. Please check your connection.';
         break;
       default:
         this.loginErrors.firebase = 'Login fehlgeschlagen. Bitte erneut versuchen.';
@@ -96,6 +125,10 @@ export class Login implements OnInit {
     this.cdr.markForCheck();
   }
 
+  /**
+   * Validates the form and triggers authenticated login.
+   * @returns {void} No return value.
+   */
   onSubmit(): void {
     this.resetErrors();
     this.validateEmail();
@@ -111,10 +144,18 @@ export class Login implements OnInit {
     });
   }
 
+  /**
+   * Navigates directly to the app in guest mode.
+   * @returns {void} No return value.
+   */
   onGuestLogin(): void {
     this.router.navigate(['contacts']);
   }
 
+  /**
+   * Resets login form fields to empty values.
+   * @returns {void} No return value.
+   */
   resetForm(): void {
     this.email = '';
     this.password = '';

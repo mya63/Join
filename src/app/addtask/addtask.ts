@@ -21,6 +21,10 @@ import { Router } from '@angular/router';
 export class AddTask implements OnInit {
   private router = inject(Router);
 
+  /**
+   * Validates required fields and creates a new task in the to-do column.
+   * @returns {void} No return value.
+   */
   create() {
     this.submitAttempted = true;
 
@@ -36,6 +40,10 @@ export class AddTask implements OnInit {
     this.router.navigate(['/board']);
   }
 
+  /**
+   * Resets the add-task form state to its initial defaults.
+   * @returns {void} No return value.
+   */
   clearForm() {
     this.initTaskState();
   }
@@ -72,12 +80,20 @@ export class AddTask implements OnInit {
   assignPlaceholder = computed(() => this.isSmallAssignPlaceholder() ? 'contacts' : 'Select contacts to assign');
 
 
+  /**
+   * Initializes responsive state and default task payload.
+   * @returns {void} No return value.
+   */
   ngOnInit(): void {
     this.submitAttempted = false;
     this.onViewportResize();
     this.initTaskState();
   }
 
+  /**
+   * Updates responsive UI flags based on current viewport width.
+   * @returns {void} No return value.
+   */
   onViewportResize(): void {
     if (typeof window === 'undefined') {
       return;
@@ -85,6 +101,10 @@ export class AddTask implements OnInit {
     this.isSmallAssignPlaceholder.set(window.innerWidth < 365);
   }
 
+  /**
+   * Rebuilds task-related form models and UI helper flags.
+   * @returns {void} No return value.
+   */
   private initTaskState(): void {
     this.task = this.fbTaskService.newTask;
     this.currentTask = this.fbTaskService.newTask;
@@ -107,6 +127,11 @@ export class AddTask implements OnInit {
     this.showCalendar = false;
   }
 
+  /**
+   * Persists a task and resets mutable task fields used by the form.
+   * @param {ITask} newTask - Task payload to persist.
+   * @returns {void} No return value.
+   */
   addTask(newTask: ITask) {
     this.fbTaskService.createTask(newTask);
     this.task.assignTo = [];
@@ -115,10 +140,20 @@ export class AddTask implements OnInit {
     this.task.subTasks = [];
   }
 
+  /**
+   * Checks whether the provided priority is currently selected.
+   * @param {string} priority - Priority key to compare.
+   * @returns {boolean} True when the given priority is active.
+   */
   whichPriority(priority: string): boolean {
     return this.task.priority === priority;
   }
 
+  /**
+   * Updates the selected priority in both task models.
+   * @param {string} priority - Priority key to set.
+   * @returns {void} No return value.
+   */
   setPriority(priority: string): void {
     this.task.priority = priority;
     this.currentTask.priority = priority
@@ -127,6 +162,10 @@ export class AddTask implements OnInit {
 
 
 
+  /**
+   * Returns contacts filtered by the current assignee search term.
+   * @returns {IContact[]} Filtered contact list for assignment.
+   */
   getUserForTask() {
     return this.FbService.contactsArray.filter(user =>
       user.name.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
@@ -135,6 +174,12 @@ export class AddTask implements OnInit {
     )
   }
 
+  /**
+   * Checks whether a user is already part of the assigned user list.
+   * @param {IContact} user - User candidate to verify.
+   * @param {IContact[]} assignedUsers - Current assigned contacts.
+   * @returns {boolean} True when the user is already assigned.
+   */
   isUserAssigned(user: IContact, assignedUsers: IContact[]): boolean {
     if (!assignedUsers || !Array.isArray(assignedUsers)) {
       return false;
@@ -144,6 +189,12 @@ export class AddTask implements OnInit {
     );
   }
 
+  /**
+   * Adds or removes a user from the assigned contacts collection.
+   * @param {IContact} user - User to toggle.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts list.
+   * @returns {void} No return value.
+   */
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
     if (!assignedUsers) {
       assignedUsers = [];
@@ -154,27 +205,46 @@ export class AddTask implements OnInit {
     );
 
     if (index > -1) {
-      // User ist bereits zugewiesen, entfernen
+      // User is already assigned, remove from list.
       assignedUsers.splice(index, 1);
     } else {
-      // User ist nicht zugewiesen, hinzufügen
+      // User is not assigned yet, add to list.
       assignedUsers.push(user);
     }
   }
 
+  /**
+   * Toggles assignee dropdown visibility for the selected model scope.
+   * @param {'task' | 'currentTask'} target - Target model scope key.
+   * @returns {void} No return value.
+   */
   toggleAssignDropdown(target: 'task' | 'currentTask'): void {
     this.showAssignDropdown[target] = !this.showAssignDropdown[target];
   }
 
+  /**
+   * Toggles category dropdown visibility for the selected model scope.
+   * @param {'task' | 'currentTask'} target - Target model scope key.
+   * @returns {void} No return value.
+   */
   toggleCategoryDropdown(target: 'task' | 'currentTask'): void {
     this.showCategoryDropdown[target] = !this.showCategoryDropdown[target];
   }
 
 
+  /**
+   * Checks whether a valid category has been selected.
+   * @returns {boolean} True when category selection is not the placeholder.
+   */
   dataIsSet() {
     return (this.currentCategory != 'Select task category');
   }
 
+  /**
+   * Closes assignment and category dropdowns when click happens outside them.
+   * @param {Event} event - Global click event.
+   * @returns {void} No return value.
+   */
   closeAssignDropdown(event: Event) {
     const target = event.target as HTMLElement | null;
     if (!target) return;
@@ -191,6 +261,11 @@ export class AddTask implements OnInit {
     }
   }
 
+  /**
+   * Applies the selected category metadata to the task model.
+   * @param {string} categoryName - Display name of the selected category.
+   * @returns {void} No return value.
+   */
   setCategory(categoryName: string): void {
     this.currentCategory = categoryName;
     const categoryIndex = this.categoryOptions.categoryProperties.findIndex(category => category.name === categoryName);
@@ -202,6 +277,11 @@ export class AddTask implements OnInit {
     }
   }
 
+  /**
+   * Appends a new subtask to the provided task.
+   * @param {ITask} myTask - Target task that receives the new subtask.
+   * @returns {void} No return value.
+   */
   addSubtask(myTask: ITask) {
     if (!myTask || this.subtask.title.trim() === '') {
       return;
@@ -210,6 +290,13 @@ export class AddTask implements OnInit {
     this.subtask = { title: '', completed: false, onEdit: false };
   }
 
+  /**
+   * Renames an existing subtask and exits edit mode.
+   * @param {string} subtaskTitle - Current subtask title.
+   * @param {string} newTitle - New subtask title.
+   * @param {ITask} myTask - Task containing the subtask.
+   * @returns {void} No return value.
+   */
   editSubtask(subtaskTitle: string, newTitle: string, myTask: ITask) {
     const subtask = myTask.subTasks.find(st => st.subtaskTitle === subtaskTitle);
 
@@ -219,31 +306,61 @@ export class AddTask implements OnInit {
     }
   }
 
+  /**
+   * Removes a subtask from the provided task by title.
+   * @param {string} subtaskTitle - Subtask title to remove.
+   * @param {ITask} myTask - Task containing the subtask.
+   * @returns {void} No return value.
+   */
   deleteSubtask(subtaskTitle: string, myTask: ITask) {
     myTask.subTasks = myTask.subTasks.filter(st => st.subtaskTitle !== subtaskTitle);
     myTask.subTasks = [...myTask.subTasks];
   }
 
+  /**
+   * Checks whether title validation passes.
+   * @returns {boolean} True when task title is valid.
+   */
   alowAddTask(): boolean {
     return this.hasValidTitle();
   }
 
+  /**
+   * Checks whether due-date validation passes.
+   * @returns {boolean} True when due date is valid.
+   */
   alowAddTaskCalender(): boolean {
     return this.hasValidDueDate();
   }
 
+  /**
+   * Checks whether all required task validations pass.
+   * @returns {boolean} True when task can be created.
+   */
   canCreateTask(): boolean {
     return this.hasValidTitle() && this.hasValidDueDate() && this.hasValidCategory();
   }
 
+  /**
+   * Validates task title input.
+   * @returns {boolean} True when title contains non-whitespace content.
+   */
   private hasValidTitle(): boolean {
     return !!this.task.title && this.task.title.trim().length > 0;
   }
 
+  /**
+   * Validates task category selection.
+   * @returns {boolean} True when a non-placeholder category is selected.
+   */
   private hasValidCategory(): boolean {
     return this.task.category.category !== -1;
   }
 
+  /**
+   * Validates due-date format and ensures date is not in the past.
+   * @returns {boolean} True when due date is valid and not expired.
+   */
   private hasValidDueDate(): boolean {
     const raw = (this.task.dueDate ?? '').trim();
 
@@ -271,15 +388,29 @@ export class AddTask implements OnInit {
     return parsed >= todayStart;
   }
 
+  /**
+   * Opens the calendar overlay for the selected task model.
+   * @param {'task' | 'currentTask'} target - Target model scope for due-date update.
+   * @returns {void} No return value.
+   */
   openCalendar(target: 'task' | 'currentTask') {
     this.calendarTarget = target;
     this.showCalendar = true;
   }
 
+  /**
+   * Closes the calendar overlay.
+   * @returns {void} No return value.
+   */
   closeCalendar() {
     this.showCalendar = false;
   }
 
+  /**
+   * Applies a selected date to the active task model in dd/mm/yyyy format.
+   * @param {Date} date - Date picked from the calendar.
+   * @returns {void} No return value.
+   */
   selectDate(date: Date) {
     if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
       return; // Verhindere Auswahl von Terminen in der Vergangenheit
@@ -300,20 +431,36 @@ export class AddTask implements OnInit {
     this.closeCalendar();
   }
 
+  /**
+   * Returns the number of days in a given month/year.
+   * @param {number} month - Zero-based month index.
+   * @param {number} year - Full year value.
+   * @returns {number} Number of days in the requested month.
+   */
   getDaysInMonth(month: number, year: number): number {
     return new Date(year, month + 1, 0).getDate();
   }
 
+  /**
+   * Returns weekday index of the first day in a given month/year.
+   * @param {number} month - Zero-based month index.
+   * @param {number} year - Full year value.
+   * @returns {number} Weekday index (0-6).
+   */
   getFirstDayOfMonth(month: number, year: number): number {
     return new Date(year, month, 1).getDay();
   }
 
+  /**
+   * Builds a calendar grid including leading empty slots.
+   * @returns {(number | null)[]} Calendar day cells for rendering.
+   */
   getCalendarDays(): (number | null)[] {
     const daysInMonth = this.getDaysInMonth(this.currentMonth, this.currentYear);
     const firstDay = this.getFirstDayOfMonth(this.currentMonth, this.currentYear);
     const days: (number | null)[] = [];
 
-    // Füge leere Zellen für die Tage vor dem ersten Tag des Monats hinzu
+    // Add leading empty cells before the first weekday.
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
@@ -326,6 +473,10 @@ export class AddTask implements OnInit {
     return days;
   }
 
+  /**
+   * Moves calendar view one month backward.
+   * @returns {void} No return value.
+   */
   previousMonth() {
     if (this.currentMonth === 0) {
       this.currentMonth = 11;
@@ -335,6 +486,10 @@ export class AddTask implements OnInit {
     }
   }
 
+  /**
+   * Moves calendar view one month forward.
+   * @returns {void} No return value.
+   */
   nextMonth() {
     if (this.currentMonth === 11) {
       this.currentMonth = 0;
@@ -344,6 +499,11 @@ export class AddTask implements OnInit {
     }
   }
 
+  /**
+   * Returns localized month label for calendar header.
+   * @param {number} month - Zero-based month index.
+   * @returns {string} Month display name.
+   */
   getMonthName(month: number): string {
     const months = [
       'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -352,11 +512,21 @@ export class AddTask implements OnInit {
     return months[month];
   }
 
+  /**
+   * Checks whether a day in the visible month lies before today.
+   * @param {number} day - Day number inside current month view.
+   * @returns {boolean} True when the day is in the past.
+   */
   isDayInPast(day: number): boolean {
     const date = new Date(this.currentYear, this.currentMonth, day);
     return date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
   }
 
+  /**
+   * Handles day-cell selection and applies date when selectable.
+   * @param {number} day - Selected day number.
+   * @returns {void} No return value.
+   */
   onDayClick(day: number) {
     if (!this.isDayInPast(day)) {
       this.selectDate(new Date(this.currentYear, this.currentMonth, day));

@@ -59,6 +59,10 @@ export class Board implements OnInit, OnDestroy {
     this.fbTaskService.currentTask = this.currentTask;
   }
 
+  /**
+   * Subscribes to task updates and initializes cached column data.
+   * @returns {void} No return value.
+   */
   ngOnInit() {
     // Subscribe to task updates from the service only for external changes
     this.tasksSubscription = this.fbTaskService.tasksUpdated$.subscribe(tasks => {
@@ -76,23 +80,44 @@ export class Board implements OnInit, OnDestroy {
 
   private isDragging = false;
 
+  /**
+   * Determines whether drag-and-drop should be disabled for the current viewport.
+   * @returns {boolean} True when drag-and-drop interactions are disabled.
+   */
   isDragDisabled(): boolean {
     return window.innerWidth <= 1350;
   }
 
+  /**
+   * Unsubscribes from task stream updates when the component is destroyed.
+   * @returns {void} No return value.
+   */
   ngOnDestroy() {
     this.tasksSubscription.unsubscribe();
   }
 
+  /**
+   * Returns all tasks sorted by their position index.
+   * @returns {ITask[]} Sorted task list.
+   */
   gettasks() {
     return this.fbTaskService.tasksArray.sort((a, b) => a.positionIndex - b.positionIndex);
   }
 
+  /**
+   * Filters tasks by status/column key.
+   * @param {string} header - Status key used as column identifier.
+   * @returns {ITask[]} Tasks that belong to the requested status.
+   */
   getTaskCollumn(header: string) {
     const myArry = this.fbTaskService.tasksArray.filter(task => task.status === header)
     return myArry
   }
 
+  /**
+   * Rebuilds cached column arrays from the current filtered task set.
+   * @returns {void} No return value.
+   */
   updateColumnArrays() {
     //console.log('Updating column arrays, isDragging:', this.isDragging);
     //console.log('All tasks from service:', this.fbTaskService.tasksArray);
@@ -135,6 +160,11 @@ export class Board implements OnInit, OnDestroy {
         }); */
   }
 
+  /**
+   * Returns the cached task array for a specific status column.
+   * @param {string} status - Status key for the target column.
+   * @returns {ITask[]} Mutable column array used by the board view.
+   */
   getColumnArray(status: string): ITask[] {
     switch (status) {
       case 'to-do':
@@ -150,11 +180,21 @@ export class Board implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Resolves a drop container id and returns its backing column array.
+   * @param {string} containerId - CDK drop-list container id.
+   * @returns {ITask[]} Column array associated with the container.
+   */
   getColumnArrayById(containerId: string): ITask[] {
     const status = this.getStatusFromContainerId(containerId);
     return this.getColumnArray(status);
   }
 
+  /**
+   * Handles drag-and-drop operations and persists updated ordering/status.
+   * @param {CdkDragDrop<ITask[]>} event - Drag-and-drop payload emitted by CDK.
+   * @returns {void} No return value.
+   */
   async drop(event: CdkDragDrop<ITask[]>) {
     const draggedTask = event.item.data as ITask;
     //console.log('Drop event:', event, 'Dragged task:', draggedTask);
@@ -219,6 +259,11 @@ export class Board implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  /**
+   * Maps a CDK drop-list container id to the internal task status key.
+   * @param {string} containerId - CDK drop-list container id.
+   * @returns {string} Status key for the corresponding board column.
+   */
   private getStatusFromContainerId(containerId: string): string {
     switch (containerId) {
       case 'getTaskCollumnOne':
@@ -236,37 +281,65 @@ export class Board implements OnInit, OnDestroy {
 
 
 
-  /** Predicate function that only allows even numbers to be dropped into a list. */
+  /**
+   * Placeholder drop predicate reserved for custom validation rules.
+   * @param {CdkDrag<number>} item - Dragged item metadata.
+   * @returns {boolean} Always returns true in the current implementation.
+   */
   evenPredicate(item: CdkDrag<number>) {
     return true; //item.data % 2 === 0;
   }
 
-  /** Predicate function that doesn't allow items to be dropped into a list. */
+  /**
+   * Placeholder drop predicate that currently allows all drops.
+   * @returns {boolean} Always returns true in the current implementation.
+   */
   noReturnPredicate() {
     return true;
   }
 
+  /**
+   * Backward-compatible predicate used by existing template bindings.
+   * @returns {boolean} Always returns true.
+   */
   newPredicate() {
     return true;
   }
 
+  /**
+   * Marks the board as actively dragging to prevent conflicting UI refreshes.
+   * @returns {void} No return value.
+   */
   onDragStarted() {
     this.isDragging = true;
     //console.log('Drag started');
   }
 
+  /**
+   * Handles drag-end notifications; final state reset is performed in drop handler.
+   * @returns {void} No return value.
+   */
   onDragEnded() {
     //console.log('Drag ended');
     // Don't set isDragging to false here, let the drop method handle it
   }
 
   // Search methods
+  /**
+   * Applies a text filter and rebuilds visible task columns.
+   * @param {string} searchTerm - Raw search term entered by the user.
+   * @returns {void} No return value.
+   */
   onSearchTasks(searchTerm: string): void {
     this.searchTerm = searchTerm.toLowerCase().trim();
     console.log('Searching for tasks with term:', this.searchTerm);
     this.updateColumnArrays();
   }
 
+  /**
+   * Returns tasks filtered by the normalized search term.
+   * @returns {ITask[]} Tasks matching title or description criteria.
+   */
   private getFilteredTasks(): ITask[] {
     if (!this.searchTerm) {
       return this.fbTaskService.tasksArray;
@@ -280,39 +353,69 @@ export class Board implements OnInit, OnDestroy {
   }
 
   // Overlay-Methoden
+  /**
+   * Opens the add-task overlay for a specific target column.
+   * @param {string} columnType - Target status/column key.
+   * @returns {void} No return value.
+   */
   openAddCardOverlay(columnType: string): void {
     this.selectedColumn = columnType;
     this.showAddCardOverlay = true;
     console.log('Opening add card overlay for column:', columnType);
   }
 
+  /**
+   * Closes the add-task overlay and resets selected column metadata.
+   * @returns {void} No return value.
+   */
   closeAddCardOverlay(): void {
     this.showAddCardOverlay = false;
     this.selectedColumn = '';
   }
 
+  /**
+   * Opens the task detail overlay for the selected task.
+   * @param {ITask} task - Task to display in the detail view.
+   * @returns {void} No return value.
+   */
   openInfoTask(task: ITask): void {
     this.selectedTask = task;
     this.showInfoTask = true;
     this.cdr.markForCheck();
   }
 
+  /**
+   * Closes the task detail overlay and clears selection state.
+   * @returns {void} No return value.
+   */
   closeInfoTask(): void {
     this.showInfoTask = false;
     this.selectedTask = null;
     this.cdr.markForCheck();
   }
 
+  /**
+   * Opens the edit overlay for the currently selected task.
+   * @returns {void} No return value.
+   */
   openEditTask(): void {
     this.showEditTask = true;
     this.cdr.markForCheck();
   }
 
+  /**
+   * Closes the edit overlay.
+   * @returns {void} No return value.
+   */
   closeEditTask(): void {
     this.showEditTask = false;
     this.cdr.markForCheck();
   }
 
+  /**
+   * Handles successful task save by closing overlays and clearing task selection.
+   * @returns {void} No return value.
+   */
   onEditSaved(): void {
     this.showEditTask = false;
     this.showInfoTask = false;

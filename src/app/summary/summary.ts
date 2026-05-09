@@ -21,6 +21,10 @@ export class Summary implements OnInit, OnDestroy {
   private injector = inject(Injector);
   private router = inject(Router);
 
+  /**
+   * Navigates to the board page.
+   * @returns {void} No return value.
+   */
   goToBoard() {
     this.router.navigate(['/board']);
   }
@@ -39,11 +43,19 @@ export class Summary implements OnInit, OnDestroy {
 
   private subscription: Subscription = new Subscription();
 
+  /**
+   * Initializes auth and task subscriptions for summary metrics.
+   * @returns {void} No return value.
+   */
   ngOnInit() {
     this.checkAuthStatus();
     this.subscribeToTasks();
   }
 
+  /**
+   * Cleans up active subscriptions on component teardown.
+   * @returns {void} No return value.
+   */
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
@@ -64,6 +76,11 @@ export class Summary implements OnInit, OnDestroy {
     }));
   }
 
+  /**
+   * Loads display name for a user via uid/ownerId contact records.
+   * @param {string} uid - Authenticated user id.
+   * @returns {Promise<string>} Resolved display name or fallback value.
+   */
   private async loadDisplayName(uid: string): Promise<string> {
     try {
       return await runInInjectionContext(this.injector, async () => {

@@ -10,10 +10,14 @@ import { Router } from '@angular/router';
 })
 export class Intro {
   private router = inject(Router);
-    ngOnInit() {
+  /**
+   * Redirects from intro screen to login after a short delay.
+   * @returns {void} No return value.
+   */
+  ngOnInit() {
     setTimeout(() => {
       this.router.navigate(['/login']);
     }, 2000);
   }
-  }
+}
 

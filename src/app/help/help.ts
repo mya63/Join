@@ -11,6 +11,10 @@ import { CommonModule, Location } from '@angular/common';
 export class Help {
   private location = inject(Location);
 
+  /**
+   * Navigates back in browser history.
+   * @returns {void} No return value.
+   */
   goBack(): void {
     this.location.back();
   }
