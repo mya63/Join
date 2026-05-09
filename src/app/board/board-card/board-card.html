@@ -1,8 +1,10 @@
 <!-- board-card.component.html -->
 <div class="card-wrap">
   <div class="card" (click)="onCardClick()">
-    <div class="label" [style.--myColor]="card.category.categoryProperties[0].color">
-      {{ card.category.categoryProperties[0].name }}
+    <div cdkDragHandle class="drag-handle">
+      <div class="label" [style.--myColor]="card.category.categoryProperties[0].color">
+        {{ card.category.categoryProperties[0].name }}
+      </div>
     </div>
 
     <div class="content">

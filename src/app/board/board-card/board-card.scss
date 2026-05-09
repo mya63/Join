@@ -12,6 +12,17 @@
   width: 100%;
 }
 
+.drag-handle {
+  width: 100%;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
 .card {
   width: 100%;
   min-width: 252px;

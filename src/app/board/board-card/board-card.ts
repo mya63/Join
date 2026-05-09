@@ -1,10 +1,11 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CdkDragHandle } from '@angular/cdk/drag-drop';
 import { ITask } from '../../interfaces/i-task';  
 
 @Component({
   selector: 'app-board-card',
-  imports: [CommonModule],
+  imports: [CommonModule, CdkDragHandle],
   templateUrl: './board-card.html',
   styleUrl: './board-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
