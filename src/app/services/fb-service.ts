@@ -44,26 +44,45 @@ export class FbService {
     this.contactsArray = [];
     this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
 
-    this.myContacts = onSnapshot(this.contactsCollectionSorted, (snapshot) => {
+    this.myContacts = this.bindContactsListener();
+    this.bindAuthStateToOwnerFilter();
+    this.myData = this.bindDataListener();
+  }
+
+  /**
+   * Attaches a Firestore snapshot listener to the sorted contacts collection.
+   * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
+   */
+  private bindContactsListener(): VoidFunction {
+    return onSnapshot(this.contactsCollectionSorted, (snapshot) => {
       this.allContacts = [];
       snapshot.forEach((element) => {
         this.allContacts.push({ id: element.id, ...element.data() } as IContact);
       });
       this.applyOwnerFilter();
     });
+  }
 
+  /**
+   * Subscribes to Firebase auth state changes and re-applies owner filter on each change.
+   * @returns {void} No return value.
+   */
+  private bindAuthStateToOwnerFilter(): void {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, () => {
         this.applyOwnerFilter();
       });
     });
+  }
 
-
-    this.myData = onSnapshot(this.dataCollection, (snapshot) => {
-      this.data = snapshot.docs.map((doc) => doc.data());
-      //console.log(this.data);
+  /**
+   * Attaches a Firestore snapshot listener to the data collection.
+   * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
+   */
+  private bindDataListener(): VoidFunction {
+    return onSnapshot(this.dataCollection, (snapshot) => {
+      this.data = snapshot.docs.map((document) => document.data());
     });
-
   }
 
   /**
@@ -135,23 +154,44 @@ export class FbService {
   async delContact(id: number): Promise<boolean> {
     const contact = this.contactsArray[id];
     if (!contact) return false;
+    if (this.isForeignUserContact(contact)) return false;
+
+    const isSelf = this.isSelfAccountContact(contact);
+    await deleteDoc(doc(this.contactsCollection, contact.id));
+
+    if (isSelf) {
+      await this.authService.deleteCurrentUserAccount();
+    }
+
+    this.id = this.firstConnect();
+    return true;
+  }
+
+  /**
+   * Checks whether the given contact belongs to a different authenticated user.
+   * @param {IContact} contact - Contact to evaluate.
+   * @returns {boolean} True when the contact is owned by another user and must not be deleted.
+   */
+  private isForeignUserContact(contact: IContact): boolean {
+    const currentUserId = this.getCurrentUserId();
+    return !!(contact.uid && contact.uid !== currentUserId);
+  }
+
+  /**
+   * Checks whether the given contact represents the currently authenticated user's own account.
+   * @param {IContact} contact - Contact to evaluate.
+   * @returns {boolean} True when the contact matches the logged-in user's uid and email.
+   */
+  private isSelfAccountContact(contact: IContact): boolean {
     const currentUserId = this.getCurrentUserId();
     const currentUserEmail = (this.authService.getCurrentUserEmail() || '').trim().toLowerCase();
     const contactEmail = (contact.email || '').trim().toLowerCase();
-    const isSelfAccountContact =
+    return (
       Boolean(contact.uid) &&
       contact.uid === currentUserId &&
       !!currentUserEmail &&
-      contactEmail === currentUserEmail;
-    // Registered foreign user: deletion is not allowed.
-    if (contact.uid && contact.uid !== currentUserId) return false;
-    await deleteDoc(doc(this.contactsCollection, contact.id));
-    // Own account: also remove authenticated account data.
-    if (isSelfAccountContact) {
-      await this.authService.deleteCurrentUserAccount();
-    }
-    this.id = this.firstConnect();
-    return true;
+      contactEmail === currentUserEmail
+    );
   }
 
   /**
@@ -218,10 +258,30 @@ export class FbService {
       ? this.allContacts.filter(contact => contact.ownerId === userId)
       : [...this.allContacts];
 
-    this.contactsGroups = Array.from(
-      new Set(this.contactsArray.map(contact => (contact.name || '').charAt(0).toUpperCase()).filter(Boolean))
-    ).sort();
+    this.rebuildContactGroups();
+    this.resolveCurrentContact();
+  }
 
+  /**
+   * Rebuilds the sorted list of unique first-letter group keys from the filtered contacts.
+   * @returns {void} No return value.
+   */
+  private rebuildContactGroups(): void {
+    this.contactsGroups = Array.from(
+      new Set(
+        this.contactsArray
+          .map(contact => (contact.name || '').charAt(0).toUpperCase())
+          .filter(Boolean)
+      )
+    ).sort();
+  }
+
+  /**
+   * Selects the appropriate current contact after filter changes.
+   * Handles empty list, pending new contact email, and out-of-bounds index.
+   * @returns {void} No return value.
+   */
+  private resolveCurrentContact(): void {
     if (this.contactsArray.length === 0) {
       this.id = 0;
       this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;

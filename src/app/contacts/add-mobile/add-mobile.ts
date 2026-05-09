@@ -161,28 +161,25 @@ export class AddMobile {
    * @returns {boolean} True when form data is valid.
    */
   isFormValid(form: any): boolean {
-    // Standard Angular form validation.
-    if (form.invalid) {
-      return false;
-    }
-
-    // Additional phone validation.
-    if (this.hasInvalidPhoneFormat(this.contact.phone)) {
-      return false;
-    }
-
-    // Additional name/surname character and capitalization validation.
-    if (this.hasInvalidCharacters(this.contact.name) || this.hasInvalidCharacters(this.contact.surname) ||
-      this.hasInvalidCapitalization(this.contact.name) ||
-      this.hasInvalidCapitalization(this.contact.surname)) {
-      return false;
-    }
-
-    // Additional email format validation.
-    if (this.hasInvalidEmailFormat(this.contact.email)) {
-      return false;
-    }
-
+    if (form.invalid) return false;
+    if (this.hasInvalidPhoneFormat(this.contact.phone)) return false;
+    if (this.hasInvalidNameData(this.contact.name, this.contact.surname)) return false;
+    if (this.hasInvalidEmailFormat(this.contact.email)) return false;
     return true;
+  }
+
+  /**
+   * Checks name and surname for invalid characters and missing capitalization.
+   * @param {string | undefined} name - First name to validate.
+   * @param {string | undefined} surname - Last name to validate.
+   * @returns {boolean} True when either name or surname fails character or capitalization rules.
+   */
+  private hasInvalidNameData(name: string | undefined, surname: string | undefined): boolean {
+    return (
+      this.hasInvalidCharacters(name) ||
+      this.hasInvalidCharacters(surname) ||
+      this.hasInvalidCapitalization(name) ||
+      this.hasInvalidCapitalization(surname)
+    );
   }
 }

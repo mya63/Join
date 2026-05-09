@@ -61,23 +61,33 @@ setTimeout(() => {
  * @param {any} form - The form.
  * @returns {void} No return value.
  */
-async upContact(form: any) {
-// Mark all fields as touched so validation messages become visible.
+async upContact(form: any): Promise<void> {
+this.markAllControlsTouched(form);
+if (!this.isFormValid(form)) return;
+await this.persistContactUpdate();
+}
+
+/**
+ * Marks all form controls as touched to trigger validation message display.
+ * @param {any} form - Template-driven form reference.
+ * @returns {void} No return value.
+ */
+private markAllControlsTouched(form: any): void {
 Object.keys(form.controls).forEach(key => {
   form.controls[key].markAsTouched();
 });
-
-// Use the existing isFormValid method for full validation.
-if (!this.isFormValid(form)) {
-  return; // Stop execution when form validation fails.
 }
 
+/**
+ * Persists the edited contact and closes the overlay with exit animation.
+ * @returns {Promise<void>} Promise resolved after Firestore update completes.
+ */
+private async persistContactUpdate(): Promise<void> {
 await this.fbService.updateContact(this.fbService.id, this.editedContact);
 this.isClosing = true;
-// Wait for animation end before closing the overlay.
 setTimeout(() => {
   this.fbService.showEditContact = false;
-}, 400); // 400ms matches the animation duration.
+}, 400);
 }
 
 /**
@@ -162,27 +172,25 @@ return !phoneRegex.test(phone);
  * @returns {boolean} True when the form is valid.
  */
 isFormValid(form: any): boolean {
-// Standard Angular form validation.
-if (form.invalid) {
-return false;
-}
-
-// Additional phone validation.
-if (this.hasInvalidPhoneFormat(this.editedContact.phone)) {
-return false;
-}
-
-// Additional name/surname capitalization validation.
-if (this.hasInvalidCapitalization(this.editedContact.name) ||
-this.hasInvalidCapitalization(this.editedContact.surname)) {
-return false;
-}
-
-// Additional email format validation.
-if (this.hasInvalidEmailFormat(this.editedContact.email)) {
-return false;
-}
-
+if (form.invalid) return false;
+if (this.hasInvalidPhoneFormat(this.editedContact.phone)) return false;
+if (this.hasInvalidNameData(this.editedContact.name, this.editedContact.surname)) return false;
+if (this.hasInvalidEmailFormat(this.editedContact.email)) return false;
 return true;
+}
+
+/**
+ * Checks name and surname for invalid characters and missing capitalization.
+ * @param {string | undefined} name - First name to validate.
+ * @param {string | undefined} surname - Last name to validate.
+ * @returns {boolean} True when either name or surname fails character or capitalization rules.
+ */
+private hasInvalidNameData(name: string | undefined, surname: string | undefined): boolean {
+return (
+  this.hasInvalidCharacters(name) ||
+  this.hasInvalidCharacters(surname) ||
+  this.hasInvalidCapitalization(name) ||
+  this.hasInvalidCapitalization(surname)
+);
 }
 }

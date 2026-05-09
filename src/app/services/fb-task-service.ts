@@ -33,11 +33,20 @@ export class FbTaskService {
   tasksCollection = collection(this.db, 'tasks');
 
   constructor() {
-
     this.task = {} as ITask;
     this.currentTask = {} as ITask;
     this.tasksArray = [];
-    this.newTask = {
+    this.newTask = this.buildDefaultTask();
+    this.myTasks = null;
+    this.bindTaskListenerToAuthState();
+  }
+
+  /**
+   * Builds the default task template used as the initial form model.
+   * @returns {ITask} A task object populated with default values.
+   */
+  private buildDefaultTask(): ITask {
+    return {
       createDate: new Date().toISOString(),
       ownerId: this.getCurrentUserId(),
       completed: this.task.completed || false,
@@ -51,10 +60,13 @@ export class FbTaskService {
       priority: this.task.priority || 'medium',
       subTasks: this.task.subTasks || [],
     };
+  }
 
-    this.myTasks = null;
-
-    // Always bind listener to the UID provided by Firebase auth state.
+  /**
+   * Subscribes to Firebase auth state changes and starts the task listener for the active user.
+   * @returns {void} No return value.
+   */
+  private bindTaskListenerToAuthState(): void {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, (user) => {
         const userId = user?.uid || 'guest';
@@ -70,79 +82,115 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private startTasksListener(userId: string): void {
+    this.stopCurrentTasksListener();
+
+    const ownerFilterEnabled = environment.featureFlags?.enableOwnerFilter === true;
+    if (!ownerFilterEnabled) {
+      this.attachUnfilteredListener();
+      return;
+    }
+
+    this.attachFilteredListener(userId);
+  }
+
+  /**
+   * Unsubscribes from the currently active Firestore snapshot listener.
+   * @returns {void} No return value.
+   */
+  private stopCurrentTasksListener(): void {
     if (this.myTasks) {
       this.myTasks();
     }
+  }
 
-    const ownerFilterEnabled = environment.featureFlags?.enableOwnerFilter === true;
+  /**
+   * Attaches a Firestore snapshot listener without owner-based filtering.
+   * @returns {void} No return value.
+   */
+  private attachUnfilteredListener(): void {
+    this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
+      this.applyTaskSnapshot(snapshot);
+    });
+  }
+
+  /**
+   * Attaches a Firestore snapshot listener filtered by owner id, with unfiltered fallback on empty results.
+   * @param {string} userId - Authenticated user id or guest fallback.
+   * @returns {void} No return value.
+   */
+  private attachFilteredListener(userId: string): void {
+    let fallbackActive = false;
+
     const filteredQuery = userId === 'guest'
       ? query(this.tasksCollection, where('ownerId', '==', 'guest'))
       : query(this.tasksCollection, where('ownerId', 'in', [userId, 'guest']));
 
-    let fallbackActive = false;
-
-    const applySnapshot = (snapshot: any) => {
-      this.tasksArray = [];
-      snapshot.forEach((element: any) => {
-        this.tasksArray.push({ dbid: element.id, ...element.data() } as ITask);
-      });
-      this.tasksArray = this.tasksArray.sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-      this.ngZone.run(() => {
-        this.tasksUpdatedSubject.next([...this.tasksArray]);
-      });
-    };
-
-    const attachUnfilteredListener = () => {
-      fallbackActive = true;
-      if (this.myTasks) {
-        this.myTasks();
-      }
-      this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
-        applySnapshot(snapshot);
-      });
-    };
-
-    if (!ownerFilterEnabled) {
-      this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
-        applySnapshot(snapshot);
-      });
-      return;
-    }
-
     this.myTasks = onSnapshot(filteredQuery, (snapshot) => {
       if (!fallbackActive && snapshot.empty) {
-        attachUnfilteredListener();
+        fallbackActive = true;
+        this.attachUnfilteredListener();
         return;
       }
-      applySnapshot(snapshot);
+      this.applyTaskSnapshot(snapshot);
     }, () => {
       if (!fallbackActive) {
-        attachUnfilteredListener();
+        fallbackActive = true;
+        this.attachUnfilteredListener();
       }
+    });
+  }
+
+  /**
+   * Parses a Firestore snapshot into the tasks array and notifies subscribers.
+   * @param {any} snapshot - Firestore query snapshot to process.
+   * @returns {void} No return value.
+   */
+  private applyTaskSnapshot(snapshot: any): void {
+    this.tasksArray = [];
+    snapshot.forEach((element: any) => {
+      this.tasksArray.push({ dbid: element.id, ...element.data() } as ITask);
+    });
+    this.tasksArray = this.tasksArray.sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
+    this.ngZone.run(() => {
+      this.tasksUpdatedSubject.next([...this.tasksArray]);
     });
   }
 
   /**
    * Creates a task document and ensures a valid owner id is assigned.
    * @param {ITask} task - Task payload to persist.
-   * @returns {void} No return value.
+   * @returns {Promise<void>} Promise resolved after the task document is created.
    */
-  async createTask(task: ITask) {
+  async createTask(task: ITask): Promise<void> {
+    const ownerId = await this.resolveOwnerId();
+    await addDoc(this.tasksCollection, { ...task, ownerId });
+  }
+
+  /**
+   * Resolves the current owner id, waiting for Firebase auth state when needed.
+   * @returns {Promise<string>} Resolved owner id or guest fallback.
+   */
+  private async resolveOwnerId(): Promise<string> {
     let ownerId = this.auth.currentUser?.uid || null;
     if (!ownerId) {
-      await new Promise<void>((resolve) => {
-        runInInjectionContext(this.injector, () => {
-          const unsubscribe = onAuthStateChanged(this.auth, (user) => {
-            ownerId = user?.uid || null;
-            unsubscribe();
-            resolve();
-          });
+      ownerId = await this.waitForAuthUserId();
+    }
+    return ownerId || this.getCurrentUserId() || 'guest';
+  }
+
+  /**
+   * Waits for Firebase auth state to emit a user id.
+   * @returns {Promise<string | null>} Resolved user id or null when unauthenticated.
+   */
+  private waitForAuthUserId(): Promise<string | null> {
+    return new Promise<string | null>((resolve) => {
+      runInInjectionContext(this.injector, () => {
+        const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+          unsubscribe();
+          resolve(user?.uid || null);
         });
       });
-    }
-
-    ownerId = ownerId || this.getCurrentUserId() || 'guest';
-    await addDoc(this.tasksCollection, { ...task, ownerId });
+    });
   }
 
   /**

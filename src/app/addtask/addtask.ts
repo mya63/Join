@@ -106,6 +106,15 @@ export class AddTask implements OnInit {
    * @returns {void} No return value.
    */
   private initTaskState(): void {
+    this.resetTaskModel();
+    this.resetFormUiState();
+  }
+
+  /**
+   * Resets all task model fields to their default empty values.
+   * @returns {void} No return value.
+   */
+  private resetTaskModel(): void {
     this.task = this.fbTaskService.newTask;
     this.currentTask = this.fbTaskService.newTask;
     this.task.status = 'to-do';
@@ -119,6 +128,13 @@ export class AddTask implements OnInit {
     this.task.category.category = -1;
     this.task.subTasks = [];
     this.currentTask = this.task;
+  }
+
+  /**
+   * Resets all UI state flags and input helpers used by the form.
+   * @returns {void} No return value.
+   */
+  private resetFormUiState(): void {
     this.currentCategory = 'Select task category';
     this.filterAssignedUsers = '';
     this.showAssignDropdown = { task: false, currentTask: false };
@@ -363,29 +379,36 @@ export class AddTask implements OnInit {
    */
   private hasValidDueDate(): boolean {
     const raw = (this.task.dueDate ?? '').trim();
+    if (!raw) return false;
 
-    if (!raw) {
-      return false;
-    }
+    const parsed = this.parseDdMmYyyy(raw);
+    if (!parsed) return false;
 
+    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return parsed >= todayStart;
+  }
+
+  /**
+   * Parses a date string in dd/mm/yyyy format and returns a Date object.
+   * Returns null when the format is invalid or the date does not exist in the calendar.
+   * @param {string} raw - Date string to parse.
+   * @returns {Date | null} Parsed Date or null when input is invalid.
+   */
+  private parseDdMmYyyy(raw: string): Date | null {
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(raw);
-    if (!match) {
-      return false;
-    }
+    if (!match) return null;
 
     const day = Number(match[1]);
     const month = Number(match[2]);
     const year = Number(match[3]);
 
     const parsed = new Date(year, month - 1, day);
-    const isRealDate = parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day;
+    const isRealDate =
+      parsed.getFullYear() === year &&
+      parsed.getMonth() === month - 1 &&
+      parsed.getDate() === day;
 
-    if (!isRealDate) {
-      return false;
-    }
-
-    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
-    return parsed >= todayStart;
+    return isRealDate ? parsed : null;
   }
 
   /**
@@ -411,24 +434,46 @@ export class AddTask implements OnInit {
    * @param {Date} date - Date picked from the calendar.
    * @returns {void} No return value.
    */
-  selectDate(date: Date) {
-    if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
-      return; // Verhindere Auswahl von Terminen in der Vergangenheit
-    }
+  selectDate(date: Date): void {
+    if (this.isDateInPast(date)) return;
+    const dateString = this.formatDateDdMmYyyy(date);
+    this.applyDateToTarget(dateString);
+    this.closeCalendar();
+  }
 
-    // Formatiere Datum korrekt ohne Zeitzonenproblem
+  /**
+   * Checks whether the given date lies before today.
+   * @param {Date} date - Date to evaluate.
+   * @returns {boolean} True when the date is in the past.
+   */
+  private isDateInPast(date: Date): boolean {
+    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return date < todayStart;
+  }
+
+  /**
+   * Formats a Date object as a dd/mm/yyyy string without timezone shifting.
+   * @param {Date} date - Date to format.
+   * @returns {string} Formatted date string.
+   */
+  private formatDateDdMmYyyy(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    const dateString = `${day}/${month}/${year}`;
+    return `${day}/${month}/${year}`;
+  }
 
+  /**
+   * Writes the formatted date string to the currently active task model target.
+   * @param {string} dateString - Formatted due date string.
+   * @returns {void} No return value.
+   */
+  private applyDateToTarget(dateString: string): void {
     if (this.calendarTarget === 'task') {
       this.task.dueDate = dateString;
     } else {
       this.currentTask.dueDate = dateString;
     }
-
-    this.closeCalendar();
   }
 
   /**

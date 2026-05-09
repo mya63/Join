@@ -254,10 +254,15 @@ export class SignUp {
     this.validatePassword();
     this.validateConfirmPassword();
     this.validatePrivacy();
-    if (this.hasErrors()) {
-      return;
-    }
+    if (this.hasErrors()) return;
+    await this.checkEmailAndSubmit();
+  }
 
+  /**
+   * Checks whether the email is already registered and triggers account creation when not.
+   * @returns {Promise<void>} Promise resolved after the email check and optional sign-up completes.
+   */
+  private async checkEmailAndSubmit(): Promise<void> {
     const alreadyRegistered = await this.authService.isEmailRegistered(this.signUpData.email);
     if (alreadyRegistered) {
       this.signUpErrors.email = 'This email address is already registered.';

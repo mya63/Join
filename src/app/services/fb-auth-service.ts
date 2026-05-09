@@ -228,28 +228,45 @@ export class FbAuthService {
    * @returns {Promise<void>} Promise resolved after login flow completes.
    */
   async loginAsTestUser(): Promise<void> {
+    const loginSucceeded = await this.tryLoginAsTestUser();
+    if (loginSucceeded) return;
+    await this.createAndLoginTestUser();
+  }
+
+  /**
+   * Attempts to sign in with the configured test-user credentials.
+   * @returns {Promise<boolean>} True when login succeeded, false when account does not exist.
+   * @throws When an unexpected Firebase error occurs.
+   */
+  private async tryLoginAsTestUser(): Promise<boolean> {
     try {
       await this.login(environment.testUser.email, environment.testUser.password);
-      return;
+      return true;
     } catch (error: any) {
-      const canCreateAfterFailedLogin =
+      const isNotFound =
         error?.code === 'auth/invalid-credential' ||
         error?.code === 'auth/user-not-found' ||
         error?.code === 'auth/invalid-login-credentials';
-      if (!canCreateAfterFailedLogin) {
-        throw error;
-      }
+      if (!isNotFound) throw error;
+      return false;
     }
+  }
 
+  /**
+   * Creates the test-user account when it does not exist yet and navigates to summary.
+   * Falls back to a plain login attempt when the account already exists.
+   * @returns {Promise<void>} Promise resolved after account creation and login.
+   */
+  private async createAndLoginTestUser(): Promise<void> {
     try {
-      const created = await createUserWithEmailAndPassword(this.auth, environment.testUser.email, environment.testUser.password);
+      const created = await createUserWithEmailAndPassword(
+        this.auth, environment.testUser.email, environment.testUser.password
+      );
       await this.syncDailyTestDataForUser(created.user);
       this.setLocalLoginState(true);
       this.router.navigate(['/summary']);
     } catch (createError: any) {
-      if (createError?.code !== 'auth/email-already-in-use') {
-        throw createError;
-      }
+      if (createError?.code !== 'auth/email-already-in-use') throw createError;
       await this.login(environment.testUser.email, environment.testUser.password);
     }
   }
@@ -305,18 +322,34 @@ export class FbAuthService {
     if (!user) return;
     try {
       await deleteUser(user);
-      this.setLocalLoginState(false);
-      this.router.navigate(['/login']);
+      this.navigateAfterSignOut();
     } catch (error: any) {
-      if (error.code === 'auth/requires-recent-login') {
-        // Session is too old; user must authenticate again.
-        await signOut(this.auth);
-        this.setLocalLoginState(false);
-        this.router.navigate(['/login']);
-      } else {
-        console.error('Error deleting user account:', error);
-        throw error;
-      }
+      await this.handleDeleteUserError(error);
+    }
+  }
+
+  /**
+   * Clears local login state and navigates to the login page.
+   * @returns {void} No return value.
+   */
+  private navigateAfterSignOut(): void {
+    this.setLocalLoginState(false);
+    this.router.navigate(['/login']);
+  }
+
+  /**
+   * Handles errors thrown during account deletion.
+   * Signs out and redirects when the session is too old; rethrows all other errors.
+   * @param {any} error - Firebase error payload.
+   * @returns {Promise<void>} Promise resolved after error handling.
+   */
+  private async handleDeleteUserError(error: any): Promise<void> {
+    if (error.code === 'auth/requires-recent-login') {
+      await signOut(this.auth);
+      this.navigateAfterSignOut();
+    } else {
+      console.error('Error deleting user account:', error);
+      throw error;
     }
   }
 
@@ -330,27 +363,54 @@ export class FbAuthService {
   private async ensureSelfContact(user: User, name = '', surname = ''): Promise<void> {
     try {
       const contactsCollection = collection(this.db, 'contacts');
-      const q = query(contactsCollection, where('ownerId', '==', user.uid));
-      const existing = await getDocs(q);
-      const hasOwnEmail = existing.docs.some((docItem) => docItem.data()['email'] === user.email);
-      if (hasOwnEmail) {
-        return;
-      }
-
-      const fallbackName = this.getFallbackName(user.email || '');
-      await addDoc(contactsCollection, {
-        ownerId: user.uid,
-        uid: user.uid,
-        date: new Date(),
-        color: this.getRandomColor(),
-        name: name || fallbackName,
-        surname: surname || '',
-        email: user.email || '',
-        phone: ''
-      });
+      const alreadyExists = await this.selfContactExists(contactsCollection, user);
+      if (alreadyExists) return;
+      await this.createSelfContact(contactsCollection, user, name, surname);
     } catch (error) {
       console.error('Error ensuring self contact:', error);
     }
+  }
+
+  /**
+   * Checks whether a self-contact with the user's own email already exists.
+   * @param {ReturnType<typeof collection>} contactsCollection - Firestore contacts collection reference.
+   * @param {User} user - Authenticated Firebase user.
+   * @returns {Promise<boolean>} True when a matching self-contact exists.
+   */
+  private async selfContactExists(
+    contactsCollection: ReturnType<typeof collection>,
+    user: User
+  ): Promise<boolean> {
+    const q = query(contactsCollection, where('ownerId', '==', user.uid));
+    const existing = await getDocs(q);
+    return existing.docs.some((docItem) => docItem.data()['email'] === user.email);
+  }
+
+  /**
+   * Creates a new self-contact document for the authenticated user.
+   * @param {ReturnType<typeof collection>} contactsCollection - Firestore contacts collection reference.
+   * @param {User} user - Authenticated Firebase user.
+   * @param {string} name - Preferred first name.
+   * @param {string} surname - Preferred surname.
+   * @returns {Promise<void>} Promise resolved after the contact document is created.
+   */
+  private async createSelfContact(
+    contactsCollection: ReturnType<typeof collection>,
+    user: User,
+    name: string,
+    surname: string
+  ): Promise<void> {
+    const fallbackName = this.getFallbackName(user.email || '');
+    await addDoc(contactsCollection, {
+      ownerId: user.uid,
+      uid: user.uid,
+      date: new Date(),
+      color: this.getRandomColor(),
+      name: name || fallbackName,
+      surname: surname || '',
+      email: user.email || '',
+      phone: ''
+    });
   }
 
   /**
@@ -555,7 +615,15 @@ export class FbAuthService {
       await existingLock;
       return;
     }
+    await this.runExclusiveSyncJob(user);
+  }
 
+  /**
+   * Executes the sync job under a per-user lock to prevent concurrent duplicate writes.
+   * @param {User} user - Authenticated Firebase user.
+   * @returns {Promise<void>} Promise resolved after self-contact and test data sync complete.
+   */
+  private async runExclusiveSyncJob(user: User): Promise<void> {
     const syncJob = (async () => {
       await this.ensureSelfContact(user);
       await this.ensureDailyTestData(user);

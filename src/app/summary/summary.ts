@@ -80,61 +80,86 @@ export class Summary implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads display name for a user via uid/ownerId contact records.
+   * Loads the display name for the authenticated user from Firestore contact records.
    * @param {string} uid - Authenticated user id.
-   * @returns {Promise<string>} Resolved display name or fallback value.
+   * @param {string} email - Authenticated user email used for exact-match preference.
+   * @returns {Promise<string>} Resolved display name or generic fallback.
    */
   private async loadDisplayName(uid: string, email: string): Promise<string> {
     try {
       return await runInInjectionContext(this.injector, async () => {
         const contactsRef = collection(this.db, 'contacts');
-        const contactByOwnerId = query(contactsRef, where('ownerId', '==', uid));
-        const contactByOwnerIdSnapshot = await getDocs(contactByOwnerId);
-        if (!contactByOwnerIdSnapshot.empty) {
-          const preferredByEmail = contactByOwnerIdSnapshot.docs.find((docItem) => {
-            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
-            return !!contactEmail && contactEmail === email.trim().toLowerCase();
-          });
+        const nameByOwner = await this.resolveNameByField(contactsRef, 'ownerId', uid, email);
+        if (nameByOwner) return nameByOwner;
 
-          const preferredNonTest = contactByOwnerIdSnapshot.docs.find((docItem) => {
-            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
-            return !!contactEmail && !contactEmail.endsWith('@join.local') && !contactEmail.endsWith('@test.join.local');
-          });
-
-          const preferredDoc = preferredByEmail || preferredNonTest || contactByOwnerIdSnapshot.docs[0];
-          const data = preferredDoc.data();
-          const name = data['name'] || '';
-          const surname = data['surname'] || '';
-          if (name || surname) return `${name} ${surname}`.trim();
-        }
-
-        const contactByUid = query(contactsRef, where('uid', '==', uid));
-        const contactByUidSnapshot = await getDocs(contactByUid);
-        if (!contactByUidSnapshot.empty) {
-          const preferredByEmail = contactByUidSnapshot.docs.find((docItem) => {
-            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
-            return !!contactEmail && contactEmail === email.trim().toLowerCase();
-          });
-
-          const preferredNonTest = contactByUidSnapshot.docs.find((docItem) => {
-            const contactEmail = String(docItem.data()['email'] || '').trim().toLowerCase();
-            return !!contactEmail && !contactEmail.endsWith('@join.local') && !contactEmail.endsWith('@test.join.local');
-          });
-
-          const preferredDoc = preferredByEmail || preferredNonTest || contactByUidSnapshot.docs[0];
-          const data = preferredDoc.data();
-          const name = data['name'] || '';
-          const surname = data['surname'] || '';
-          if (name || surname) return `${name} ${surname}`.trim();
-        }
+        const nameByUid = await this.resolveNameByField(contactsRef, 'uid', uid, email);
+        if (nameByUid) return nameByUid;
 
         return 'User';
       });
     } catch {
       // Keep fallback generic if Firestore fetch fails.
     }
-
     return 'User';
+  }
+
+  /**
+   * Queries contacts by a given field and returns the best-matching display name.
+   * Priority: exact email match → non-test email → first result.
+   * @param {ReturnType<typeof collection>} contactsRef - Firestore contacts collection reference.
+   * @param {'ownerId' | 'uid'} field - Firestore field to query by.
+   * @param {string} uid - Value to match against the given field.
+   * @param {string} email - Authenticated user email for exact-match preference.
+   * @returns {Promise<string | null>} Display name string or null when no match found.
+   */
+  private async resolveNameByField(
+    contactsRef: ReturnType<typeof collection>,
+    field: 'ownerId' | 'uid',
+    uid: string,
+    email: string
+  ): Promise<string | null> {
+    const snapshot = await getDocs(query(contactsRef, where(field, '==', uid)));
+    if (snapshot.empty) return null;
+
+    const preferredDoc = this.pickPreferredContactDoc(snapshot.docs, email);
+    return this.extractFullName(preferredDoc.data());
+  }
+
+  /**
+   * Selects the most relevant contact document from a list based on email preference.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Array of Firestore document snapshots.
+   * @param {string} email - Authenticated user email for exact-match preference.
+   * @returns {Awaited<ReturnType<typeof getDocs>>['docs'][0]} Best matching document snapshot.
+   */
+  private pickPreferredContactDoc(
+    docs: Awaited<ReturnType<typeof getDocs>>['docs'],
+    email: string
+  ): Awaited<ReturnType<typeof getDocs>>['docs'][0] {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const byEmail = docs.find(d =>
+      String((d.data() as Record<string, unknown>)['email'] || '').trim().toLowerCase() === normalizedEmail
+    );
+    if (byEmail) return byEmail;
+
+    const nonTest = docs.find(d => {
+      const e = String((d.data() as Record<string, unknown>)['email'] || '').trim().toLowerCase();
+      return !!e && !e.endsWith('@join.local') && !e.endsWith('@test.join.local');
+    });
+    return nonTest ?? docs[0];
+  }
+
+  /**
+   * Builds a full name string from a Firestore contact data object.
+   * @param {unknown} rawData - Raw Firestore document data.
+   * @returns {string | null} Trimmed full name or null when both name and surname are empty.
+   */
+  private extractFullName(rawData: unknown): string | null {
+    const data = rawData as Record<string, unknown>;
+    const name = String(data['name'] || '').trim();
+    const surname = String(data['surname'] || '').trim();
+    const full = `${name} ${surname}`.trim();
+    return full || null;
   }
 
   /**

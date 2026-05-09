@@ -49,7 +49,15 @@ export class EditTask implements OnInit {
    */
   ngOnInit(): void {
     this.onViewportResize();
-    // Deep copy task to avoid mutating original
+    this.buildEditedTaskCopy();
+    this.restoreCurrentCategory();
+  }
+
+  /**
+   * Creates a deep copy of the input task to avoid mutating the original signal value.
+   * @returns {void} No return value.
+   */
+  private buildEditedTaskCopy(): void {
     const t = this.task();
     this.editedTask = {
       ...t,
@@ -60,6 +68,13 @@ export class EditTask implements OnInit {
         categoryProperties: t.category.categoryProperties.map(p => ({ ...p })),
       },
     };
+  }
+
+  /**
+   * Restores the category label from the edited task's category properties.
+   * @returns {void} No return value.
+   */
+  private restoreCurrentCategory(): void {
     if (this.editedTask.category.category !== -1) {
       this.currentCategory = this.editedTask.category.categoryProperties[0]?.name ?? 'Select task category';
     }
@@ -135,19 +150,35 @@ export class EditTask implements OnInit {
   hasValidDueDate(): boolean {
     const raw = (this.editedTask.dueDate ?? '').trim();
     if (!raw) return false;
+
+    const parsed = this.parseDdMmYyyy(raw);
+    if (!parsed) return false;
+
+    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return parsed >= todayStart;
+  }
+
+  /**
+   * Parses a date string in dd/mm/yyyy format and returns a Date object.
+   * Returns null when the format is invalid or the date does not exist in the calendar.
+   * @param {string} raw - Date string to parse.
+   * @returns {Date | null} Parsed Date or null when input is invalid.
+   */
+  private parseDdMmYyyy(raw: string): Date | null {
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(raw);
-    if (!match) return false;
+    if (!match) return null;
+
     const day = Number(match[1]);
     const month = Number(match[2]);
     const year = Number(match[3]);
+
     const parsed = new Date(year, month - 1, day);
     const isRealDate =
       parsed.getFullYear() === year &&
       parsed.getMonth() === month - 1 &&
       parsed.getDate() === day;
-    if (!isRealDate) return false;
-    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
-    return parsed >= todayStart;
+
+    return isRealDate ? parsed : null;
   }
 
   /**

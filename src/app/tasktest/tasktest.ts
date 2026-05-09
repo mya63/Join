@@ -144,24 +144,46 @@ export class Tasktest {
    * @param {Date} date - Chosen date from the calendar.
    * @returns {void} No return value.
    */
-  selectDate(date: Date) {
-    if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
-      return; // Prevent selecting dates in the past.
-    }
+  selectDate(date: Date): void {
+    if (this.isDateInPast(date)) return;
+    const dateString = this.formatDateDdMmYyyy(date);
+    this.applyDateToTarget(dateString);
+    this.closeCalendar();
+  }
 
-    // Format date deterministically to avoid timezone shifts.
+  /**
+   * Checks whether the given date lies before today.
+   * @param {Date} date - Date to evaluate.
+   * @returns {boolean} True when the date is in the past.
+   */
+  private isDateInPast(date: Date): boolean {
+    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
+    return date < todayStart;
+  }
+
+  /**
+   * Formats a Date object as a dd.mm.yyyy string without timezone shifting.
+   * @param {Date} date - Date to format.
+   * @returns {string} Formatted date string.
+   */
+  private formatDateDdMmYyyy(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
-    const dateString = `${day}.${month}.${year}`;
+    return `${day}.${month}.${year}`;
+  }
 
+  /**
+   * Writes the formatted date string to the currently active task model target.
+   * @param {string} dateString - Formatted due date string.
+   * @returns {void} No return value.
+   */
+  private applyDateToTarget(dateString: string): void {
     if (this.calendarTarget === 'task') {
       this.task.dueDate = dateString;
     } else {
       this.currentTask.dueDate = dateString;
     }
-
-    this.closeCalendar();
   }
 
   /**
@@ -297,21 +319,33 @@ export class Tasktest {
    * @returns {void} No return value.
    */
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
-    if (!assignedUsers) {
-      assignedUsers = [];
-    }
-    
-    const index = assignedUsers.findIndex(assignedUser => 
-      assignedUser.id === user.id 
-    );
-    
+    if (!assignedUsers) assignedUsers = [];
+    const index = assignedUsers.findIndex(assignedUser => assignedUser.id === user.id);
     if (index > -1) {
-      // User is already assigned, remove from list.
-      assignedUsers.splice(index, 1);
+      this.removeUserFromAssignment(assignedUsers, index);
     } else {
-      // User is not assigned yet, add to list.
-      assignedUsers.push(user);
+      this.addUserToAssignment(assignedUsers, user);
     }
+  }
+
+  /**
+   * Removes a contact from the assigned users list by index.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {number} index - Index of the contact to remove.
+   * @returns {void} No return value.
+   */
+  private removeUserFromAssignment(assignedUsers: IContact[], index: number): void {
+    assignedUsers.splice(index, 1);
+  }
+
+  /**
+   * Appends a contact to the assigned users list.
+   * @param {IContact[]} assignedUsers - Mutable assigned contacts array.
+   * @param {IContact} user - Contact to add.
+   * @returns {void} No return value.
+   */
+  private addUserToAssignment(assignedUsers: IContact[], user: IContact): void {
+    assignedUsers.push(user);
   }
 
   /**

@@ -118,46 +118,38 @@ export class Board implements OnInit, OnDestroy {
    * Rebuilds cached column arrays from the current filtered task set.
    * @returns {void} No return value.
    */
-  updateColumnArrays() {
-    //console.log('Updating column arrays, isDragging:', this.isDragging);
-    //console.log('All tasks from service:', this.fbTaskService.tasksArray);
+  updateColumnArrays(): void {
+    this.clearColumnArrays();
+    const filteredTasks = this.getFilteredTasks();
+    this.populateColumnArrays(filteredTasks);
+  }
 
-    // Clear existing arrays while maintaining references
+  /**
+   * Resets all column arrays to empty while keeping their references intact.
+   * @returns {void} No return value.
+   */
+  private clearColumnArrays(): void {
     this.todoTasks.length = 0;
     this.inProgressTasks.length = 0;
     this.awaitFeedbackTasks.length = 0;
     this.doneTasks.length = 0;
+  }
 
-    // Get filtered tasks based on search term
-    const filteredTasks = this.getFilteredTasks();
+  /**
+   * Distributes filtered tasks into the correct column arrays sorted by position.
+   * @param {ITask[]} tasks - Pre-filtered task list to distribute.
+   * @returns {void} No return value.
+   */
+  private populateColumnArrays(tasks: ITask[]): void {
+    const byStatus = (status: string) =>
+      tasks
+        .filter(t => t.status === status)
+        .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
 
-    // Populate arrays with sorted and filtered tasks
-    const todoTasks = filteredTasks
-      .filter(task => task.status === 'to-do')
-      .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-    this.todoTasks.push(...todoTasks);
-
-    const inProgressTasks = filteredTasks
-      .filter(task => task.status === 'in-progress')
-      .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-    this.inProgressTasks.push(...inProgressTasks);
-
-    const awaitFeedbackTasks = filteredTasks
-      .filter(task => task.status === 'await-feedback')
-      .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-    this.awaitFeedbackTasks.push(...awaitFeedbackTasks);
-
-    const doneTasks = filteredTasks
-      .filter(task => task.status === 'done')
-      .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-    this.doneTasks.push(...doneTasks);
-
-    /*     console.log('Updated arrays:', {
-          todoTasks: this.todoTasks,
-          inProgressTasks: this.inProgressTasks,
-          awaitFeedbackTasks: this.awaitFeedbackTasks,
-          doneTasks: this.doneTasks
-        }); */
+    this.todoTasks.push(...byStatus('to-do'));
+    this.inProgressTasks.push(...byStatus('in-progress'));
+    this.awaitFeedbackTasks.push(...byStatus('await-feedback'));
+    this.doneTasks.push(...byStatus('done'));
   }
 
   /**
@@ -193,70 +185,81 @@ export class Board implements OnInit, OnDestroy {
   /**
    * Handles drag-and-drop operations and persists updated ordering/status.
    * @param {CdkDragDrop<ITask[]>} event - Drag-and-drop payload emitted by CDK.
-   * @returns {void} No return value.
+   * @returns {Promise<void>} Promise resolved after all Firestore updates complete.
    */
-  async drop(event: CdkDragDrop<ITask[]>) {
+  async drop(event: CdkDragDrop<ITask[]>): Promise<void> {
     const draggedTask = event.item.data as ITask;
-    //console.log('Drop event:', event, 'Dragged task:', draggedTask);
-
     if (!draggedTask) return;
 
     this.isDragging = true;
 
     if (event.previousContainer === event.container) {
-      // Innerhalb derselben Spalte verschieben
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      //console.log('Moved within same column:', event.container.data);
-
-      // Positionsindizes für alle Tasks in dieser Spalte aktualisieren
-      const updates = event.container.data.map((task, index) => {
-        task.positionIndex = index;
-        return this.fbTaskService.updateTask(task.dbid, { positionIndex: index });
-      });
-
-      await Promise.all(updates);
+      await this.handleSameColumnDrop(event);
     } else {
-      // Zwischen Spalten verschieben
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
-
-      // Status des verschobenen Tasks ändern
-      const newStatus = this.getStatusFromContainerId(event.container.id);
-      draggedTask.status = newStatus;
-
-      /*       console.log('Moved between columns:', {
-              from: event.previousContainer.id,
-              to: event.container.id,
-              newStatus,
-              task: draggedTask
-            }); */
-
-      // Task Status und Position in Firebase aktualisieren
-      await this.fbTaskService.updateTask(draggedTask.dbid, {
-        status: newStatus,
-        positionIndex: event.currentIndex
-      });
-
-      // Positionsindizes in beiden Spalten korrigieren
-      const sourceUpdates = event.previousContainer.data.map((task, index) => {
-        task.positionIndex = index;
-        return this.fbTaskService.updateTask(task.dbid, { positionIndex: index });
-      });
-
-      const targetUpdates = event.container.data.map((task, index) => {
-        task.positionIndex = index;
-        return this.fbTaskService.updateTask(task.dbid, { positionIndex: index });
-      });
-
-      await Promise.all([...sourceUpdates, ...targetUpdates]);
+      await this.handleCrossColumnDrop(event, draggedTask);
     }
 
     this.isDragging = false;
     this.cdr.markForCheck();
+  }
+
+  /**
+   * Reorders tasks within the same column and persists new position indices.
+   * @param {CdkDragDrop<ITask[]>} event - Drop event within a single column.
+   * @returns {Promise<void>} Promise resolved after position updates complete.
+   */
+  private async handleSameColumnDrop(event: CdkDragDrop<ITask[]>): Promise<void> {
+    moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    await this.persistColumnPositions(event.container.data);
+  }
+
+  /**
+   * Moves a task to another column, updates its status, and persists positions in both columns.
+   * @param {CdkDragDrop<ITask[]>} event - Drop event across two columns.
+   * @param {ITask} draggedTask - The task being moved.
+   * @returns {Promise<void>} Promise resolved after all Firestore updates complete.
+   */
+  private async handleCrossColumnDrop(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+
+    const newStatus = this.getStatusFromContainerId(event.container.id);
+    draggedTask.status = newStatus;
+
+    await this.fbTaskService.updateTask(draggedTask.dbid, {
+      status: newStatus,
+      positionIndex: event.currentIndex
+    });
+
+    await Promise.all([
+      ...this.buildPositionUpdates(event.previousContainer.data),
+      ...this.buildPositionUpdates(event.container.data)
+    ]);
+  }
+
+  /**
+   * Assigns sequential position indices to a column array and returns the Firestore update promises.
+   * @param {ITask[]} columnData - Ordered task array for a single column.
+   * @returns {Promise<void>[]} Array of Firestore update promises.
+   */
+  private buildPositionUpdates(columnData: ITask[]): Promise<void>[] {
+    return columnData.map((task, index) => {
+      task.positionIndex = index;
+      return this.fbTaskService.updateTask(task.dbid, { positionIndex: index });
+    });
+  }
+
+  /**
+   * Persists position indices for all tasks in a column.
+   * @param {ITask[]} columnData - Ordered task array to persist.
+   * @returns {Promise<void>} Promise resolved after all updates complete.
+   */
+  private async persistColumnPositions(columnData: ITask[]): Promise<void> {
+    await Promise.all(this.buildPositionUpdates(columnData));
   }
 
   /**

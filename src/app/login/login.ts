@@ -104,25 +104,30 @@ export class Login implements OnInit {
    */
   private handleFirebaseError(error: any): void {
     console.error('Login failed:', error);
+    this.loginErrors.firebase = this.getFirebaseErrorMessage(error);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Maps a Firebase authentication error code to a localized UI message.
+   * @param {any} error - Firebase auth error payload.
+   * @returns {string} Localized error message for display.
+   */
+  private getFirebaseErrorMessage(error: any): string {
     switch (error.code) {
       case 'auth/invalid-credential':
       case 'auth/user-not-found':
       case 'auth/wrong-password':
-        this.loginErrors.firebase = 'Falsche E-Mail oder falsches Passwort.';
-        break;
+        return 'Falsche E-Mail oder falsches Passwort.';
       case 'auth/invalid-email':
-        this.loginErrors.firebase = 'Bitte eine gültige E-Mail-Adresse eingeben.';
-        break;
+        return 'Bitte eine gültige E-Mail-Adresse eingeben.';
       case 'auth/user-disabled':
-        this.loginErrors.firebase = 'Dieses Konto wurde deaktiviert.';
-        break;
+        return 'Dieses Konto wurde deaktiviert.';
       case 'auth/network-request-failed':
-        this.loginErrors.firebase = 'Network error. Please check your connection.';
-        break;
+        return 'Network error. Please check your connection.';
       default:
-        this.loginErrors.firebase = 'Login fehlgeschlagen. Bitte erneut versuchen.';
+        return 'Login fehlgeschlagen. Bitte erneut versuchen.';
     }
-    this.cdr.markForCheck();
   }
 
   /**
