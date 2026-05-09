@@ -73,10 +73,10 @@ export class EditTask implements OnInit {
     this.close.emit();
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     this.submitAttempted = true;
     if (!this.canSave()) return;
-    this.fbTaskService.updateTask(this.editedTask.dbid!, {
+    await this.fbTaskService.updateTask(this.editedTask.dbid!, {
       title: this.editedTask.title,
       description: this.editedTask.description,
       dueDate: this.editedTask.dueDate,
@@ -148,9 +148,9 @@ export class EditTask implements OnInit {
   toggleUserAssignment(user: IContact): void {
     const idx = this.editedTask.assignTo.findIndex(u => u.id === user.id);
     if (idx > -1) {
-      this.editedTask.assignTo.splice(idx, 1);
+      this.editedTask.assignTo = this.editedTask.assignTo.filter(u => u.id !== user.id);
     } else {
-      this.editedTask.assignTo.push(user);
+      this.editedTask.assignTo = [...this.editedTask.assignTo, user];
     }
   }
 
@@ -177,10 +177,17 @@ export class EditTask implements OnInit {
   }
 
   closeDropdowns(event: Event): void {
-    const target = event.target as HTMLElement;
-    const cls = target.getAttribute('class') ?? '';
-    if (!['', 'ng', 'fi', 'us', 'dr', 'ca', 'dN'].includes(cls.slice(0, 2))) {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const isInsideAssign = !!target.closest('.assign-dropdown-wrap, .assign-list');
+    const isInsideCategory = !!target.closest('.category-wrap, .category-list');
+
+    if (!isInsideAssign) {
       this.showAssignDropdown = false;
+    }
+
+    if (!isInsideCategory) {
       this.showCategoryDropdown = false;
     }
   }
@@ -193,7 +200,10 @@ export class EditTask implements OnInit {
 
   editSubtask(oldTitle: string, newTitle: string): void {
     const st = this.editedTask.subTasks.find(s => s.subtaskTitle === oldTitle);
-    if (st) { st.subtaskTitle = newTitle; st.onEdit = false; }
+    if (!st) return;
+
+    st.subtaskTitle = newTitle;
+    st.onEdit = false;
   }
 
   deleteSubtask(title: string): void {

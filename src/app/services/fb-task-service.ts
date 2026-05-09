@@ -1,5 +1,5 @@
 import { Injectable, inject, NgZone } from '@angular/core';
-import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
+import { Firestore, collection, doc, onSnapshot, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { ITask } from '../interfaces/i-task';
@@ -17,7 +17,7 @@ export class FbTaskService {
   private auth = inject(Auth);
   private ngZone = inject(NgZone);
 
-  myTasks: (() => void) | null;
+  myTasks: VoidFunction | null;
   task: ITask;
   newTask: ITask;
   currentTask: ITask;
@@ -27,7 +27,7 @@ export class FbTaskService {
 
   // Subject to notify components when tasks change
   private tasksUpdatedSubject = new BehaviorSubject<ITask[]>([]);
-  tasksUpdated$ = this.tasksUpdatedSubject.asObservable();
+  readonly tasksUpdated$ = this.tasksUpdatedSubject.asObservable();
 
   tasksCollection = collection(this.db, 'tasks');
 

@@ -10,18 +10,22 @@
       <p class="text">{{ card.description }}</p>
     </div>
 
-    <div class="progress" *ngIf="card.subTasks.length > 0">
+    @if (card.subTasks.length > 0) {
+    <div class="progress">
       <div class="bar">
         <div class="fill" [style.width.%]="getSubtaskProgress()"></div>
       </div>
       <span class="subtasks">{{ getSubtaskDone() }}/{{ card.subTasks.length }} Subtasks</span>
     </div>
+    }
 
     <div class="footer">
       <div class="avatars">
-        <div class="avatar" *ngFor="let avatar of card.assignTo" [style.background]="avatar.color">
+        @for (avatar of card.assignTo; track avatar.id) {
+        <div class="avatar" [style.background]="avatar.color">
           {{ avatar.name.charAt(0) + avatar.surname.charAt(0) }}
         </div>
+        }
       </div>
       <div class="prio" [class.prio-low]="card.priority === 'low'" [class.prio-medium]="card.priority === 'medium'"
         [class.prio-urgent]="card.priority === 'urgent'"></div>

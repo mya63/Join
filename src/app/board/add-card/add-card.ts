@@ -20,6 +20,9 @@ import { IContact } from '../../interfaces/i-contact';
 export class AddCard implements OnInit {
   selectedColumn = input<string>('');
   closeOverlay = output<void>();
+  private readonly fbService = inject(FbService);
+  private readonly fbTaskService = inject(FbTaskService);
+
   onClose(): void {
     this.closeOverlay.emit();
   }
@@ -38,12 +41,6 @@ export class AddCard implements OnInit {
     this.addTask(this.task);
     this.onClose();
   }
-
-  injectedFbService = inject(FbService);
-  FbService: FbService = this.injectedFbService;
-
-  injectedfbTaskService = inject(FbTaskService);
-  fbTaskService: FbTaskService = this.injectedfbTaskService;
 
   task: ITask = {} as ITask;
   currentTask: ITask = {} as ITask;
@@ -80,10 +77,10 @@ export class AddCard implements OnInit {
     this.task.title = '';
     this.task.description = '';
     this.task.priority = 'medium';
+    this.task.assignTo = [];
     this.task.category.categoryProperties[0].color = this.categoryOptions.categoryProperties[0].color;
     this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[0].name;
     this.task.subTasks = [];
-    console.log(this.task);
   }
 
   onViewportResize(): void {
@@ -97,7 +94,7 @@ export class AddCard implements OnInit {
     return status
   }
 
-  addTask(newTask: ITask) {
+  addTask(newTask: ITask): void {
     this.fbTaskService.createTask(newTask);
     this.task.assignTo = [];
     this.task.priority = 'medium';
@@ -117,8 +114,8 @@ export class AddCard implements OnInit {
 
 
 
-  getUserForTask() {
-    return this.FbService.contactsArray.filter(user =>
+  getUserForTask(): IContact[] {
+    return this.fbService.contactsArray.filter(user =>
       user.name.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
       user.surname.toLowerCase().includes(this.filterAssignedUsers.toLowerCase()) ||
       user.email.toLowerCase().includes(this.filterAssignedUsers.toLowerCase())
@@ -135,9 +132,7 @@ export class AddCard implements OnInit {
   }
 
   toggleUserAssignment(user: IContact, assignedUsers: IContact[]): void {
-    if (!assignedUsers) {
-      assignedUsers = [];
-    }
+    if (!assignedUsers) return;
 
     const index = assignedUsers.findIndex(assignedUser =>
       assignedUser.id === user.id
@@ -165,13 +160,19 @@ export class AddCard implements OnInit {
     return (this.currentCategory != 'Select task category');
   }
 
-  closeAssignDropdown(event: any) {
-    //console.log(event.target.getAttribute('class'));
-    if (event.target.getAttribute('class') != null) {
-      if (!['', 'ng', 'fi', 'us', 'dr', 'ca', 'dN'].includes((event.target.getAttribute('class').slice(0, 2)))) {
-        this.showAssignDropdown = { task: false, currentTask: false };
-        this.showCategoryDropdown = { task: false, currentTask: false };
-      }
+  closeAssignDropdown(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const isInsideAssign = !!target.closest('.field-assign-to');
+    const isInsideCategory = !!target.closest('.field-category');
+
+    if (!isInsideAssign) {
+      this.showAssignDropdown = { task: false, currentTask: false };
+    }
+
+    if (!isInsideCategory) {
+      this.showCategoryDropdown = { task: false, currentTask: false };
     }
   }
 
@@ -186,7 +187,7 @@ export class AddCard implements OnInit {
     }
   }
 
-  addSubtask(myTask: ITask) {
+  addSubtask(myTask: ITask): void {
     if (!myTask || this.subtask.title.trim() === '') {
       return;
     }
@@ -194,7 +195,7 @@ export class AddCard implements OnInit {
     this.subtask = { title: '', completed: false, onEdit: false };
   }
 
-  editSubtask(subtaskTitle: string, newTitle: string, myTask: ITask) {
+  editSubtask(subtaskTitle: string, newTitle: string, myTask: ITask): void {
     const subtask = myTask.subTasks.find(st => st.subtaskTitle === subtaskTitle);
 
     if (subtask) {
@@ -203,18 +204,28 @@ export class AddCard implements OnInit {
     }
   }
 
-  deleteSubtask(subtaskTitle: string, myTask: ITask) {
+  deleteSubtask(subtaskTitle: string, myTask: ITask): void {
     myTask.subTasks = myTask.subTasks.filter(st => st.subtaskTitle !== subtaskTitle);
     myTask.subTasks = [...myTask.subTasks];
   }
 
 
-  alowAddTask(): boolean {
+  allowAddTask(): boolean {
     return this.hasValidTitle();
   }
 
-  alowAddTaskCalender(): boolean {
+  allowAddTaskCalendar(): boolean {
     return this.hasValidDueDate();
+  }
+
+  // Backward-compatible aliases for existing template bindings.
+  alowAddTask(): boolean {
+    return this.allowAddTask();
+  }
+
+  // Backward-compatible alias for existing template bindings.
+  alowAddTaskCalender(): boolean {
+    return this.allowAddTaskCalendar();
   }
 
   canCreateTask(): boolean {
@@ -259,16 +270,16 @@ export class AddCard implements OnInit {
 
 
   
-  openCalendar(target: 'task' | 'currentTask') {
+  openCalendar(target: 'task' | 'currentTask'): void {
     this.calendarTarget = target;
     this.showCalendar = true;
   }
 
-  closeCalendar() {
+  closeCalendar(): void {
     this.showCalendar = false;
   }
 
-  selectDate(date: Date) {
+  selectDate(date: Date): void {
     if (date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate())) {
       return; // Verhindere Auswahl von Terminen in der Vergangenheit
     }
@@ -314,7 +325,7 @@ export class AddCard implements OnInit {
     return days;
   }
 
-  previousMonth() {
+  previousMonth(): void {
     if (this.currentMonth === 0) {
       this.currentMonth = 11;
       this.currentYear--;
@@ -323,7 +334,7 @@ export class AddCard implements OnInit {
     }
   }
 
-  nextMonth() {
+  nextMonth(): void {
     if (this.currentMonth === 11) {
       this.currentMonth = 0;
       this.currentYear++;
@@ -345,7 +356,7 @@ export class AddCard implements OnInit {
     return date < new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
   }
 
-  onDayClick(day: number) {
+  onDayClick(day: number): void {
     if (!this.isDayInPast(day)) {
       this.selectDate(new Date(this.currentYear, this.currentMonth, day));
     }

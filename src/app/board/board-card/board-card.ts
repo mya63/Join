@@ -20,12 +20,14 @@ export class BoardCard {
   }
 
   getSubtaskDone(): number {
-    return this.card.subTasks.filter(subtask => subtask.subtaskCompleted === true).length;
+    const subTasks = this.card.subTasks ?? [];
+    return subTasks.filter(subtask => subtask.subtaskCompleted === true).length;
   }
 
   getSubtaskProgress(): number {
-    if (this.card.subTasks.length === 0) return 0;
-    return (this.getSubtaskDone() / this.card.subTasks.length) * 100;
+    const subTasks = this.card.subTasks ?? [];
+    if (subTasks.length === 0) return 0;
+    return (this.getSubtaskDone() / subTasks.length) * 100;
   }
 
 }
