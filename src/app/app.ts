@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, Injector, runInInjectionContext } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FigmaHeader } from './shared/layout/figma-header/figma-header';
 import { FigmaSidenav } from './shared/layout/figma-sidenav/figma-sidenav';
@@ -18,6 +18,7 @@ export class App {
   protected readonly title = signal('join2');
   private location = inject(Location);
   private auth = inject(Auth);
+  private injector = inject(Injector);
   protected readonly isAuthenticated = signal(!!this.auth.currentUser);
 
   /**
@@ -25,8 +26,10 @@ export class App {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
-    onAuthStateChanged(this.auth, (user) => {
-      this.isAuthenticated.set(!!user);
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, (user) => {
+        this.isAuthenticated.set(!!user);
+      });
     });
   }
 

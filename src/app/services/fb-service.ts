@@ -1,4 +1,4 @@
-import { Injectable, inject, HostListener, ComponentRef } from '@angular/core';
+import { Injectable, inject, HostListener, ComponentRef, Injector, runInInjectionContext } from '@angular/core';
 import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -15,6 +15,7 @@ export class FbService {
   private db = inject(Firestore);
   private authService = inject(FbAuthService);
   private auth = inject(Auth);
+  private injector = inject(Injector);
 
   contact: IContact;
   currentContact: IContact;
@@ -51,8 +52,10 @@ export class FbService {
       this.applyOwnerFilter();
     });
 
-    onAuthStateChanged(this.auth, () => {
-      this.applyOwnerFilter();
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, () => {
+        this.applyOwnerFilter();
+      });
     });
 
 

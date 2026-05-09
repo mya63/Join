@@ -1,4 +1,4 @@
-import { Injectable, inject, NgZone } from '@angular/core';
+import { Injectable, inject, NgZone, Injector, runInInjectionContext } from '@angular/core';
 import { Firestore, collection, doc, onSnapshot, query, where } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -16,6 +16,7 @@ export class FbTaskService {
   private fbService = inject(FbService);
   private auth = inject(Auth);
   private ngZone = inject(NgZone);
+  private injector = inject(Injector);
 
   myTasks: VoidFunction | null;
   task: ITask;
@@ -54,10 +55,12 @@ export class FbTaskService {
     this.myTasks = null;
 
     // Always bind listener to the UID provided by Firebase auth state.
-    onAuthStateChanged(this.auth, (user) => {
-      const userId = user?.uid || 'guest';
-      this.newTask.ownerId = userId;
-      this.startTasksListener(userId);
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, (user) => {
+        const userId = user?.uid || 'guest';
+        this.newTask.ownerId = userId;
+        this.startTasksListener(userId);
+      });
     });
   }
 
@@ -128,10 +131,12 @@ export class FbTaskService {
     let ownerId = this.auth.currentUser?.uid || null;
     if (!ownerId) {
       await new Promise<void>((resolve) => {
-        const unsubscribe = onAuthStateChanged(this.auth, (user) => {
-          ownerId = user?.uid || null;
-          unsubscribe();
-          resolve();
+        runInInjectionContext(this.injector, () => {
+          const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+            ownerId = user?.uid || null;
+            unsubscribe();
+            resolve();
+          });
         });
       });
     }

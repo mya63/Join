@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
 import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, deleteUser, User, onAuthStateChanged } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Firestore, collection, addDoc, query, where, getDocs, deleteDoc } from '@angular/fire/firestore';
@@ -112,15 +112,20 @@ export class FbAuthService {
   private auth = inject(Auth);
   private router = inject(Router);
   private db = inject(Firestore);
+  private injector = inject(Injector);
 
   constructor() {
-    onAuthStateChanged(this.auth, (user) => {
-      if (!user) {
-        return;
-      }
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, (user) => {
+        if (!user) {
+          return;
+        }
 
-      this.syncDailyTestDataForUser(user).catch((error) => {
-        console.error('Error during auth-state test data sync:', error);
+        runInInjectionContext(this.injector, () => {
+          this.syncDailyTestDataForUser(user).catch((error) => {
+            console.error('Error during auth-state test data sync:', error);
+          });
+        });
       });
     });
   }
@@ -160,15 +165,17 @@ export class FbAuthService {
       const unsub = onAuthStateChanged(this.auth, (user) => {
         unsub();
         if (user) {
-          this.syncDailyTestDataForUser(user)
-            .then(() => {
-              this.setLocalLoginState(true);
-              resolve('/summary');
-            })
-            .catch(() => {
-              this.setLocalLoginState(true);
-              resolve('/summary');
-            });
+          runInInjectionContext(this.injector, () => {
+            this.syncDailyTestDataForUser(user)
+              .then(() => {
+                this.setLocalLoginState(true);
+                resolve('/summary');
+              })
+              .catch(() => {
+                this.setLocalLoginState(true);
+                resolve('/summary');
+              });
+          });
         } else {
           this.setLocalLoginState(false);
           resolve('/login');

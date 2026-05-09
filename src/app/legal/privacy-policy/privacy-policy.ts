@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -16,6 +16,7 @@ export class PrivacyPolicy implements OnInit {
   private location = inject(Location);
   private router = inject(Router);
   private auth = inject(Auth);
+  private injector = inject(Injector);
 
   isExternal = signal(!this.auth.currentUser);
 
@@ -24,8 +25,10 @@ export class PrivacyPolicy implements OnInit {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
-    onAuthStateChanged(this.auth, (user) => {
-      this.isExternal.set(!user);
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, (user) => {
+        this.isExternal.set(!user);
+      });
     });
   }
 

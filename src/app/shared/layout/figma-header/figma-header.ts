@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, OnInit, Injector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -19,6 +19,7 @@ export class FigmaHeader implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
   private authService = inject(FbAuthService);
+  private injector = inject(Injector);
 
   userInitials = signal('G');
   dropdownOpen = signal(false);
@@ -31,14 +32,16 @@ export class FigmaHeader implements OnInit {
   ngOnInit() {
     this.onResize();
 
-    onAuthStateChanged(this.auth, (user) => {
-      if (user?.displayName) {
-        this.userInitials.set(this.getInitialsFromDisplayName(user.displayName));
-      } else if (user?.email) {
-        this.userInitials.set(this.getInitialsFromEmail(user.email));
-      } else {
-        this.userInitials.set('G');
-      }
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, (user) => {
+        if (user?.displayName) {
+          this.userInitials.set(this.getInitialsFromDisplayName(user.displayName));
+        } else if (user?.email) {
+          this.userInitials.set(this.getInitialsFromEmail(user.email));
+        } else {
+          this.userInitials.set('G');
+        }
+      });
     });
   }
 
