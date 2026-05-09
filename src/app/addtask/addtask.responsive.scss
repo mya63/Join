@@ -1,0 +1,91 @@
+﻿@media (max-width: 1100px) {
+
+    .priority-buttons {
+        button {
+            span {
+                display: none;
+            }
+
+        }
+    }
+}
+
+@media (max-width: 1350px) {
+    .add-task-page {
+        min-height: calc(100dvh - var(--header-h-mobile, 80px));
+        padding: 40px 64px 104px;
+        align-items: center;
+    }
+
+    .add-task-page .content {
+        width: 100%;
+        max-width: 976px;
+        align-items: flex-start;
+    }
+
+    .add-task-page .content .inputTask .content-bottom {
+        width: 100%;
+        max-width: 976px;
+        margin-top: 32px;
+    }
+}
+
+@media (max-width: 700px) {
+    .add-task-page {
+        padding: 24px 16px 104px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        width: 100%;
+        max-width: 100%;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .divider-vert {
+        display: none;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col,
+    .add-task-page .content .inputTask .content-top .input-content .right-col {
+        width: 100%;
+        flex: unset;
+    }
+}
+
+@media (max-width: 500px) {
+    .add-task-page .content .inputTask .content-bottom {
+        flex-direction: column-reverse;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .check {
+        height: auto;
+        align-items: center;
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 370px) {
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        height: 44px;
+        padding: 10px 14px;
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group .button-cancel {
+        min-width: unset;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group .button-create {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 365px) {
+    .add-task-page .content .inputTask .content-top .input-content .field-assign-to .filterAssignedUsers {
+        padding-right: 4px;
+        gap: 4px;
+    }
+}

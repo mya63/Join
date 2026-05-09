@@ -1,0 +1,237 @@
+﻿.detail-panel-mobile {
+  position: absolute;
+  max-width: 1100px;
+  width: calc(100% - 16px);
+  top: 128px;
+  left: 16px;
+  height: calc(100vh - 172px - 128px);
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  gap: 16px;
+
+  .go-back {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    top: 0px;
+    right: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:active {
+      border-radius: 50%;
+      background-color: #0C2E621F;
+
+      img {
+        transform: scale(1.2);
+      }
+
+    }
+
+
+    //Bjorn fragen!!!>>>live server pfad OK auf DA kann nicht gefunden werden  
+    /* 
+    &::before {
+      content: "";
+      display: block;
+      width: 24px;
+      height: 24px;
+      background-image: url("/assets/img/contacts/arrow-left.svg");
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    &:active {
+      border-radius: 50%;
+      background-color: #0C2E621F;
+
+      &::before {
+        display: none;
+      }
+
+      &::after {
+        content: "";
+        display: block;
+        width: 26px;
+        height: 26px;
+        background-image: url("/assets/img/contacts/arrow-left-bigger.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+    }
+ */
+
+  }
+
+  .panel-width {
+    max-width: 428px;
+    width: 100%;
+
+    .heading-mobile {
+      display: flex;
+      flex-direction: column;
+      height: 104px;
+      min-width: 213px;
+      gap: 16px;
+
+      .heading-mobile-title {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: center;
+        height: 88px;
+        width: 213px;
+        gap: 8px;
+
+        h1 {
+          width: 211px;
+          height: 56px;
+          font-weight: 700;
+          font-size: 48px;
+          line-height: 120%;
+          color: #000;
+          margin: 0;
+        }
+
+        p {
+          width: 175px;
+          height: 24px;
+          font-size: 20px;
+          line-height: 120%;
+          font-weight: 400;
+          color: #2a3647;
+          margin: 0;
+          letter-spacing: 0;
+        }
+      }
+
+      .blue-line {
+        position: relative;
+        top: -3px;
+        width: 90px;
+        height: 0px;
+        border: 2px solid #29ABE2;
+        transform: rotate(-90deg);
+        transform: scaleX(1);
+        transform-origin: top left;
+      }
+    }
+
+    .detail-panel-mobile-content {
+      margin-top: 50px;
+      width: 100%;
+
+      .name {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+
+        .avatar-container {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          padding: 0px;
+          gap: 10px;
+          width: 80px;
+          height: 80px;
+          background: #ffffff;
+          border: 3px solid #ffffff;
+          box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.1);
+          border-radius: 70px;
+          flex: none;
+          order: 0;
+          flex-grow: 0;
+          margin-right: 10px;
+        }
+
+        .avatar-circle {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .avatar-initials {
+          width: 100%;
+          height: 100%;
+          font-style: normal;
+          font-weight: 400;
+          font-size: 27px;
+          line-height: 120%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+        }
+
+        .contact-name {
+          height: 43px;
+          font-weight: 700;
+          font-size: 36px;
+          line-height: 120%;
+          letter-spacing: 0%;
+          margin: 0;
+
+        }
+      }
+
+      .section-title {
+        padding-top: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        height: 24px;
+        font-size: 20px;
+        font-weight: 400;
+        line-height: 120%;
+        margin: 0;
+        gap: 15px;
+
+        .detail-group {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+
+          .detail-label {
+            height: 19px;
+            min-width: 50px;
+            font-size: 16px;
+            font-weight: 700;
+            font-style: bold;
+            line-height: 120%;
+            color: #2a3647;
+          }
+
+          .email-link {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 120%;
+            color: #007CEE;
+            text-decoration: none;
+          }
+
+          .phone-number {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 120%;
+            color: #000000;
+            text-decoration: none;
+          }
+        }
+      }
+    }
+  }
+}

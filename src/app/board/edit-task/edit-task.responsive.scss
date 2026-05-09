@@ -1,0 +1,36 @@
+﻿@media (max-width: 600px) {
+  .panel {
+    border-radius: 30px;
+  }
+
+  .panel-body {
+    margin-right: 8px;
+    padding: 10px 20px 16px 20px;
+    gap: 16px;
+  }
+
+  .panel-top {
+    padding: 20px 20px 0 20px;
+  }
+
+  .panel-footer {
+    padding: 8px 20px 24px 20px;
+  }
+
+  .priority-buttons { flex-direction: column; }
+  .priority-btn { max-width: 100%; }
+}
+
+@media (max-width: 365px) {
+  .assign-dropdown-wrap {
+    padding: 4px 8px;
+  }
+
+  .assign-input {
+    min-width: 0;
+  }
+
+  .dropdown-arrow-icons {
+    flex-shrink: 0;
+  }
+}

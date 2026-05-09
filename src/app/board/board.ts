@@ -23,10 +23,6 @@ export class Board implements OnInit, OnDestroy {
   private fbTaskService = inject(FbTaskService);
   private cdr = inject(ChangeDetectorRef);
 
-  task: ITask = {} as ITask;
-  currentTask: ITask = {} as ITask;
-  defaultPriority: string = 'low';
-  priorityOptions: string[] = ['low', 'medium', 'urgent'];
   columnIndex: number = 0;
   collumns: string[] = ['getTaskCollumnOne', 'getTaskCollumnTwo', 'getTaskCollumnThree', 'getTaskCollumnFour'];
 
@@ -48,10 +44,8 @@ export class Board implements OnInit, OnDestroy {
   private tasksSubscription: Subscription = new Subscription();
 
   constructor() {
-    this.task = this.fbTaskService.newTask;
     this.columnIndex = 0;
-    this.currentTask = {} as ITask;
-    this.fbTaskService.currentTask = this.currentTask;
+    this.fbTaskService.currentTask = {} as ITask;
   }
 
   /**
@@ -86,24 +80,6 @@ export class Board implements OnInit, OnDestroy {
    */
   ngOnDestroy() {
     this.tasksSubscription.unsubscribe();
-  }
-
-  /**
-   * Returns all tasks sorted by their position index.
-   * @returns {ITask[]} Sorted task list.
-   */
-  gettasks() {
-    return this.fbTaskService.tasksArray.sort((a, b) => a.positionIndex - b.positionIndex);
-  }
-
-  /**
-   * Filters tasks by status/column key.
-   * @param {string} header - Status key used as column identifier.
-   * @returns {ITask[]} Tasks that belong to the requested status.
-   */
-  getTaskCollumn(header: string) {
-    const myArry = this.fbTaskService.tasksArray.filter(task => task.status === header)
-    return myArry
   }
 
   /**
@@ -296,30 +272,11 @@ export class Board implements OnInit, OnDestroy {
     }
   }
 
-
-
-  /**
-   * Placeholder drop predicate reserved for custom validation rules.
-   * @param {CdkDrag<number>} item - Dragged item metadata.
-   * @returns {boolean} Always returns true in the current implementation.
-   */
-  evenPredicate(item: CdkDrag<number>) {
-    return true;
-  }
-
   /**
    * Placeholder drop predicate that currently allows all drops.
    * @returns {boolean} Always returns true in the current implementation.
    */
   noReturnPredicate() {
-    return true;
-  }
-
-  /**
-   * Backward-compatible predicate used by existing template bindings.
-   * @returns {boolean} Always returns true.
-   */
-  newPredicate() {
     return true;
   }
 
@@ -332,20 +289,12 @@ export class Board implements OnInit, OnDestroy {
   }
 
   /**
-   * Handles drag-end notifications; final state reset is performed in drop handler.
-   * @returns {void} No return value.
-   */
-  onDragEnded() {
-  }
-
-  /**
    * Applies a text filter and rebuilds visible task columns.
    * @param {string} searchTerm - Raw search term entered by the user.
    * @returns {void} No return value.
    */
   onSearchTasks(searchTerm: string): void {
     this.searchTerm = searchTerm.toLowerCase().trim();
-    console.log('Searching for tasks with term:', this.searchTerm);
     this.updateColumnArrays();
   }
 
@@ -373,7 +322,6 @@ export class Board implements OnInit, OnDestroy {
   openAddCardOverlay(columnType: string): void {
     this.selectedColumn = columnType;
     this.showAddCardOverlay = true;
-    console.log('Opening add card overlay for column:', columnType);
   }
 
   /**

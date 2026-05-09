@@ -1,0 +1,207 @@
+﻿@media (max-width: 1350px) {
+
+  .detail-panel {
+    .heading {
+      position: absolute;
+      left: 500px;
+    }
+  }
+
+  .list-panel {
+    position: absolute;
+    left: 0px;
+    top: 0;
+  }
+
+  .list-panel__inner {
+    height: 100%;
+
+    .contacts-list {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto;
+
+      .contacts-list-center {
+        width: 352px;
+        height: auto;
+        overflow: hidden !important;
+      }
+    }
+  }
+}
+
+
+@media (max-width: 1100px) {
+    .primary-contact-container {
+    height: 0px !important;
+  }
+
+  .detail-panel {
+    .heading {
+      display: none !important;
+    }
+  }
+
+  .primary-contact-container {
+    height: 0px;
+  }
+
+  .list-panel {
+    position: absolute;
+    left: 0px;
+    top: 0;
+    width: 100%;
+    height: auto;
+
+
+    .primary-contact-container {
+      width: 100%;
+    }
+
+    .list-panel__inner {
+      height: calc(100dvh - 80px);
+
+      .contacts-list {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        height: auto;
+
+        .contacts-list-center {
+          width: 352px;
+        }
+      }
+    }
+
+    .contact-row {
+      width: 352px;
+    }
+
+  }
+
+  .primary-contact {
+    position: fixed;
+    right: 20px !important;
+    bottom: 120px !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+
+    span {
+      display: none !important;
+    }
+  }
+
+  .primary-contact:after {
+    visibility: hidden;
+  }
+}
+
+
+
+
+@media (max-width: 350px) {
+  .detail-panel {
+    display: none !important;
+  }
+
+  .list-panel {
+    position: absolute;
+    left: 0px;
+    top: 0;
+  }
+}
+
+@media (min-width:1100px) {
+  .contactMobileList {
+
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+.dnone {
+  display: none !important;
+}
+
+
+/* FAB */
+/* FAB sitzt ├╝ber der Bottom-Nav */
+.fab {
+  position: fixed;
+  //top: 758px;
+  //left: 356px;
+  right: 20px;
+  bottom: 120px;
+  /* Bottom-Nav = 80px ÔåÆ +16px Abstand */
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: none;
+  cursor: pointer;
+  box-shadow: 6px 0px 12px rgba(0, 0, 1, 0.5);
+  display: grid;
+  place-items: center;
+  rotate: 90deg;
+  z-index: 1000;
+
+  &:active {
+    background: #29abe2;
+  }
+
+}
+
+/* Ankerpunkt direkt ├╝ber dem FAB */
+.options-anchor {
+  position: fixed;
+  right: 16px;
+  bottom: calc(96px + 56px + 12px);
+  /* FAB-Unterkante + FAB-H├Âhe + Luft */
+  z-index: 4200;
+  /* h├Âher als FAB & Bottom-Nav */
+}
+
+@media (max-height: 700px) {
+  .contacts-list .contact-row {
+    padding-top: 0px !important;
+    padding-bottom: 10px !important;
+    height: auto !important;
+  }
+
+  .letter {
+    padding-top: 0px !important;
+    margin: 0px !important;
+  }
+}
+
+.stayBlue {
+  background-color: #2a3647 !important;
+      color: white !important;
+
+      .contact-row__text {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        .name {
+          color: white !important;
+        }
+
+        .mail {
+          color: #007cee !important;
+        }
+      }
+}

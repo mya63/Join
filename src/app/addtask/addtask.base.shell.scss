@@ -1,0 +1,84 @@
+﻿.dropdown-arrow-icons {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-task-page {
+    width: 100%;
+    min-height: calc(100dvh - var(--header-h, 96px));
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding: var(--page-gutter-y, 56px) var(--page-gutter-x, 96px) 40px;
+    background-color: var(--bg);
+    border-radius: 0;
+    font-family: Inter, system-ui, Arial, sans-serif;
+
+    input,
+    textarea,
+    button {
+        font-family: inherit;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+
+        .inputTask {
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: space-between;
+            height: 100%;
+            width: 100%;
+
+            .content-top {
+                flex-direction: column;
+                width: 100%;
+                overflow: visible;
+
+                .page-title {
+                    width: auto;
+                    height: auto;
+                    font-family: Inter, sans-serif;
+                    font-style: normal;
+                    font-size: 61px;
+                    line-height: 1.2;
+                    font-weight: 700;
+                    letter-spacing: 0;
+                    color: #000;
+                    margin: 0 0 40px 0;
+                }
+
+                .input-content {
+                    width: min(100%, 976px);
+                    display: flex;
+                    flex-direction: row;
+                    align-items: flex-start;
+                    justify-content: flex-start;
+                    gap: 48px;
+
+                    .label,
+                    .field-date > span:first-child {
+                        font-size: 20px;
+                        font-weight: 400;
+                        line-height: 1.2;
+                        color: #2a3647;
+                    }
+
+                    .divider-vert {
+                        border: 1px solid #D1D1D1;
+                        margin-inline: 0;
+                        width: 1px;
+                        min-height: 424px;
+                    }
+                }
+            }
+        }
+    }
+}

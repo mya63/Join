@@ -347,48 +347,29 @@ export class EditTask implements OnInit {
     this.editedTask.subTasks = this.editedTask.subTasks.filter(s => s.subtaskTitle !== title);
   }
 
-  /**
-   * Opens the due-date calendar.
-   * @returns {void} No return value.
-   */
   openCalendar(): void { this.showCalendar = true; }
-  /**
-   * Closes the due-date calendar.
-   * @returns {void} No return value.
-   */
+
+
   closeCalendar(): void { this.showCalendar = false; }
 
-  /**
-   * Returns month label for the calendar header.
-   * @param {number} month - Zero-based month index.
-   * @returns {string} Localized month name.
-   */
+
   getMonthName(month: number): string {
     return new Date(2000, month, 1).toLocaleString('default', { month: 'long' });
   }
 
-  /**
-   * Moves calendar view one month backward.
-   * @returns {void} No return value.
-   */
+
   previousMonth(): void {
     if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
     else { this.currentMonth--; }
   }
 
-  /**
-   * Moves calendar view one month forward.
-   * @returns {void} No return value.
-   */
+
   nextMonth(): void {
     if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
     else { this.currentMonth++; }
   }
 
-  /**
-   * Builds calendar cells including leading empty placeholders.
-   * @returns {(number | null)[]} Calendar cell values for rendering.
-   */
+
   getCalendarDays(): (number | null)[] {
     const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
@@ -397,22 +378,14 @@ export class EditTask implements OnInit {
     return days;
   }
 
-  /**
-   * Checks whether a day in the current view is before today.
-   * @param {number} day - Day number in current month.
-   * @returns {boolean} True when the date is in the past.
-   */
+
   isDayInPast(day: number): boolean {
     const d = new Date(this.currentYear, this.currentMonth, day);
     const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
     return d < todayStart;
   }
 
-  /**
-   * Handles date selection from calendar day cells.
-   * @param {number} day - Selected day number.
-   * @returns {void} No return value.
-   */
+
   onDayClick(day: number): void {
     const d = new Date(this.currentYear, this.currentMonth, day);
     const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
