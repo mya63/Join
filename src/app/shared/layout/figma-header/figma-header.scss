@@ -86,7 +86,7 @@
 }
 
 .user {
-  position: relative;
+  position: static;
 }
 
 .user-trigger {
@@ -117,8 +117,8 @@
 
 .submenu {
   position: absolute;
-  right: 0;
-  top: calc(100% + 14px);
+  right: 24px;
+  top: 100%;
   display: flex;
   flex-direction: column;
   width: 158px;
@@ -190,6 +190,7 @@
 
   .submenu {
     min-height: 212px;
+    right: 16px;
   }
 
   .circle {
