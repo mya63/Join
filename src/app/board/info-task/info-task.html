@@ -1,21 +1,24 @@
 <div class="backdrop" (click)="onClose()"></div>
 
 <div class="panel">
-  <!-- Category + Close -->
-  <div class="panel-top">
-    <span class="category-badge" [style.background]="task().category.categoryProperties[0].color">
-      {{ task().category.categoryProperties[0].name }}
-    </span>
-    <button type="button" class="close-btn" (click)="onClose()" aria-label="Close">
-      <div class="vorHover">
-        <img src="assets/img/contacts/add-desktop/x-vector-icon-only.svg" alt="Close">
-      </div>
-    </button>
+  <div class="panel-header">
+    <!-- Category + Close -->
+    <div class="panel-top">
+      <span class="category-badge" [style.background]="task().category.categoryProperties[0].color">
+        {{ task().category.categoryProperties[0].name }}
+      </span>
+      <button type="button" class="close-btn" (click)="onClose()" aria-label="Close">
+        <div class="vorHover">
+          <img src="assets/img/contacts/add-desktop/x-vector-icon-only.svg" alt="Close">
+        </div>
+      </button>
+    </div>
+
+    <!-- Pinned Title -->
+    <h2 class="task-title task-title-pinned">{{ task().title }}</h2>
   </div>
 
-  <!-- Title -->
-  <h2 class="task-title">{{ task().title }}</h2>
-
+  <div class="panel-body">
   <!-- Description -->
   @if (task().description) {
     <p class="task-description">{{ task().description }}</p>
@@ -70,6 +73,8 @@
       </div>
     </div>
   }
+
+  </div><!-- /.panel-body -->
 
   <!-- Footer Actions -->
   <div class="panel-footer">

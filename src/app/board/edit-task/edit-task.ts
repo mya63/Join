@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, output, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../../services/fb-service';
@@ -12,6 +12,9 @@ import { IContact } from '../../interfaces/i-contact';
   templateUrl: './edit-task.html',
   styleUrl: './edit-task.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onViewportResize()'
+  }
 })
 export class EditTask implements OnInit {
   task = input.required<ITask>();
@@ -32,6 +35,8 @@ export class EditTask implements OnInit {
   today = new Date();
   subtaskInput = '';
   submitAttempted = false;
+  isSmallAssignPlaceholder = signal<boolean>(typeof window !== 'undefined' ? window.innerWidth < 365 : false);
+  assignPlaceholder = computed(() => this.isSmallAssignPlaceholder() ? 'contacts' : 'Select contacts to assign');
 
   categoryOptions = [
     { name: 'User Story', color: '#0038FF' },
@@ -39,6 +44,7 @@ export class EditTask implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.onViewportResize();
     // Deep copy task to avoid mutating original
     const t = this.task();
     this.editedTask = {
@@ -54,6 +60,14 @@ export class EditTask implements OnInit {
       this.currentCategory = this.editedTask.category.categoryProperties[0]?.name ?? 'Select task category';
     }
   }
+
+  onViewportResize(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    this.isSmallAssignPlaceholder.set(window.innerWidth < 365);
+  }
+
 
   onClose(): void {
     this.close.emit();

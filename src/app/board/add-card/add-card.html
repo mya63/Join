@@ -109,7 +109,7 @@
                     <span class="selected-users">
                       <span class="filterAssignedUsers">
                         <input name="assigned-to-input" [(ngModel)]="this.filterAssignedUsers"
-                          placeholder="Select contacts to assign" required>
+                          [placeholder]="assignPlaceholder()" required>
                         <span class="dropdown-arrow-icons">
                           <img [class.dNone]="showAssignDropdown.currentTask"
                             src="assets/img/board/add-card/assigned-to-arrow-drop-down-open.svg"

@@ -99,7 +99,7 @@
     <label class="field-label">Assigned to</label>
     <div class="assign-dropdown-wrap">
       <div class="dropdown-header" (click)="toggleAssignDropdown()">
-        <input class="assign-input" [(ngModel)]="filterAssignedUsers" placeholder="Select contacts to assign" name="assigned-to-input">
+        <input class="assign-input" [(ngModel)]="filterAssignedUsers" [placeholder]="assignPlaceholder()" name="assigned-to-input">
         <span class="dropdown-arrow-icons">
           <img [class.dNone]="showAssignDropdown"  src="assets/img/board/add-card/assigned-to-arrow-drop-down-open.svg" alt="">
           <img [class.dNone]="!showAssignDropdown" src="assets/img/board/add-card/assigned-to-arrow-drop-down-close.svg" alt="">

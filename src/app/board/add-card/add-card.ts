@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, output, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../../services/fb-service';
@@ -13,6 +13,9 @@ import { IContact } from '../../interfaces/i-contact';
   templateUrl: './add-card.html',
   styleUrl: './add-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onViewportResize()'
+  }
 })
 export class AddCard implements OnInit {
   selectedColumn = input<string>('');
@@ -64,10 +67,13 @@ export class AddCard implements OnInit {
   selectedDate: Date | null = null;
   today: Date = new Date();
   submitAttempted: boolean = false;
+  isSmallAssignPlaceholder = signal<boolean>(typeof window !== 'undefined' ? window.innerWidth < 365 : false);
+  assignPlaceholder = computed(() => this.isSmallAssignPlaceholder() ? 'contacts' : 'Select contacts to assign');
 
 
   ngOnInit(): void {
     this.submitAttempted = false;
+    this.onViewportResize();
     this.task = this.fbTaskService.newTask;
     this.currentTask = this.fbTaskService.newTask;
     this.task.status = this.getStatus(this.selectedColumn());
@@ -78,6 +84,13 @@ export class AddCard implements OnInit {
     this.task.category.categoryProperties[0].name = this.categoryOptions.categoryProperties[0].name;
     this.task.subTasks = [];
     console.log(this.task);
+  }
+
+  onViewportResize(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    this.isSmallAssignPlaceholder.set(window.innerWidth < 365);
   }
 
   getStatus(status: string): string {

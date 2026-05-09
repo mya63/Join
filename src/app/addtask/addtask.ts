@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FbService } from '../services/fb-service';
@@ -14,6 +14,9 @@ import { Router } from '@angular/router';
   templateUrl: './addtask.html',
   styleUrl: './addtask.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onViewportResize()'
+  }
 })
 export class AddTask implements OnInit {
   private router = inject(Router);
@@ -65,11 +68,21 @@ export class AddTask implements OnInit {
   selectedDate: Date | null = null;
   today: Date = new Date();
   submitAttempted: boolean = false;
+  isSmallAssignPlaceholder = signal<boolean>(typeof window !== 'undefined' ? window.innerWidth < 365 : false);
+  assignPlaceholder = computed(() => this.isSmallAssignPlaceholder() ? 'contacts' : 'Select contacts to assign');
 
 
   ngOnInit(): void {
     this.submitAttempted = false;
+    this.onViewportResize();
     this.initTaskState();
+  }
+
+  onViewportResize(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    this.isSmallAssignPlaceholder.set(window.innerWidth < 365);
   }
 
   private initTaskState(): void {
