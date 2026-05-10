@@ -30,7 +30,7 @@
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1100px) {
     .add-task-page {
         padding: 24px 16px 104px;
     }
@@ -68,6 +68,57 @@
 }
 
 @media (max-width: 370px) {
+    .add-task-page {
+        min-height: calc(100dvh - var(--header-h-mobile, 80px));
+        padding: 20px 10px 96px;
+    }
+
+    .add-task-page .content {
+        gap: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 44px;
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        gap: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority {
+        height: auto;
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category {
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        min-width: 0;
+    }
+
     .add-task-page .content .inputTask .content-bottom .button-group button {
         height: 44px;
         padding: 10px 14px;
@@ -87,5 +138,133 @@
     .add-task-page .content .inputTask .content-top .input-content .field-assign-to .filterAssignedUsers {
         padding-right: 4px;
         gap: 4px;
+    }
+}
+
+@media (max-width: 320px) {
+    .add-task-page {
+        min-height: calc(100dvh - var(--header-h-mobile, 80px));
+        padding: 16px 8px 92px;
+    }
+
+    .add-task-page .content {
+        gap: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        gap: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .label,
+    .add-task-page .content .inputTask .content-top .input-content .field-date > span:first-child {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority {
+        height: auto;
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category {
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons {
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        max-width: none;
+        min-width: 0;
+        height: 44px;
+        padding: 8px 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .avatars .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+        line-height: 24px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .assign-to-container .user-checkbox .user-checkbox-label {
+        font-size: 16px;
+        gap: 8px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        height: 40px;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 14px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .check {
+        font-size: 12px;
+    }
+
+    .calendar-widget {
+        min-width: 260px;
+        max-width: 94vw;
+        padding: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .field-assign-to .filterAssignedUsers {
+        gap: 2px;
+        padding-right: 2px;
+    }
+}
+
+@media (max-width: 310px) {
+    .add-task-page {
+        padding: 14px 6px 88px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 36px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input {
+        font-size: 15px;
+    }
+
+    .calendar-widget {
+        min-width: 240px;
+        padding: 10px;
     }
 }

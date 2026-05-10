@@ -20,7 +20,7 @@
         </div>
         @for (item of todoTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()" class="cell"><app-board-card
-            [card]="item" [displayIndex]="idx + 1" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks To do</div>} </div>
+            [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks To do</div>} </div>
 
     <div id="getTaskCollumnTwo" cdkDropList [cdkDropListData]="inProgressTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
@@ -39,7 +39,7 @@
         </div>
         @for (item of inProgressTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()" class="cell"><app-board-card
-            [card]="item" [displayIndex]="idx + 1" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks In progress</div>} </div>
+            [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks In progress</div>} </div>
 
     <div id="getTaskCollumnThree" cdkDropList [cdkDropListData]="awaitFeedbackTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
@@ -58,7 +58,7 @@
         </div>
         @for (item of awaitFeedbackTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()" class="cell"><app-board-card
-            [card]="item" [displayIndex]="idx + 1" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks Await feedback</div>} </div>
+            [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks Await feedback</div>} </div>
 
     <div id="getTaskCollumnFour" cdkDropList [cdkDropListData]="doneTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
@@ -73,7 +73,7 @@
         </div>
         @for (item of doneTasks; track item.dbid; let idx = $index) {<div cdkDrag [cdkDragData]="item"
             (cdkDragStarted)="onDragStarted()" class="cell"><app-board-card
-            [card]="item" [displayIndex]="idx + 1" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks Done</div>} </div>
+            [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks Done</div>} </div>
 
 </div><!-- /.task-table -->
 </div><!-- /.board -->

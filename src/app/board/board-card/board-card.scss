@@ -46,6 +46,14 @@
   }
 }
 
+.card-full-drag {
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
 .label {
   padding: 4px 16px;
   border-radius: 8px;

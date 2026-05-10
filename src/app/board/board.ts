@@ -18,6 +18,9 @@ import { Subscription } from 'rxjs';
   templateUrl: './board.html',
   styleUrl: './board.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onViewportResize()'
+  }
 })
 export class Board implements OnInit, OnDestroy {
   private fbTaskService = inject(FbTaskService);
@@ -40,6 +43,7 @@ export class Board implements OnInit, OnDestroy {
   showEditTask: boolean = false;
 
   searchTerm: string = '';
+  dragHandleOnly: boolean = typeof window !== 'undefined' ? window.innerWidth <= 1350 : true;
 
   private tasksSubscription: Subscription = new Subscription();
 
@@ -61,6 +65,7 @@ export class Board implements OnInit, OnDestroy {
     });
 
     this.updateColumnArrays();
+    this.onViewportResize();
     this.cdr.markForCheck();
   }
 
@@ -72,6 +77,17 @@ export class Board implements OnInit, OnDestroy {
    */
   isDragDisabled(): boolean {
     return window.innerWidth <= 1350;
+  }
+
+
+  /**
+   * Updates drag mode according to viewport width.
+   * @returns {void} No return value.
+   */
+  onViewportResize(): void {
+    if (typeof window === 'undefined') return;
+    this.dragHandleOnly = window.innerWidth <= 1350;
+    this.cdr.markForCheck();
   }
 
   /**

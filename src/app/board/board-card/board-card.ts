@@ -14,6 +14,7 @@ export class BoardCard {
 
   @Input() card!: ITask;
   @Input() displayIndex: number = 0;
+  @Input() dragHandleOnly: boolean = true;
   @Output() cardClick = new EventEmitter<ITask>();
 
   /**

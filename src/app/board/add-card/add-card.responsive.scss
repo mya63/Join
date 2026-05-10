@@ -1,5 +1,27 @@
 @media (max-width: 1100px) {
 
+    .add-task-page {
+        padding: 24px 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        width: 100%;
+        max-width: 100%;
+        flex-direction: column;
+        gap: 24px;
+        max-height: none;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .divider-vert {
+        display: none;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col,
+    .add-task-page .content .inputTask .content-top .input-content .right-col {
+        width: 100%;
+        flex: unset;
+    }
+
     .priority-buttons {
         button {
             span {
@@ -7,5 +29,170 @@
             }
 
         }
+    }
+}
+
+@media (max-width: 700px) {
+    .add-task-page .content .inputTask .content-bottom {
+        flex-direction: column-reverse;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .check {
+        height: auto;
+        align-items: center;
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 370px) {
+    .add-task-page {
+        padding: 16px 10px;
+        border-radius: 24px;
+    }
+
+    .add-task-page .content {
+        gap: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 44px;
+        line-height: 1;
+        height: auto;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        gap: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority {
+        height: auto;
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category {
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        min-width: 0;
+        height: 42px;
+        font-size: 15px;
+        padding: 8px 8px;
+    }
+}
+
+@media (max-width: 320px) {
+    .add-task-page {
+        padding: 12px 8px;
+    }
+
+    .add-task-page .content {
+        gap: 10px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 36px;
+        height: auto;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content {
+        gap: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority {
+        height: auto;
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category {
+        margin-bottom: 12px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons {
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        max-width: none;
+        min-width: 0;
+        height: 44px;
+        padding: 8px 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        height: 40px;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 14px;
+    }
+
+    .calendar-widget {
+        min-width: 240px;
+        max-width: 92vw;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 310px) {
+    .add-task-page {
+        padding: 10px 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 32px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        grid-template-columns: 1fr;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-title .input input,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-description .textarea textarea,
+    .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input {
+        font-size: 15px;
     }
 }
