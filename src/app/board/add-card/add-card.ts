@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, input, output, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnInit, input, output, ViewChild, ElementRef, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskFormBase } from '../../shared/task-form-base';
@@ -14,6 +14,8 @@ import { TaskFormBase } from '../../shared/task-form-base';
   }
 })
 export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
   @ViewChild('inputContent') inputContent: ElementRef | undefined;
   
   selectedColumn = input<string>('');
@@ -57,7 +59,10 @@ export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
     if (!this.canCreateTask()) return;
     this.task.positionIndex = this.getNextColumnPositionIndex(this.task.status);
     await this.addTask(this.task);
-    this.onClose();
+    this.zone.run(() => {
+      this.onClose();
+      this.cdr.markForCheck();
+    });
   }
 
 

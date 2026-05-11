@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -12,6 +12,8 @@ import { FbService } from '../../services/fb-service';
 })
 export class EditDesktop {
   private fbService = inject(FbService);
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
   constructor() { this.getCurrentContact(); }
 
@@ -19,16 +21,14 @@ contact: IContact = { name: '', surname: '', email: '', phone: '' };
 editedContact: IContact = { ...this.contact };
 isClosing = false;
 duplicateEmail = false;
+private readonly closeAnimationMs = 400;
 
 /**
  * Closes the desktop edit overlay with exit animation.
  * @returns {void} No return value.
  */
 onClose() {
-this.isClosing = true;
-setTimeout(() => {
-  this.fbService.showEditContact = false;
-}, 400);
+this.startCloseAnimation();
 }
 
 /**
@@ -49,10 +49,7 @@ if (event.target === event.currentTarget) {
 delContact() {
 this.fbService.contactsArray.length > 0 && this.fbService.contactsGroups.length > 0 &&
 this.fbService.contactsArray.length > this.fbService.id ? this.fbService.delContact(this.fbService.id) : null;
-this.isClosing = true;
-setTimeout(() => {
-  this.fbService.showEditContact = false;
-}, 400);
+this.startCloseAnimation();
 }
 
 /**
@@ -89,10 +86,20 @@ try {
   this.handleSubmitError(error);
   return;
 }
-this.isClosing = true;
-setTimeout(() => {
-  this.fbService.showEditContact = false;
-}, 400);
+this.startCloseAnimation();
+}
+
+private startCloseAnimation(): void {
+this.zone.run(() => {
+  this.isClosing = true;
+  this.cdr.detectChanges();
+
+  setTimeout(() => {
+    this.fbService.showEditContact = false;
+    this.isClosing = false;
+    this.cdr.markForCheck();
+  }, this.closeAnimationMs);
+});
 }
 
 onEmailChange(): void {

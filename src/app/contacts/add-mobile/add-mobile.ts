@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Output, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, EventEmitter, NgZone, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -14,6 +14,8 @@ import { FbService } from '../../services/fb-service';
 })
 export class AddMobile {
   private fbService = inject(FbService);
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
   @Output() close = new EventEmitter<void>();
   @Output() created = new EventEmitter<void>();
@@ -22,6 +24,7 @@ export class AddMobile {
   id = 0;
   isClosing = false;
   duplicateEmail = false;
+  private readonly closeAnimationMs = 300;
 
   /**
    * Triggers full validation and creates a contact when valid.
@@ -101,11 +104,16 @@ export class AddMobile {
    * @returns {void} No return value.
    */
   closeOverlayWithAnimation() {
-    this.isClosing = true;
-    setTimeout(() => {
-      this.close.emit();
-      this.isClosing = false;
-    }, 300);
+    this.zone.run(() => {
+      this.isClosing = true;
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.close.emit();
+        this.isClosing = false;
+        this.cdr.markForCheck();
+      }, this.closeAnimationMs);
+    });
   }
 
 

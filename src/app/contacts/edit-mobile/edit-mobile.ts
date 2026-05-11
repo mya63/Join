@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IContact } from '../../interfaces/i-contact';
@@ -12,6 +12,8 @@ import { FbService } from '../../services/fb-service';
 })
 export class EditMobile {
   private fbService = inject(FbService);
+  private cdr = inject(ChangeDetectorRef);
+  private zone = inject(NgZone);
 
   constructor() { this.getCurrentContact(); }
 
@@ -19,6 +21,7 @@ export class EditMobile {
   editedContact: IContact = { ...this.contact };
   isClosing = false;
   duplicateEmail = false;
+  private readonly closeAnimationMs = 300;
 
   /**
    * Closes the mobile edit overlay and restores list visibility.
@@ -53,11 +56,16 @@ export class EditMobile {
    * @returns {void} No return value.
    */
   closeOverlayWithAnimation() {
-    this.isClosing = true;
-    setTimeout(() => {
-      this.onClose();
-      this.isClosing = false;
-    }, 300);
+    this.zone.run(() => {
+      this.isClosing = true;
+      this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.onClose();
+        this.isClosing = false;
+        this.cdr.markForCheck();
+      }, this.closeAnimationMs);
+    });
   }
 
   /**
@@ -78,8 +86,7 @@ export class EditMobile {
       this.handleSubmitError(error);
       return;
     }
-    this.onClose();
-    this.isClosing = false;
+    this.closeOverlayWithAnimation();
   }
 
   onEmailChange(): void {
