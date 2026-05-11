@@ -1,4 +1,17 @@
-﻿.add-task-page {
+﻿
+.add-task-page .content .inputTask .content-top .input-content .left-col::-webkit-scrollbar {
+    width: 4px;
+}
+
+.add-task-page .content .inputTask .content-top .input-content .left-col::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.add-task-page .content .inputTask .content-top .input-content .left-col::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 10px;
+}
+.add-task-page {
     .content {
         .inputTask {
             .content-top {
@@ -12,7 +25,6 @@
                         overflow-y: auto;
                         scrollbar-width: thin;
                         padding-right: 8px;
-
 
                         .field-title {
                             width: 100%;

@@ -11,6 +11,21 @@
         gap: 24px;
         max-height: calc(100dvh - 80px);
         overflow: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 transparent;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content::-webkit-scrollbar-thumb {
+        background-color: #c1c1c1;
+        border-radius: 10px;
     }
 
     .add-task-page .content .inputTask .content-top .input-content .content-scroll-wrapper {
