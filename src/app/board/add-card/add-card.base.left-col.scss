@@ -72,7 +72,7 @@
                                 textarea {
                                     width: 100%;
                                     min-height: 96px;
-                                    max-height: 300px;
+                                    max-height: none;
                                     border-radius: 10px;
                                     border: 1px solid transparent;
                                     outline: none;
@@ -83,6 +83,8 @@
                                     line-height: 120%;
                                     letter-spacing: 0%;
                                     resize: vertical;
+                                    overflow: hidden;
+                                    field-sizing: content;
 
                                     &::placeholder {
                                         color: #D1D1D1;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input, output, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TaskFormBase } from '../../shared/task-form-base';
@@ -13,7 +13,9 @@ import { TaskFormBase } from '../../shared/task-form-base';
     '(window:resize)': 'onViewportResize()'
   }
 })
-export class AddCard extends TaskFormBase implements OnInit {
+export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
+  @ViewChild('inputContent') inputContent: ElementRef | undefined;
+  
   selectedColumn = input<string>('');
   closeOverlay = output<void>();
 
@@ -26,6 +28,14 @@ export class AddCard extends TaskFormBase implements OnInit {
     this.submitAttempted = false;
     this.onViewportResize();
     this.initializeTaskState(this.getStatus(this.selectedColumn()));
+  }
+
+  /**
+   * Lifecycle hook after view initialization.
+   * @returns {void} No return value.
+   */
+  ngAfterViewInit(): void {
+    // ViewChild is now available
   }
 
 
@@ -70,5 +80,28 @@ export class AddCard extends TaskFormBase implements OnInit {
     const columnTasks = this.fbTaskService.tasksArray.filter((task) => task.status === status);
     const maxIndex = columnTasks.reduce((max, task) => Math.max(max, task.positionIndex ?? 0), -1);
     return maxIndex + 1;
+  }
+
+  /**
+   * Scrolls the input content container to the bottom.
+   * @returns {void} No return value.
+   */
+  private scrollToBottom(): void {
+    if (this.inputContent) {
+      setTimeout(() => {
+        const element = this.inputContent!.nativeElement;
+        element.scrollTop = element.scrollHeight;
+      }, 0);
+    }
+  }
+
+  /**
+   * Adds a subtask and scrolls to make it visible.
+   * @param {ITask} myTask - Task to add subtask to.
+   * @returns {void} No return value.
+   */
+  override addSubtask(myTask: any): void {
+    super.addSubtask(myTask);
+    this.scrollToBottom();
   }
 }

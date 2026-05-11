@@ -286,9 +286,8 @@
                             .subtasks-container {
                                 display: flex;
                                 flex-direction: column;
-                                max-height: 100px;
-                                overflow-y: auto;
-                                scrollbar-width: thin;
+                                max-height: none;
+                                overflow-y: visible;
 
                                 .subtask-label-edit {
                                     display: flex;
@@ -311,7 +310,7 @@
                                     font-weight: 400;
                                     overflow-wrap: break-word;
                                     word-break: break-all;
-                                    overflow-y: auto;
+                                    overflow-y: visible;
                                     display: flex;
                                     align-items: center;
                                     justify-content: space-between;

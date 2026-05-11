@@ -9,7 +9,13 @@
         max-width: 100%;
         flex-direction: column;
         gap: 24px;
-        max-height: none;
+        max-height: calc(100dvh - 80px);
+        overflow: auto;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .content-scroll-wrapper {
+        flex-direction: column;
+        overflow: visible;
     }
 
     .add-task-page .content .inputTask .content-top .input-content .divider-vert {
@@ -20,6 +26,13 @@
     .add-task-page .content .inputTask .content-top .input-content .right-col {
         width: 100%;
         flex: unset;
+        height: auto;
+        min-height: 0;
+        overflow-y: visible;
+    }
+
+    .add-task-page .content .inputTask .content-bottom {
+        margin-top: 10px;
     }
 
     .priority-buttons {
