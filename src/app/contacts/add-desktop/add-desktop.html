@@ -104,7 +104,7 @@
           <!-- Reserved space for validation message -->
           <div class="validation-message">
             @if (phoneInput.touched && hasInvalidPhoneFormat(contact.phone)) {
-            <span>The phone number must be at least 6 digits long.</span>
+            <span>The phone number must contain at least 6 digits and no spaces.</span>
             }
           </div>
         </div>
