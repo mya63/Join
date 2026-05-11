@@ -72,8 +72,8 @@ src/
 │   ├── shared/           # Layout (header, sidenav, bottom nav)
 │   └── summary/          # Dashboard / Summary page
 ├── environments/
-│   ├── environment.ts          # Your local config (not committed)
-│   └── environment.ts-help     # Template – copy and fill in your values
+│   ├── environment.ts               # Active local config
+│   └── environment.template.ts      # Template – copy and fill in your values
 └── styles.scss           # Global styles
 ```
 
@@ -108,6 +108,20 @@ npm install
 
 ## Firebase Setup
 
+Install AngularFire (includes Firebase SDK setup helpers):
+
+```bash
+ng add @angular/fire
+```
+
+If you only want to install packages without the Angular schematic wizard:
+
+```bash
+npm install @angular/fire firebase
+```
+
+This repository already contains both dependencies in `package.json`.
+
 1. Go to [Firebase Console](https://console.firebase.google.com/) and create a new project.
 2. Enable **Authentication** → Sign-in method → **Email/Password**.
 3. Create a **Firestore Database** in production or test mode.
@@ -117,15 +131,25 @@ npm install
 
 ## Environment Configuration
 
-The file `src/environments/environment.ts` is **not committed** to the repository (contains secrets).  
-Use the provided template to create it:
+Use the template file and create your local environment config.
+
+1. Copy the template:
 
 ```bash
-# Copy the template
-cp src/environments/environment.ts-help src/environments/environment.ts
+# macOS / Linux / Git Bash
+cp src/environments/environment.template.ts src/environments/environment.ts
 ```
 
-Then open `src/environments/environment.ts` and fill in your Firebase values:
+```powershell
+# Windows PowerShell
+Copy-Item src/environments/environment.template.ts src/environments/environment.ts
+```
+
+2. Open `src/environments/environment.ts` and replace placeholders in `firebaseConfig` with values from Firebase Console.
+3. Optional: adjust `testUser` for your guest/demo login.
+4. Keep `featureFlags.enableOwnerFilter` as needed for your test scenario.
+
+Template content:
 
 ```typescript
 export const environment = {
@@ -134,21 +158,21 @@ export const environment = {
     enableOwnerFilter: false,
   },
   firebaseConfig: {
-    apiKey: 'YOUR_API_KEY',
-    authDomain: 'YOUR_AUTH_DOMAIN',
+    apiKey: 'YOUR_FIREBASE_API_KEY',
+    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
     projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
     messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    appId: 'YOUR_APP_ID',
+    appId: 'YOUR_FIREBASE_APP_ID',
   },
   testUser: {
-    email: 'YOUR_TEST_USER_EMAIL',
-    password: 'YOUR_TEST_USER_PASSWORD',
+    email: 'guest@join.local',
+    password: 'Guest123!',
   },
 };
 ```
 
-> **Never commit your real `environment.ts` to version control.**
+If you already have an existing `src/environments/environment.ts`, keep it and only use the template as reference.
 
 ---
 
