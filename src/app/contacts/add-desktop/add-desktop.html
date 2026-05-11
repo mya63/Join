@@ -30,7 +30,7 @@
         <div class="form-field">
           <div class="input-wrapper">
             <input type="text" id="name" [(ngModel)]="contact.name" name="name" placeholder="Name" required
-              autocomplete="name" #nameInput="ngModel" [class.invalid]="nameInput.invalid && nameInput.touched">
+              autocomplete="name" maxlength="50" #nameInput="ngModel" [class.invalid]="nameInput.invalid && nameInput.touched">
             <img src="assets/img/contacts/add-desktop/person-icon-only.svg" alt="Name Icon" class="input-icon">
           </div>
 
@@ -50,7 +50,7 @@
         <div class="form-field">
           <div class="input-wrapper">
             <input type="text" id="surname" [(ngModel)]="contact.surname" name="surname" placeholder="Surname" required
-              autocomplete="family-name" #surnameInput="ngModel"
+              autocomplete="family-name" maxlength="50" #surnameInput="ngModel"
               [class.invalid]="surnameInput.invalid && surnameInput.touched">
             <img src="assets/img/contacts/add-desktop/person-icon-only.svg" alt="Surname Icon" class="input-icon">
           </div>
@@ -71,7 +71,7 @@
         <div class="form-field">
           <div class="input-wrapper">
             <input type="text" id="email" [(ngModel)]="contact.email" name="email" placeholder="Email" required
-              autocomplete="email" #emailInput="ngModel" (ngModelChange)="onEmailChange()"
+              autocomplete="email" maxlength="254" #emailInput="ngModel" (ngModelChange)="onEmailChange()"
               [class.invalid]="(emailInput.invalid && emailInput.touched) || duplicateEmail">
             <img src="assets/img/contacts/add-desktop/mail-icon-only.svg" alt="Email Icon" class="input-icon">
           </div>
@@ -95,7 +95,7 @@
         <!-- Phone Input with Validation -->
         <div class="form-field">
           <div class="input-wrapper">
-            <input type="tel" id="phone" [(ngModel)]="contact.phone" name="phone" placeholder="Phone" autocomplete="tel"
+            <input type="tel" id="phone" [(ngModel)]="contact.phone" name="phone" placeholder="Phone" autocomplete="tel" maxlength="20"
               #phoneInput="ngModel"
               [class.invalid]="(phoneInput.invalid && phoneInput.touched) || (phoneInput.touched && hasInvalidPhoneFormat(contact.phone))">
             <img src="assets/img/contacts/add-desktop/call-icon-only.svg" alt="Phone Icon" class="input-icon">

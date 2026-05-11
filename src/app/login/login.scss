@@ -286,6 +286,9 @@ button {
   font-size: 12px;
   color: #e60026;
   line-height: 1.4;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .mya-input-group .error-text {
@@ -295,6 +298,13 @@ button {
   margin: 0;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.login-signup-hint span,
+.login-signup-hint-mobile span,
+.login-footer-link {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .login-form .input-group {

@@ -22,6 +22,7 @@
             name="name" 
             placeholder="Name" 
             required 
+            maxlength="50"
             #nameInput="ngModel"
             [class.invalid]="nameInput.invalid && nameInput.touched" />
           <span class="icon i-person"><img src="assets/img/contacts/edit-mobile/person-icon-only.svg" alt="Person Icon" /></span>
@@ -45,6 +46,7 @@
             name="surname" 
             placeholder="Surname" 
             required 
+            maxlength="50"
             #surnameInput="ngModel"
             [class.invalid]="surnameInput.invalid && surnameInput.touched" />
           <span class="icon i-person"><img src="assets/img/contacts/edit-mobile/person-icon-only.svg" alt="Person Icon" /></span>
@@ -69,6 +71,7 @@
             placeholder="Email" 
             required 
             email
+            maxlength="254"
             #emailInput="ngModel"
             (ngModelChange)="onEmailChange()"
             [class.invalid]="(emailInput.invalid && emailInput.touched) || duplicateEmail" />
@@ -96,6 +99,7 @@
             [(ngModel)]="contact.phone" 
             name="phone" 
             placeholder="Phone" 
+            maxlength="20"
             #phoneInput="ngModel"
             [class.invalid]="(phoneInput.invalid && phoneInput.touched) || (phoneInput.touched && hasInvalidPhoneFormat(contact.phone))" />
           <span class="icon i-call"><img src="assets/img/contacts/edit-mobile/call-icon-only.svg" alt="Call Icon" /></span>

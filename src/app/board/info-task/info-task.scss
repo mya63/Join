@@ -94,6 +94,8 @@
   font-size: 16px;
   font-weight: 400;
   line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .close-btn {
@@ -130,6 +132,8 @@
   color: #000;
   margin: 0 0 24px;
   line-height: 1.08;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .task-title-pinned {
@@ -144,6 +148,8 @@
   margin: 0 0 20px;
   line-height: 1.5;
   font-weight: 400;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .info-row {
@@ -163,6 +169,9 @@
 .info-value {
   color: #2a3647;
   font-weight: 400;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   &.priority-value {
     display: flex;
@@ -204,6 +213,13 @@
   gap: 16px;
   font-size: 16px;
   color: #2a3647;
+}
+
+.assigned-row span,
+.subtask-row span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .avatar {

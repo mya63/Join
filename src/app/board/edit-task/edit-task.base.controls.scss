@@ -161,8 +161,13 @@
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
 
-  .field-input { padding-right: 70px; }
+  .field-input {
+    width: 100%;
+    min-width: 0;
+    padding-right: 70px;
+  }
 }
 
 .subtask-icons {
@@ -198,6 +203,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
+  gap: 8px;
+  min-width: 0;
   border-radius: 8px;
   font-size: 16px;
   color: #2a3647;
@@ -208,8 +215,16 @@
   .subtask-icons { position: static; }
 }
 
+.subtask-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .subtask-edit-input {
   flex: 1;
+  min-width: 0;
   border: none;
   border-bottom: 1px solid #29abe2;
   outline: none;
@@ -217,6 +232,11 @@
   padding: 2px 4px;
   margin-right: 8px;
   background: transparent;
+}
+
+.subtask-view-row .subtask-icons,
+.subtask-edit-row .subtask-icons {
+  flex-shrink: 0;
 }
 
 /* ÔöÇÔöÇ Error hints ÔöÇÔöÇ */

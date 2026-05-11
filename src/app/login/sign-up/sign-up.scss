@@ -161,6 +161,13 @@
   font-size: 14px;
 }
 
+.privacy-row span,
+.privacy-link,
+.login-footer-link {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .privacy-link {
   color: #29abe2;
   text-decoration: none;
@@ -242,6 +249,9 @@
   font-size: 12px;
   line-height: 1.4;
   margin: 4px 0 0 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .mya-input-group {

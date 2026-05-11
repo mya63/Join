@@ -226,11 +226,19 @@
 .name {
   font-size: 20px;
   color: #000;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .mail {
   font-size: 16px;
   color: #007cee;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.contact-row__text {
+  min-width: 0;
 }
 
 div.contact-row:hover {

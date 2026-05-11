@@ -110,6 +110,17 @@ export class AddMobile {
 
 
   /**
+   * Validates that field length does not exceed maximum allowed.
+   * @param {string | undefined} value - Field value to validate.
+   * @param {number} maxLength - Maximum allowed length.
+   * @returns {boolean} True when length exceeds maximum.
+   */
+  hasExceededMaxLength(value: string | undefined, maxLength: number): boolean {
+    if (!value) return false;
+    return value.length > maxLength;
+  }
+
+  /**
    * Validates that a name starts with an uppercase character.
    * @param {string | undefined} name - Name value to validate.
    * @returns {boolean} True when capitalization is invalid.
@@ -175,6 +186,10 @@ export class AddMobile {
     if (this.hasInvalidPhoneFormat(this.contact.phone)) return false;
     if (this.hasInvalidNameData(this.contact.name, this.contact.surname)) return false;
     if (this.hasInvalidEmailFormat(this.contact.email)) return false;
+    if (this.hasExceededMaxLength(this.contact.name, 50)) return false;
+    if (this.hasExceededMaxLength(this.contact.surname, 50)) return false;
+    if (this.hasExceededMaxLength(this.contact.email, 254)) return false;
+    if (this.hasExceededMaxLength(this.contact.phone, 20)) return false;
     return true;
   }
 

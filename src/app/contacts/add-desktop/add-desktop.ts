@@ -142,6 +142,17 @@ export class AddDesktop {
     return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
   }
   /**
+   * Validates that field length does not exceed maximum allowed.
+   * @param {string | undefined} value - Field value to validate.
+   * @param {number} maxLength - Maximum allowed length.
+   * @returns {boolean} True when length exceeds maximum.
+   */
+  hasExceededMaxLength(value: string | undefined, maxLength: number): boolean {
+    if (!value) return false;
+    return value.length > maxLength;
+  }
+
+  /**
    * Validates email format against project constraints.
    * @param {string | undefined} email - Email value to validate.
    * @returns {boolean} True when email format is invalid.

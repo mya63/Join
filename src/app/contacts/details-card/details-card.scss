@@ -90,6 +90,8 @@
   align-items: center;
   color: #000000;
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 /*   flex: none;
   order: 0;
   flex-grow: 0;
@@ -219,8 +221,9 @@
 }
 
 .email-link {
-  width: 140px;
-  height: 19px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 19px;
 
   font-style: normal;
   font-weight: 400;
@@ -234,6 +237,8 @@
   order: 1;
   flex-grow: 0;
   transition: text-decoration 0.2s;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .email-link:hover {
@@ -241,8 +246,9 @@
 }
 
 .phone-number {
-  width: 124px;
-  height: 19px;
+  width: 100%;
+  max-width: 100%;
+  min-height: 19px;
 
   font-style: normal;
   font-weight: 400;
@@ -254,6 +260,8 @@
   flex: none;
   order: 1;
   flex-grow: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 1350px) {

@@ -125,6 +125,17 @@ export class EditMobile {
   }
 
   /**
+   * Validates that field length does not exceed maximum allowed.
+   * @param {string | undefined} value - Field value to validate.
+   * @param {number} maxLength - Maximum allowed length.
+   * @returns {boolean} True when length exceeds maximum.
+   */
+  hasExceededMaxLength(value: string | undefined, maxLength: number): boolean {
+    if (!value) return false;
+    return value.length > maxLength;
+  }
+
+  /**
    * Validates that a name starts with an uppercase character.
    * @param {string | undefined} name - Name value to validate.
    * @returns {boolean} True when capitalization is invalid.
@@ -190,6 +201,10 @@ export class EditMobile {
     if (this.hasInvalidPhoneFormat(this.editedContact.phone)) return false;
     if (this.hasInvalidNameData(this.editedContact.name, this.editedContact.surname)) return false;
     if (this.hasInvalidEmailFormat(this.editedContact.email)) return false;
+    if (this.hasExceededMaxLength(this.editedContact.name, 50)) return false;
+    if (this.hasExceededMaxLength(this.editedContact.surname, 50)) return false;
+    if (this.hasExceededMaxLength(this.editedContact.email, 254)) return false;
+    if (this.hasExceededMaxLength(this.editedContact.phone, 20)) return false;
     return true;
   }
 
