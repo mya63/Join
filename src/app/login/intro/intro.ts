@@ -14,6 +14,7 @@ export class Intro {
   private authService = inject(FbAuthService);
   protected readonly landsOnSidebar = signal(false);
   protected readonly introReady = signal(false);
+  private readonly introDelayMs = 3200;
 
   /**
    * Resolves startup target and redirects after intro delay.
@@ -26,7 +27,7 @@ export class Intro {
 
     setTimeout(() => {
       this.router.navigate([targetRoute]);
-    }, 2000);
+    }, this.introDelayMs);
   }
 }
 

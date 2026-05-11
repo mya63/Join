@@ -9,9 +9,9 @@ import { FbAuthService } from '../services/fb-auth-service';
 export const authGuard: CanActivateFn = async () => {
   const authService = inject(FbAuthService);
   const router = inject(Router);
-  const targetRoute = await authService.resolveStartupRoute();
+  const hasSession = !!authService.getCurrentUserId() || authService.isLocallyLoggedIn();
 
-  if (targetRoute === '/summary') {
+  if (hasSession) {
     return true;
   }
 
