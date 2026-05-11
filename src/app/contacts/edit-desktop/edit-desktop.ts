@@ -155,15 +155,26 @@ return !/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name);
  * @returns {boolean} True when length exceeds maximum.
  */
 hasExceededMaxLength(value: string | undefined, maxLength: number): boolean {
-if (!value) return false;
-return value.length > maxLength;
-}
-if (email.endsWith('.')) {
-return true;
+  if (!value) return false;
+  return value.length > maxLength;
 }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
-return !emailRegex.test(email);
+/**
+ * Validates email format against project constraints.
+ * @param {string | undefined} email - Email value to validate.
+ * @returns {boolean} True when email format is invalid.
+ */
+hasInvalidEmailFormat(email: string | undefined): boolean {
+  if (!email || email.length === 0) {
+    return false;
+  }
+
+  if (email.endsWith('.')) {
+    return true;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u;
+  return !emailRegex.test(email);
 }
 
 /**
@@ -172,25 +183,30 @@ return !emailRegex.test(email);
  * @returns {boolean} True when phone format is invalid.
  */
 hasInvalidPhoneFormat(phone: string | undefined): boolean {
-if (!phone || phone.length === 0) {
-return false;
-}
+  if (!phone || phone.length === 0) {
+    return false;
+  }
 
-const phoneRegex = /^\+?[0-9]{6,}$/;
-return !phoneRegex.test(phone);
+  const phoneRegex = /^\+?[0-9]{6,}$/;
+  return !phoneRegex.test(phone);
 }
 
 /**
- * Runs full form validation including custom business rules.
+ * Validates form state using Angular and custom validation rules.
  * @param {any} form - Template-driven form reference.
- * @returns {boolean} True when the form is valid.
+ * @returns {boolean} True when form data is valid.
  */
 isFormValid(form: any): boolean {
-if (form.invalid) return false;
-if (this.hasInvalidPhoneFormat(this.editedContact.phone)) return false;
-if (this.hasInvalidNameData(this.editedContact.name, this.editedContact.surname)) return false;
-if (this.hasInvalidEmailFormat(this.editedContact.email)) return false;
-return true;
+  if (form.invalid) {
+    return false;
+  }
+
+  const isNameValid = !!this.editedContact.name && !this.hasInvalidCharacters(this.editedContact.name) && !this.hasInvalidCapitalization(this.editedContact.name) && !this.hasExceededMaxLength(this.editedContact.name, 50);
+  const isSurnameValid = !!this.editedContact.surname && !this.hasInvalidCharacters(this.editedContact.surname) && !this.hasInvalidCapitalization(this.editedContact.surname) && !this.hasExceededMaxLength(this.editedContact.surname, 50);
+  const isEmailValid = !!this.editedContact.email && !this.hasInvalidEmailFormat(this.editedContact.email) && !this.hasExceededMaxLength(this.editedContact.email, 254);
+  const isPhoneValid = !this.editedContact.phone || (!this.hasInvalidPhoneFormat(this.editedContact.phone) && !this.hasExceededMaxLength(this.editedContact.phone, 20));
+  
+  return isNameValid && isSurnameValid && isEmailValid && isPhoneValid;
 }
 
 /**
@@ -200,11 +216,11 @@ return true;
  * @returns {boolean} True when either name or surname fails character or capitalization rules.
  */
 private hasInvalidNameData(name: string | undefined, surname: string | undefined): boolean {
-return (
-  this.hasInvalidCharacters(name) ||
-  this.hasInvalidCharacters(surname) ||
-  this.hasInvalidCapitalization(name) ||
-  this.hasInvalidCapitalization(surname)
-);
+  return (
+    this.hasInvalidCharacters(name) ||
+    this.hasInvalidCharacters(surname) ||
+    this.hasInvalidCapitalization(name) ||
+    this.hasInvalidCapitalization(surname)
+  );
 }
 }
