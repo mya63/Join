@@ -110,6 +110,7 @@ export class FbAuthService {
     try {
       const result = await createUserWithEmailAndPassword(this.auth, email, password);
       await this.ensureSelfContact(result.user, name, surname);
+      await this.syncDailyTestDataForUser(result.user);
       await signOut(this.auth);
       this.setLocalLoginState(false);
       this.router.navigate(['/login'], { queryParams: { email, password, signupSuccess: '1' } });

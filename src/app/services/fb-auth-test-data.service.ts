@@ -24,15 +24,49 @@ export class FbAuthTestDataService {
   private async ensureDailyTestContacts(user: User): Promise<void> {
     const contactsCollection = collection(this.db, 'contacts');
     const managedDocs = await this.loadManagedTestContactDocs(contactsCollection, user.uid);
-    if (this.isDailyTestContactsComplete(managedDocs)) return;
+    
+    // If NO test contacts exist, create them
+    if (managedDocs.length === 0) {
+      console.log(`[TestData] No test contacts found for user ${user.uid}. Creating all test contacts.`);
+      await this.recreateManagedTestContacts(contactsCollection, managedDocs, user.uid);
+      console.log('[TestData] Test contacts created successfully');
+      return;
+    }
+    
+    // If test contacts exist, check if they're older than 24 hours
+    if (this.isDailyTestContactsComplete(managedDocs)) {
+      console.log(`[TestData] Test contacts are fresh (younger than 24h). Skipping update.`);
+      return;
+    }
+    
+    // If older than 24 hours, recreate them
+    console.log(`[TestData] Test contacts are older than 24h. Deleting and recreating all.`);
     await this.recreateManagedTestContacts(contactsCollection, managedDocs, user.uid);
+    console.log('[TestData] Test contacts recreated successfully');
   }
 
   private async ensureDailyTestTasks(user: User): Promise<void> {
     const tasksCollection = collection(this.db, 'tasks');
     const managedDocs = await this.loadManagedTestTaskDocs(tasksCollection, user.uid);
-    if (this.isDailyTestTasksComplete(managedDocs)) return;
+    
+    // If NO test tasks exist, create them
+    if (managedDocs.length === 0) {
+      console.log(`[TestData] No test tasks found for user ${user.uid}. Creating all test tasks.`);
+      await this.recreateManagedTestTasks(tasksCollection, managedDocs, user.uid);
+      console.log('[TestData] Test tasks created successfully');
+      return;
+    }
+    
+    // If test tasks exist, check if they're older than 24 hours
+    if (this.isDailyTestTasksComplete(managedDocs)) {
+      console.log(`[TestData] Test tasks are fresh (younger than 24h). Skipping update.`);
+      return;
+    }
+    
+    // If older than 24 hours, recreate them
+    console.log(`[TestData] Test tasks are older than 24h. Deleting and recreating all.`);
     await this.recreateManagedTestTasks(tasksCollection, managedDocs, user.uid);
+    console.log('[TestData] Test tasks recreated successfully');
   }
 
   private async loadManagedTestContactDocs(
