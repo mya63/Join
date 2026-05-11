@@ -56,10 +56,17 @@ export class FbAuthTestDataService {
 
   private isDailyTestContactsComplete(docs: Awaited<ReturnType<typeof getDocs>>['docs']): boolean {
     const todayKey = this.getTodayKey();
-    const existingEmails = new Set(docs.map((docItem) => String(this.toRecord(docItem.data())['email'] ?? '').toLowerCase()).filter(Boolean));
+    const existingRecords = docs.map((docItem) => this.toRecord(docItem.data()));
+    const existingEmails = new Set(existingRecords.map((record) => String(record['email'] ?? '').toLowerCase()).filter(Boolean));
+    const existingByEmail = new Map(existingRecords.map((record) => [String(record['email'] ?? '').toLowerCase(), record]));
     const hasTodayDates = docs.every((docItem) => this.getDayKeyFromUnknown(this.toRecord(docItem.data())['date']) === todayKey);
     const hasAllEmails = TEST_CONTACTS.every((contact) => existingEmails.has(contact.email.toLowerCase()));
-    return docs.length === TEST_CONTACTS.length && hasTodayDates && hasAllEmails;
+    const hasNormalizedPhones = TEST_CONTACTS.every((contact) => {
+      const record = existingByEmail.get(contact.email.toLowerCase());
+      if (!record) return false;
+      return this.normalizePhone(String(record['phone'] ?? '')) === contact.phone;
+    });
+    return docs.length === TEST_CONTACTS.length && hasTodayDates && hasAllEmails && hasNormalizedPhones;
   }
 
   private async recreateManagedTestContacts(
@@ -81,8 +88,12 @@ export class FbAuthTestDataService {
       name: contact.name,
       surname: contact.surname,
       email: contact.email,
-      phone: contact.phone,
+      phone: this.normalizePhone(contact.phone),
     };
+  }
+
+  private normalizePhone(phone: string): string {
+    return phone.replace(/\s+/g, '').trim();
   }
 
   private async loadManagedTestTaskDocs(

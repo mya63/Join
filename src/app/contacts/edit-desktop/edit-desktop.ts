@@ -176,8 +176,9 @@ if (!phone || phone.length === 0) {
 return false;
 }
 
+const normalizedPhone = phone.replace(/\s+/g, '');
 const phoneRegex = /^\+?[0-9]{6,}$/;
-return !phoneRegex.test(phone);
+return !phoneRegex.test(normalizedPhone);
 }
 
 /**

@@ -107,7 +107,7 @@ export class FbService {
    * @returns {Promise<void>} Promise resolved after contact creation.
    */
   async addContact(contact: IContact) {
-    const payload = this.withNormalizedEmail(contact);
+    const payload = this.withNormalizedContact(contact);
     if (this.hasEmailConflict(payload.email)) throw new Error('CONTACT_EMAIL_EXISTS');
     this.pendingNewContactEmail = payload.email;
     await addDoc(this.contactsCollection, {
@@ -127,13 +127,17 @@ export class FbService {
   async updateContact(id: number, contact: IContact) {
     const current = this.contactsArray[id];
     if (!current?.id) return;
-    const payload = this.withNormalizedEmail(contact);
+    const payload = this.withNormalizedContact(contact);
     if (this.hasEmailConflict(payload.email, current.id)) throw new Error('CONTACT_EMAIL_EXISTS');
     await updateDoc(doc(this.contactsCollection, current.id), { ...payload });
   }
 
-  private withNormalizedEmail(contact: IContact): IContact {
-    return { ...contact, email: this.normalizeEmail(contact.email || '') };
+  private withNormalizedContact(contact: IContact): IContact {
+    return {
+      ...contact,
+      email: this.normalizeEmail(contact.email || ''),
+      phone: this.normalizePhone(contact.phone || ''),
+    };
   }
 
   private hasEmailConflict(email: string, excludeContactId = ''): boolean {
@@ -147,6 +151,10 @@ export class FbService {
 
   private normalizeEmail(email: string): string {
     return email.trim().toLowerCase();
+  }
+
+  private normalizePhone(phone: string): string {
+    return phone.replace(/\s+/g, '').trim();
   }
 
   /**
