@@ -363,7 +363,7 @@ h1 {
     }
 
     to {
-      transform: translateX(100%);
+      transform: translateX(calc(200vw + 100%));
     }
   }
 }
