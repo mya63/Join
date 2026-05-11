@@ -48,6 +48,17 @@ export class FbService {
   }
 
   /**
+   * Resets contact selection state for new user sessions.
+   * Called after successful login to clear previous user's contact selection.
+   * @returns {void} No return value.
+   */
+  resetContactState(): void {
+    this.id = 0;
+    this.currentContact = { name: '', surname: '', email: '', phone: '' } as IContact;
+    this.showEditContact = false;
+  }
+
+  /**
    * Attaches a Firestore snapshot listener to the sorted contacts collection.
    * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
    */
@@ -68,6 +79,7 @@ export class FbService {
   private bindAuthStateToOwnerFilter(): void {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, () => {
+        this.resetContactState();
         this.applyOwnerFilter();
       });
     });
