@@ -31,14 +31,14 @@ export class AddTask extends TaskFormBase implements OnInit {
 
   /**
    * Validates required fields and creates a new task in the to-do column.
-   * @returns {void} No return value.
+   * @returns {Promise<void>} Promise resolved after task is persisted.
    */
-  create(): void {
+  async create(): Promise<void> {
     this.submitAttempted = true;
     if (!this.canCreateTask()) return;
     this.task.status = 'to-do';
     this.task.positionIndex = this.getNextTodoPositionIndex();
-    this.addTask(this.task);
+    await this.addTask(this.task);
     this.router.navigate(['/board']);
   }
 

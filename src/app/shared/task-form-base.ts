@@ -106,10 +106,22 @@ export abstract class TaskFormBase {
   /**
    * Persists a task and resets mutable form fields.
    * @param {ITask} newTask - Task payload to persist.
-   * @returns {void} No return value.
+   * @returns {Promise<void>} Promise resolved after save and reset complete.
    */
-  addTask(newTask: ITask): void {
-    this.fbTaskService.createTask(newTask);
+  async addTask(newTask: ITask): Promise<void> {
+    // Create a deep copy to avoid reference issues with singleton newTask.
+    const taskToSave: ITask = {
+      ...newTask,
+      subTasks: newTask.subTasks && Array.isArray(newTask.subTasks) ? [...newTask.subTasks] : [],
+      assignTo: newTask.assignTo && Array.isArray(newTask.assignTo) ? [...newTask.assignTo] : [],
+      category: {
+        category: newTask.category?.category ?? -1,
+        categoryProperties: Array.isArray(newTask.category?.categoryProperties)
+          ? newTask.category.categoryProperties.map((property) => ({ ...property }))
+          : [],
+      },
+    };
+    await this.fbTaskService.createTask(taskToSave);
     this.task.assignTo = [];
     this.task.priority = 'medium';
     this.task.category.category = -1;

@@ -182,7 +182,14 @@ export class FbTaskService {
    */
   async createTask(task: ITask): Promise<void> {
     const ownerId = await this.resolveOwnerId();
-    await addDoc(this.tasksCollection, { ...task, ownerId });
+    // Ensure all required fields are properly set, including subTasks
+    const taskData = {
+      ...task,
+      ownerId,
+      subTasks: Array.isArray(task.subTasks) ? task.subTasks : [],
+      assignTo: Array.isArray(task.assignTo) ? task.assignTo : [],
+    };
+    await addDoc(this.tasksCollection, taskData);
   }
 
   /**

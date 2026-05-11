@@ -50,13 +50,13 @@ export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
 
   /**
    * Validates input, computes next index and creates the task.
-   * @returns {void} No return value.
+   * @returns {Promise<void>} Promise resolved after task is persisted.
    */
-  create(): void {
+  async create(): Promise<void> {
     this.submitAttempted = true;
     if (!this.canCreateTask()) return;
     this.task.positionIndex = this.getNextColumnPositionIndex(this.task.status);
-    this.addTask(this.task);
+    await this.addTask(this.task);
     this.onClose();
   }
 
