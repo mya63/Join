@@ -71,7 +71,8 @@
         <div class="form-field">
           <div class="input-wrapper">
             <input type="text" id="email" [(ngModel)]="contact.email" name="email" placeholder="Email" required
-              autocomplete="email" #emailInput="ngModel" [class.invalid]="emailInput.invalid && emailInput.touched">
+              autocomplete="email" #emailInput="ngModel" (ngModelChange)="onEmailChange()"
+              [class.invalid]="(emailInput.invalid && emailInput.touched) || duplicateEmail">
             <img src="assets/img/contacts/add-desktop/mail-icon-only.svg" alt="Email Icon" class="input-icon">
           </div>
 
@@ -85,6 +86,8 @@
             }
             } @else if (emailInput.touched && hasInvalidEmailFormat(contact.email)) {
             <span>Email must be in the format name@domain.extension.</span>
+            } @else if (duplicateEmail) {
+            <span>This email is already in use.</span>
             }
           </div>
         </div>

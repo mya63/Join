@@ -26,14 +26,21 @@ export class AddDesktop {
   contact: IContact = {} as IContact;
   id = 0;
   isClosing = false;
+  duplicateEmail = false;
 
   /**
    * Persists a new contact and clears local form fields.
    * @returns {void} No return value.
    */
-  addContact() {
-    this.fbService.addContact(this.contact);
-    this.clearInput();
+  async addContact(): Promise<boolean> {
+    try {
+      await this.fbService.addContact(this.contact);
+      this.clearInput();
+      return true;
+    } catch (error) {
+      this.handleSubmitError(error);
+      return false;
+    }
   }
 
   /**
@@ -62,12 +69,26 @@ export class AddDesktop {
    * Validates input and creates the contact when all checks pass.
    * @returns {void} No return value.
    */
-  onSubmit() {
+  async onSubmit() {
+    this.duplicateEmail = false;
     if (this.validateAllFields()) {
-      this.addContact();
+      const created = await this.addContact();
+      if (!created) return;
       this.created.emit();
       this.closeOverlay();
     }
+  }
+
+  onEmailChange(): void {
+    this.duplicateEmail = false;
+  }
+
+  private handleSubmitError(error: unknown): void {
+    this.duplicateEmail = this.isDuplicateEmailError(error);
+  }
+
+  private isDuplicateEmailError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }
 
   /**

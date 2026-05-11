@@ -17,7 +17,6 @@ export class FbAuthTestDataService {
    */
   async ensureDailyTestData(user: User): Promise<void> {
     await this.cleanupTestDataForOtherOwners(user.uid);
-    if (await this.hasAnyTodayTestContact(user.uid)) return;
     await this.ensureDailyTestContacts(user);
     await this.ensureDailyTestTasks(user);
   }
@@ -118,7 +117,7 @@ export class FbAuthTestDataService {
       createDate: new Date().toISOString(),
       ownerId,
       completed: taskTemplate.status === 'done',
-      dueDate: this.getIsoDateWithOffset(taskTemplate.dueOffsetDays),
+      dueDate: this.getDdMmYyyyWithOffset(taskTemplate.dueOffsetDays),
       status: taskTemplate.status,
       positionIndex: index,
       category: taskTemplate.category,
@@ -128,16 +127,6 @@ export class FbAuthTestDataService {
       priority: taskTemplate.priority,
       subTasks: taskTemplate.subTasks,
     };
-  }
-
-  private async hasAnyTodayTestContact(ownerId: string): Promise<boolean> {
-    return runInInjectionContext(this.injector, async () => {
-      const contactsCollection = collection(this.db, 'contacts');
-      const testEmails = TEST_CONTACTS.map((contact) => contact.email.toLowerCase());
-      const matches = await getDocs(query(contactsCollection, where('ownerId', '==', ownerId), where('email', 'in', testEmails)));
-      const todayKey = this.getTodayKey();
-      return matches.docs.some((docItem) => this.getDayKeyFromUnknown(this.toRecord(docItem.data())['date']) === todayKey);
-    });
   }
 
   private async cleanupTestDataForOtherOwners(currentOwnerId: string): Promise<void> {
@@ -199,10 +188,13 @@ export class FbAuthTestDataService {
     return `${year}-${month}-${day}`;
   }
 
-  private getIsoDateWithOffset(dayOffset: number): string {
+  private getDdMmYyyyWithOffset(dayOffset: number): string {
     const date = new Date();
     date.setDate(date.getDate() + dayOffset);
-    return date.toISOString();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   private getDayKeyFromUnknown(value: unknown): string | null {

@@ -196,17 +196,30 @@ export class Summary implements OnInit, OnDestroy {
   private calculateUpcomingDeadline(tasks: ITask[]): void {
     const now = new Date();
     const futureDeadlines = tasks
-      .filter(t => t.dueDate && new Date(t.dueDate) >= now)
-      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+      .map((task) => ({ task, parsedDate: this.parseDueDate(task.dueDate) }))
+      .filter((entry) => !!entry.parsedDate && entry.parsedDate >= now)
+      .sort((a, b) => a.parsedDate!.getTime() - b.parsedDate!.getTime());
 
     if (futureDeadlines.length > 0) {
-      const deadline = new Date(futureDeadlines[0].dueDate);
+      const deadline = futureDeadlines[0].parsedDate!;
       this.upcomingDeadline = {
         date: this.formatDate(deadline)
       };
     } else {
       this.upcomingDeadline = null;
     }
+  }
+
+  private parseDueDate(raw: string): Date | null {
+    const value = (raw ?? '').trim();
+    if (!value) return null;
+    const ddmmyyyy = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+    if (!ddmmyyyy) {
+      const isoDate = new Date(value);
+      return Number.isNaN(isoDate.getTime()) ? null : isoDate;
+    }
+    const parsed = new Date(Number(ddmmyyyy[3]), Number(ddmmyyyy[2]) - 1, Number(ddmmyyyy[1]));
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
 
   /**

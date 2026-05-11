@@ -72,7 +72,8 @@
             required 
             email
             #emailInput="ngModel"
-            [class.invalid]="emailInput.invalid && emailInput.touched" />
+            (ngModelChange)="onEmailChange()"
+            [class.invalid]="(emailInput.invalid && emailInput.touched) || duplicateEmail" />
           <span class="icon i-mail"><img src="assets/img/contacts/edit-mobile/mail-icon-only.svg" alt="Mail Icon" /></span>
         </label>
         <div class="validation-message">
@@ -84,6 +85,8 @@
             }
           } @else if (emailInput.touched && hasInvalidEmailFormat(editedContact.email)) {
             <span>Email must be in the format name@domain.extension.</span>
+          } @else if (duplicateEmail) {
+            <span>This email is already in use.</span>
           }
         </div>
       </div>

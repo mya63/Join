@@ -18,6 +18,7 @@ export class EditMobile {
   contact: IContact = { name: '', surname: '', email: '', phone: '' };
   editedContact: IContact = { ...this.contact };
   isClosing = false;
+  duplicateEmail = false;
 
   /**
    * Closes the mobile edit overlay and restores list visibility.
@@ -64,15 +65,33 @@ export class EditMobile {
    * @param {any} form - Template-driven form reference.
    * @returns {void} No return value.
    */
-  upContact(form?: any) {
+  async upContact(form?: any) {
+    this.duplicateEmail = false;
     if (form && !this.isFormValid(form)) {
       this.markAllFieldsAsTouched(form);
       return;
     }
 
-    this.fbService.updateContact(this.fbService.id, this.editedContact);
+    try {
+      await this.fbService.updateContact(this.fbService.id, this.editedContact);
+    } catch (error) {
+      this.handleSubmitError(error);
+      return;
+    }
     this.onClose();
     this.isClosing = false;
+  }
+
+  onEmailChange(): void {
+    this.duplicateEmail = false;
+  }
+
+  private handleSubmitError(error: unknown): void {
+    this.duplicateEmail = this.isDuplicateEmailError(error);
+  }
+
+  private isDuplicateEmailError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }
 
   /**

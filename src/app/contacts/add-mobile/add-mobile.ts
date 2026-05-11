@@ -21,16 +21,18 @@ export class AddMobile {
   contact: IContact = {} as IContact;
   id = 0;
   isClosing = false;
+  duplicateEmail = false;
 
   /**
    * Triggers full validation and creates a contact when valid.
    * @param {any} form - Template-driven form reference.
    * @returns {void} No return value.
    */
-  onCreateContactClick(form: any) {
+  async onCreateContactClick(form: any) {
+    this.duplicateEmail = false;
     this.markAllFieldsAsTouched(form);
     if (this.isFormValid(form)) {
-      this.addContact();
+      await this.addContact();
     }
   }
 
@@ -51,12 +53,28 @@ export class AddMobile {
    * Persists the contact and triggers creation side effects.
    * @returns {void} No return value.
    */
-  private addContact() {
-    this.fbService.addContact(this.contact);
-    this.clearInput();
-    this.created.emit();
-    this.closeOverlayWithAnimation();
-    this.fbService.refreshContactList();
+  private async addContact() {
+    try {
+      await this.fbService.addContact(this.contact);
+      this.clearInput();
+      this.created.emit();
+      this.closeOverlayWithAnimation();
+      this.fbService.refreshContactList();
+    } catch (error) {
+      this.handleSubmitError(error);
+    }
+  }
+
+  onEmailChange(): void {
+    this.duplicateEmail = false;
+  }
+
+  private handleSubmitError(error: unknown): void {
+    this.duplicateEmail = this.isDuplicateEmailError(error);
+  }
+
+  private isDuplicateEmailError(error: unknown): boolean {
+    return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }
 
   /**

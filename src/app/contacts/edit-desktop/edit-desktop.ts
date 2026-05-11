@@ -18,6 +18,7 @@ export class EditDesktop {
 contact: IContact = { name: '', surname: '', email: '', phone: '' };
 editedContact: IContact = { ...this.contact };
 isClosing = false;
+duplicateEmail = false;
 
 /**
  * Closes the desktop edit overlay with exit animation.
@@ -60,6 +61,7 @@ setTimeout(() => {
  * @returns {void} No return value.
  */
 async upContact(form: any): Promise<void> {
+this.duplicateEmail = false;
 this.markAllControlsTouched(form);
 if (!this.isFormValid(form)) return;
 await this.persistContactUpdate();
@@ -81,11 +83,28 @@ Object.keys(form.controls).forEach(key => {
  * @returns {Promise<void>} Promise resolved after Firestore update completes.
  */
 private async persistContactUpdate(): Promise<void> {
-await this.fbService.updateContact(this.fbService.id, this.editedContact);
+try {
+  await this.fbService.updateContact(this.fbService.id, this.editedContact);
+} catch (error) {
+  this.handleSubmitError(error);
+  return;
+}
 this.isClosing = true;
 setTimeout(() => {
   this.fbService.showEditContact = false;
 }, 400);
+}
+
+onEmailChange(): void {
+this.duplicateEmail = false;
+}
+
+private handleSubmitError(error: unknown): void {
+this.duplicateEmail = this.isDuplicateEmailError(error);
+}
+
+private isDuplicateEmailError(error: unknown): boolean {
+return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
 }
 
 /**

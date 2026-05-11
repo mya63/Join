@@ -200,3 +200,24 @@
     }
   }
 }
+
+@media (max-width: 1350px) {
+  :host {
+    width: 252px;
+    min-width: 252px;
+    max-width: 252px;
+    display: inline-block;
+  }
+
+  .card-wrap {
+    width: 252px;
+    min-width: 252px;
+    max-width: 252px;
+  }
+
+  .card {
+    width: 252px;
+    min-width: 252px;
+    max-width: 252px;
+  }
+}

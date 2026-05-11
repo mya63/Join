@@ -107,8 +107,15 @@ export class FbService {
    * @returns {Promise<void>} Promise resolved after contact creation.
    */
   async addContact(contact: IContact) {
-    this.pendingNewContactEmail = contact.email;
-    await addDoc(this.contactsCollection, { ownerId: this.getCurrentUserId(), date: new Date(), color: this.getRandomColorOld(), ...contact });
+    const payload = this.withNormalizedEmail(contact);
+    if (this.hasEmailConflict(payload.email)) throw new Error('CONTACT_EMAIL_EXISTS');
+    this.pendingNewContactEmail = payload.email;
+    await addDoc(this.contactsCollection, {
+      ownerId: this.getCurrentUserId(),
+      date: new Date(),
+      color: this.getRandomColorOld(),
+      ...payload,
+    });
   }
 
   /**
@@ -118,7 +125,28 @@ export class FbService {
    * @returns {Promise<void>} Promise resolved after contact update.
    */
   async updateContact(id: number, contact: IContact) {
-    await updateDoc(doc(this.contactsCollection, this.contactsArray[id].id), { ...contact });
+    const current = this.contactsArray[id];
+    if (!current?.id) return;
+    const payload = this.withNormalizedEmail(contact);
+    if (this.hasEmailConflict(payload.email, current.id)) throw new Error('CONTACT_EMAIL_EXISTS');
+    await updateDoc(doc(this.contactsCollection, current.id), { ...payload });
+  }
+
+  private withNormalizedEmail(contact: IContact): IContact {
+    return { ...contact, email: this.normalizeEmail(contact.email || '') };
+  }
+
+  private hasEmailConflict(email: string, excludeContactId = ''): boolean {
+    const target = this.normalizeEmail(email);
+    return this.contactsArray.some((contact) => {
+      const sameEmail = this.normalizeEmail(contact.email || '') === target;
+      const isOtherDoc = (contact.id || '') !== excludeContactId;
+      return sameEmail && isOtherDoc;
+    });
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
   }
 
   /**
