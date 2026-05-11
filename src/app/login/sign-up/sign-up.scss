@@ -11,10 +11,10 @@
 .signup-frame {
   width: 100%;
   max-width: var(--content-max-width, 1920px);
-  margin: 0;
-  padding-top: 64px;
-  padding-left: 65.98px;
-  padding-right: 64px;
+  margin: 0 auto;
+  padding-top: var(--auth-logo-top-desktop);
+  padding-left: var(--auth-logo-left-desktop);
+  padding-right: var(--auth-logo-left-desktop);
   padding-bottom: 0;
   box-sizing: border-box;
   display: flex;
@@ -52,7 +52,7 @@
 }
 
 .logo-img {
-  width: 100px;
+  width: var(--auth-logo-size-desktop);
   height: auto;
   object-fit: contain;
 }
@@ -195,9 +195,25 @@
   cursor: pointer;
 }
 
-@media (max-width: 770px) {
+@media (max-width: 768px) {
   .signup-frame {
     padding: 32px 16px;
+    max-width: var(--auth-mobile-frame-max-width);
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .signup-header {
+    margin-bottom: 0;
+  }
+
+  .logo-container {
+    margin-top: calc(var(--auth-logo-top-mobile) - 32px);
+    margin-left: calc(var(--auth-logo-left-mobile) - 16px);
+  }
+
+  .logo-img {
+    width: var(--auth-logo-size-mobile);
   }
 
   .signup-card {

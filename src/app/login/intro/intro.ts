@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FbAuthService } from '../../services/fb-auth-service';
 
@@ -12,15 +12,20 @@ import { FbAuthService } from '../../services/fb-auth-service';
 export class Intro {
   private router = inject(Router);
   private authService = inject(FbAuthService);
+  protected readonly landsOnSidebar = signal(false);
+  protected readonly introReady = signal(false);
+
   /**
    * Resolves startup target and redirects after intro delay.
    * @returns {void} No return value.
    */
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    const targetRoute = await this.authService.resolveStartupRoute();
+    this.landsOnSidebar.set(targetRoute === '/summary');
+    this.introReady.set(true);
+
     setTimeout(() => {
-      this.authService.resolveStartupRoute().then((targetRoute) => {
-        this.router.navigate([targetRoute]);
-      });
+      this.router.navigate([targetRoute]);
     }, 2000);
   }
 }

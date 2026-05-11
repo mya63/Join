@@ -6,6 +6,15 @@
   z-index: 3000;
   --intro-duration: 1400ms;
   --intro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --intro-end-top-desktop: var(--auth-logo-top-desktop);
+  --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
+  --intro-end-size-desktop: var(--auth-logo-size-desktop);
+}
+
+.intro-container.lands-on-sidebar {
+  --intro-end-top-desktop: 64px;
+  --intro-end-left-desktop: 65.98px;
+  --intro-end-size-desktop: 100px;
 }
 
 .intro-logo {
@@ -14,7 +23,12 @@
   left: 50%;
   width: 274px;
   transform: translate(-50%, -50%);
-  animation: moveToCorner 1400ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: moveToCorner var(--intro-duration) var(--intro-ease) forwards;
+  animation-play-state: paused;
+}
+
+.intro-container.ready .intro-logo {
+  animation-play-state: running;
 }
 
 @keyframes moveToCorner {
@@ -33,9 +47,9 @@
   }
 
   100% {
-    top: 64px;
-    left: 65.98px;
-    width: 100px;
+    top: var(--intro-end-top-desktop);
+    left: var(--intro-end-left-desktop);
+    width: var(--intro-end-size-desktop);
     transform: translate(0, 0);
   }
 }
@@ -60,6 +74,15 @@
     background: #2a3647;
     overflow: hidden;
     z-index: 3000;
+    --intro-end-top-mobile: var(--auth-logo-top-mobile);
+    --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
+    --intro-end-size-mobile: var(--auth-logo-size-mobile);
+  }
+
+  .intro-mobile.lands-on-sidebar {
+    --intro-end-top-mobile: 24px;
+    --intro-end-left-mobile: 16px;
+    --intro-end-size-mobile: 24px;
   }
 
   .intro-logo-m {
@@ -69,7 +92,12 @@
     left: 50%;
     width: 180px;
     transform: translate(-50%, -50%);
-    animation: mobileLogoIntro 1400ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation: mobileLogoIntro var(--intro-duration) var(--intro-ease) forwards;
+    animation-play-state: paused;
+  }
+
+  .intro-mobile.ready .intro-logo-m {
+    animation-play-state: running;
   }
 }
 
@@ -89,9 +117,9 @@
   }
 
   100% {
-    top: 64px;
-    left: calc((100vw - min(100vw, 428px)) / 2 + 40px);
-    width: 96px;
+    top: var(--intro-end-top-mobile);
+    left: var(--intro-end-left-mobile);
+    width: var(--intro-end-size-mobile);
     transform: translate(0, 0);
   }
 }
