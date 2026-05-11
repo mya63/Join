@@ -43,7 +43,7 @@ export class Board implements OnInit, OnDestroy {
   showEditTask: boolean = false;
 
   searchTerm: string = '';
-  dragHandleOnly: boolean = typeof window !== 'undefined' ? window.innerWidth <= 1350 : true;
+  dragHandleOnly: boolean = false;
 
   private tasksSubscription: Subscription = new Subscription();
 
@@ -86,7 +86,7 @@ export class Board implements OnInit, OnDestroy {
    */
   onViewportResize(): void {
     if (typeof window === 'undefined') return;
-    this.dragHandleOnly = window.innerWidth <= 1350;
+    this.dragHandleOnly = false;
     this.cdr.markForCheck();
   }
 
