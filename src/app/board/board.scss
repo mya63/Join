@@ -286,13 +286,13 @@
 @media (max-width: 370px) {
     .overlay {
         align-items: flex-start;
-        padding: 8px;
+        padding: 8px 8px 96px;
     }
 
     .overlay .overlay-content {
         width: 100%;
-        height: auto;
-        max-height: calc(100dvh - 16px);
+        height: calc(100dvh - 104px);
+        max-height: calc(100dvh - 104px);
         border-radius: 24px;
         margin-bottom: 0;
         overflow: auto;
