@@ -117,11 +117,22 @@ export class Summary implements OnInit, OnDestroy {
     uid: string,
     email: string
   ): Promise<string | null> {
-    const snapshot = await getDocs(query(contactsRef, where(field, '==', uid)));
+    const snapshot = await this.getDocsInContext(query(contactsRef, where(field, '==', uid)));
     if (snapshot.empty) return null;
 
     const preferredDoc = this.pickPreferredContactDoc(snapshot.docs, email);
     return this.extractFullName(preferredDoc.data());
+  }
+
+  /**
+   * Reads Firestore documents inside Angular injection context.
+   * @param {Parameters<typeof getDocs>[0]} docsQuery - Firestore query to execute.
+   * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Resolved query snapshot.
+   */
+  private getDocsInContext(
+    docsQuery: Parameters<typeof getDocs>[0]
+  ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    return runInInjectionContext(this.injector, () => getDocs(docsQuery));
   }
 
   /**

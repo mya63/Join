@@ -22,7 +22,7 @@ export class FbAuthTestDataService {
   }
 
   private async ensureDailyTestContacts(user: User): Promise<void> {
-    const contactsCollection = collection(this.db, 'contacts');
+    const contactsCollection = this.getCollectionInContext('contacts');
     const managedDocs = await this.loadManagedTestContactDocs(contactsCollection, user.uid);
     
     // If NO test contacts exist, create them
@@ -41,7 +41,7 @@ export class FbAuthTestDataService {
   }
 
   private async ensureDailyTestTasks(user: User): Promise<void> {
-    const tasksCollection = collection(this.db, 'tasks');
+    const tasksCollection = this.getCollectionInContext('tasks');
     const managedDocs = await this.loadManagedTestTaskDocs(tasksCollection, user.uid);
     
     // If NO test tasks exist, create them
@@ -63,7 +63,8 @@ export class FbAuthTestDataService {
     contactsCollection: ReturnType<typeof collection>,
     ownerId: string
   ): Promise<Awaited<ReturnType<typeof getDocs>>['docs']> {
-    const ownerContacts = await getDocs(query(contactsCollection, where('ownerId', '==', ownerId)));
+    const ownerQuery = this.buildQueryInContext(contactsCollection, 'ownerId', '==', ownerId);
+    const ownerContacts = await this.getDocsInContext(ownerQuery);
     return ownerContacts.docs.filter((docItem) => this.isManagedTestContactDoc(this.toRecord(docItem.data())));
   }
 
@@ -98,8 +99,8 @@ export class FbAuthTestDataService {
     managedDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
     ownerId: string
   ): Promise<void> {
-    await Promise.all(managedDocs.map((docItem) => deleteDoc(docItem.ref)));
-    const createJobs = TEST_CONTACTS.map((contact) => addDoc(contactsCollection, this.buildTestContactPayload(contact, ownerId)));
+    await Promise.all(managedDocs.map((docItem) => this.deleteDocInContext(docItem.ref)));
+    const createJobs = TEST_CONTACTS.map((contact) => this.addDocInContext(contactsCollection, this.buildTestContactPayload(contact, ownerId)));
     await Promise.all(createJobs);
   }
 
@@ -124,7 +125,8 @@ export class FbAuthTestDataService {
     tasksCollection: ReturnType<typeof collection>,
     ownerId: string
   ): Promise<Awaited<ReturnType<typeof getDocs>>['docs']> {
-    const ownerTasks = await getDocs(query(tasksCollection, where('ownerId', '==', ownerId)));
+    const ownerQuery = this.buildQueryInContext(tasksCollection, 'ownerId', '==', ownerId);
+    const ownerTasks = await this.getDocsInContext(ownerQuery);
     const knownTitles = new Set(TEST_TASKS.map((task) => task.title));
     return ownerTasks.docs.filter((docItem) => knownTitles.has(String(this.toRecord(docItem.data())['title'] ?? '')));
   }
@@ -142,8 +144,8 @@ export class FbAuthTestDataService {
     managedDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
     ownerId: string
   ): Promise<void> {
-    await Promise.all(managedDocs.map((docItem) => deleteDoc(docItem.ref)));
-    const createJobs = TEST_TASKS.map((taskTemplate, index) => addDoc(tasksCollection, this.buildTestTaskPayload(taskTemplate, ownerId, index)));
+    await Promise.all(managedDocs.map((docItem) => this.deleteDocInContext(docItem.ref)));
+    const createJobs = TEST_TASKS.map((taskTemplate, index) => this.addDocInContext(tasksCollection, this.buildTestTaskPayload(taskTemplate, ownerId, index)));
     await Promise.all(createJobs);
   }
 
@@ -166,8 +168,8 @@ export class FbAuthTestDataService {
 
   private async cleanupTestDataForOtherOwners(currentOwnerId: string): Promise<void> {
     await runInInjectionContext(this.injector, async () => {
-      const contactsCollection = collection(this.db, 'contacts');
-      const tasksCollection = collection(this.db, 'tasks');
+      const contactsCollection = this.getCollectionInContext('contacts');
+      const tasksCollection = this.getCollectionInContext('tasks');
       const [matchingContacts, matchingTasks] = await this.loadMatchingTestFixtures(contactsCollection, tasksCollection);
       const deleteJobs = this.collectForeignFixtureDeleteJobs(matchingContacts.docs, matchingTasks.docs, currentOwnerId);
       if (deleteJobs.length > 0) await Promise.all(deleteJobs);
@@ -180,10 +182,49 @@ export class FbAuthTestDataService {
   ): Promise<[Awaited<ReturnType<typeof getDocs>>, Awaited<ReturnType<typeof getDocs>>]> {
     const testEmails = TEST_CONTACTS.map((contact) => contact.email.toLowerCase());
     const testTitles = TEST_TASKS.map((task) => task.title);
+    const contactQuery = this.buildQueryInContext(contactsCollection, 'email', 'in', testEmails);
+    const taskQuery = this.buildQueryInContext(tasksCollection, 'title', 'in', testTitles);
     return Promise.all([
-      getDocs(query(contactsCollection, where('email', 'in', testEmails))),
-      getDocs(query(tasksCollection, where('title', 'in', testTitles))),
+      this.getDocsInContext(contactQuery),
+      this.getDocsInContext(taskQuery),
     ]);
+  }
+
+  /**
+   * Creates a Firestore collection reference in Angular injection context.
+   * @param {'contacts' | 'tasks'} name - Collection name.
+   * @returns {ReturnType<typeof collection>} Firestore collection reference.
+   */
+  private getCollectionInContext(name: 'contacts' | 'tasks'): ReturnType<typeof collection> {
+    return runInInjectionContext(this.injector, () => collection(this.db, name));
+  }
+
+  /**
+   * Creates a Firestore query in Angular injection context.
+   * @param {ReturnType<typeof collection>} coll - Collection reference.
+   * @param {string} field - Field name to filter.
+   * @param {'==' | 'in'} op - Firestore where operator.
+   * @param {unknown} value - Filter value.
+   * @returns {ReturnType<typeof query>} Firestore query reference.
+   */
+  private buildQueryInContext(
+    coll: ReturnType<typeof collection>,
+    field: string,
+    op: '==' | 'in',
+    value: unknown
+  ): ReturnType<typeof query> {
+    return runInInjectionContext(this.injector, () => query(coll, where(field, op, value as never)));
+  }
+
+  /**
+   * Reads Firestore documents inside Angular injection context.
+   * @param {Parameters<typeof getDocs>[0]} docsQuery - Firestore query to execute.
+   * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Resolved query snapshot.
+   */
+  private getDocsInContext(
+    docsQuery: Parameters<typeof getDocs>[0]
+  ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    return runInInjectionContext(this.injector, () => getDocs(docsQuery));
   }
 
   private collectForeignFixtureDeleteJobs(
@@ -203,7 +244,31 @@ export class FbAuthTestDataService {
   ): Array<Promise<void>> {
     return docs
       .filter((docItem) => this.isForeignOwner(this.toRecord(docItem.data()), currentOwnerId))
-      .map((docItem) => deleteDoc(docItem.ref));
+      .map((docItem) => this.deleteDocInContext(docItem.ref));
+  }
+
+  /**
+   * Creates a Firestore document inside Angular injection context.
+   * @param {Parameters<typeof addDoc>[0]} coll - Firestore collection reference.
+   * @param {Parameters<typeof addDoc>[1]} payload - Document payload.
+   * @returns {Promise<Awaited<ReturnType<typeof addDoc>>>} Created document reference.
+   */
+  private addDocInContext(
+    coll: Parameters<typeof addDoc>[0],
+    payload: Parameters<typeof addDoc>[1]
+  ): Promise<Awaited<ReturnType<typeof addDoc>>> {
+    return runInInjectionContext(this.injector, () => addDoc(coll, payload));
+  }
+
+  /**
+   * Deletes a Firestore document inside Angular injection context.
+   * @param {Parameters<typeof deleteDoc>[0]} docRef - Firestore document reference.
+   * @returns {Promise<void>} Promise resolved after deletion.
+   */
+  private deleteDocInContext(
+    docRef: Parameters<typeof deleteDoc>[0]
+  ): Promise<void> {
+    return runInInjectionContext(this.injector, () => deleteDoc(docRef));
   }
 
   private isForeignOwner(data: Record<string, unknown>, currentOwnerId: string): boolean {

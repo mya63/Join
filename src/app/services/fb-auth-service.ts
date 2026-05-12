@@ -67,7 +67,7 @@ export class FbAuthService {
    * @returns {Promise<'/summary' | '/login'>} Target route for app startup.
    */
   private resolveRouteFromAuthState(): Promise<'/summary' | '/login'> {
-    return new Promise((resolve) => {
+    return new Promise((resolve) => runInInjectionContext(this.injector, () => {
       const unsub = onAuthStateChanged(this.auth, (user) => {
         unsub();
         if (!user) {
@@ -77,7 +77,7 @@ export class FbAuthService {
         }
         this.syncAndResolveSummary(user, resolve);
       });
-    });
+    }));
   }
 
 
@@ -106,10 +106,10 @@ export class FbAuthService {
    */
   async signUp(email: string, password: string, name = '', surname = ''): Promise<void> {
     try {
-      const result = await createUserWithEmailAndPassword(this.auth, email, password);
+      const result = await this.createUserInContext(email, password);
       await this.ensureSelfContact(result.user, name, surname);
       await this.syncDailyTestDataForUser(result.user);
-      await signOut(this.auth);
+      await this.signOutInContext();
       this.setLocalLoginState(false);
       this.router.navigate(['/login'], { queryParams: { email, password, signupSuccess: '1' } });
     } catch (error) {
@@ -126,7 +126,7 @@ export class FbAuthService {
    */
   async login(email: string, password: string): Promise<void> {
     try {
-      const result = await signInWithEmailAndPassword(this.auth, email, password);
+      const result = await this.signInInContext(email, password);
       await this.syncDailyTestDataForUser(result.user);
       this.setLocalLoginState(true);
       this.router.navigate(['/summary']);
@@ -172,7 +172,7 @@ export class FbAuthService {
    */
   private async createAndLoginTestUser(): Promise<void> {
     try {
-      const created = await createUserWithEmailAndPassword(this.auth, environment.testUser.email, environment.testUser.password);
+      const created = await this.createUserInContext(environment.testUser.email, environment.testUser.password);
       await this.syncDailyTestDataForUser(created.user);
       this.setLocalLoginState(true);
       this.router.navigate(['/summary']);
@@ -200,7 +200,7 @@ export class FbAuthService {
    */
   async logout(): Promise<void> {
     try {
-      await signOut(this.auth);
+      await this.signOutInContext();
       this.setLocalLoginState(false);
       this.router.navigate(['/login']);
     } catch {}
@@ -233,7 +233,7 @@ export class FbAuthService {
     const user = this.auth.currentUser;
     if (!user) return;
     try {
-      await deleteUser(user);
+      await this.deleteUserInContext(user);
       this.navigateAfterSignOut();
     } catch (error: any) {
       await this.handleDeleteUserError(error);
@@ -258,7 +258,7 @@ export class FbAuthService {
    */
   private async handleDeleteUserError(error: any): Promise<void> {
     if (error.code === 'auth/requires-recent-login') {
-      await signOut(this.auth);
+      await this.signOutInContext();
       this.navigateAfterSignOut();
       return;
     }
@@ -293,8 +293,8 @@ export class FbAuthService {
     contactsCollection: ReturnType<typeof collection>,
     user: User
   ): Promise<boolean> {
-    const snapshot = await getDocs(query(contactsCollection, where('ownerId', '==', user.uid)));
-    return snapshot.docs.some((docItem) => docItem.data()['email'] === user.email);
+    const snapshot = await this.getDocsInContext(query(contactsCollection, where('ownerId', '==', user.uid)));
+    return snapshot.docs.some((docItem) => (docItem.data() as Record<string, unknown>)['email'] === user.email);
   }
 
 
@@ -313,7 +313,7 @@ export class FbAuthService {
     surname: string
   ): Promise<void> {
     const contactPayload = buildSelfContactPayload(user, name, surname);
-    await addDoc(contactsCollection, contactPayload);
+    await this.addDocInContext(contactsCollection, contactPayload);
   }
 
 
@@ -359,8 +359,75 @@ export class FbAuthService {
    */
   async isEmailRegistered(email: string): Promise<boolean> {
     const contactsCollection = collection(this.db, 'contacts');
-    const snapshot = await getDocs(query(contactsCollection, where('email', '==', email.trim().toLowerCase())));
+    const snapshot = await this.getDocsInContext(query(contactsCollection, where('email', '==', email.trim().toLowerCase())));
     return !snapshot.empty;
+  }
+
+  /**
+   * Executes a Firestore getDocs query inside Angular injection context.
+   * @param {Parameters<typeof getDocs>[0]} docsQuery - Firestore query reference.
+   * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Firestore query snapshot.
+   */
+  private getDocsInContext(
+    docsQuery: Parameters<typeof getDocs>[0]
+  ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    return runInInjectionContext(this.injector, () => getDocs(docsQuery));
+  }
+
+  /**
+   * Signs in a user in Angular injection context.
+   * @param {string} email - User email address.
+   * @param {string} password - User password.
+   * @returns {Promise<Awaited<ReturnType<typeof signInWithEmailAndPassword>>>} Auth sign-in result.
+   */
+  private signInInContext(
+    email: string,
+    password: string
+  ): Promise<Awaited<ReturnType<typeof signInWithEmailAndPassword>>> {
+    return runInInjectionContext(this.injector, () => signInWithEmailAndPassword(this.auth, email, password));
+  }
+
+  /**
+   * Creates a user account in Angular injection context.
+   * @param {string} email - User email address.
+   * @param {string} password - User password.
+   * @returns {Promise<Awaited<ReturnType<typeof createUserWithEmailAndPassword>>>} Auth sign-up result.
+   */
+  private createUserInContext(
+    email: string,
+    password: string
+  ): Promise<Awaited<ReturnType<typeof createUserWithEmailAndPassword>>> {
+    return runInInjectionContext(this.injector, () => createUserWithEmailAndPassword(this.auth, email, password));
+  }
+
+  /**
+   * Signs out current user in Angular injection context.
+   * @returns {Promise<void>} Promise resolved after sign-out.
+   */
+  private signOutInContext(): Promise<void> {
+    return runInInjectionContext(this.injector, () => signOut(this.auth));
+  }
+
+  /**
+   * Deletes a Firebase user in Angular injection context.
+   * @param {User} user - User to delete.
+   * @returns {Promise<void>} Promise resolved after deletion.
+   */
+  private deleteUserInContext(user: User): Promise<void> {
+    return runInInjectionContext(this.injector, () => deleteUser(user));
+  }
+
+  /**
+   * Creates a Firestore document in Angular injection context.
+   * @param {Parameters<typeof addDoc>[0]} coll - Firestore collection reference.
+   * @param {Parameters<typeof addDoc>[1]} payload - Document payload.
+   * @returns {Promise<Awaited<ReturnType<typeof addDoc>>>} Created document reference.
+   */
+  private addDocInContext(
+    coll: Parameters<typeof addDoc>[0],
+    payload: Parameters<typeof addDoc>[1]
+  ): Promise<Awaited<ReturnType<typeof addDoc>>> {
+    return runInInjectionContext(this.injector, () => addDoc(coll, payload));
   }
 
 

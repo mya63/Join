@@ -65,9 +65,11 @@ export class FbTaskService {
   private bindTaskListenerToAuthState(): void {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, (user) => {
-        const userId = user?.uid || 'guest';
-        this.newTask.ownerId = userId;
-        this.startTasksListener(userId);
+        runInInjectionContext(this.injector, () => {
+          const userId = user?.uid || 'guest';
+          this.newTask.ownerId = userId;
+          this.startTasksListener(userId);
+        });
       });
     });
   }
@@ -104,9 +106,11 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private attachUnfilteredListener(): void {
-    this.myTasks = onSnapshot(this.tasksCollection, (snapshot) => {
-      this.applyTaskSnapshot(snapshot);
-    });
+    this.myTasks = runInInjectionContext(this.injector, () =>
+      onSnapshot(this.tasksCollection, (snapshot) => {
+        this.applyTaskSnapshot(snapshot);
+      })
+    );
   }
 
   /**
@@ -117,7 +121,13 @@ export class FbTaskService {
   private attachFilteredListener(userId: string): void {
     const state = { fallbackActive: false };
     const filteredQuery = this.buildFilteredQuery(userId);
-    this.myTasks = onSnapshot(filteredQuery, (snapshot) => this.handleFilteredSnapshot(snapshot, state), () => this.handleFilteredSnapshotError(state));
+    this.myTasks = runInInjectionContext(this.injector, () =>
+      onSnapshot(
+        filteredQuery,
+        (snapshot) => this.handleFilteredSnapshot(snapshot, state),
+        () => this.handleFilteredSnapshotError(state)
+      )
+    );
   }
 
   /**

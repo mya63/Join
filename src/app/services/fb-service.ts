@@ -59,13 +59,15 @@ export class FbService {
    * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
    */
   private bindContactsListener(): VoidFunction {
-    return onSnapshot(this.contactsCollectionSorted, (snapshot) => {
-      this.allContacts = [];
-      snapshot.forEach((element) => {
-        this.allContacts.push({ id: element.id, ...element.data() } as IContact);
-      });
-      this.applyOwnerFilter();
-    });
+    return runInInjectionContext(this.injector, () =>
+      onSnapshot(this.contactsCollectionSorted, (snapshot) => {
+        this.allContacts = [];
+        snapshot.forEach((element) => {
+          this.allContacts.push({ id: element.id, ...element.data() } as IContact);
+        });
+        this.applyOwnerFilter();
+      })
+    );
   }
 
   /**
@@ -86,9 +88,11 @@ export class FbService {
    * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
    */
   private bindDataListener(): VoidFunction {
-    return onSnapshot(this.dataCollection, (snapshot) => {
-      this.data = snapshot.docs.map((document) => document.data());
-    });
+    return runInInjectionContext(this.injector, () =>
+      onSnapshot(this.dataCollection, (snapshot) => {
+        this.data = snapshot.docs.map((document) => document.data());
+      })
+    );
   }
 
   /**
