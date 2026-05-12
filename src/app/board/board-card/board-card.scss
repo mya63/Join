@@ -4,7 +4,7 @@
 }
 
 .card-wrap {
-  background-color: var(--bg);
+  background-color: transparent;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -44,6 +44,10 @@
     transform: translateY(-4px);
     box-shadow: 0 4px 16px 4px rgba(0, 0, 0, 0.12);
   }
+}
+
+.card.cdk-drag-preview {
+  background-color: transparent;
 }
 
 .card-full-drag {

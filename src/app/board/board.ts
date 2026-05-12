@@ -67,7 +67,7 @@ export class Board implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  private isDragging = false;
+  isDragging = false;
 
   /**
    * Determines whether drag-and-drop should be disabled for the current viewport.

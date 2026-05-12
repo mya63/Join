@@ -1,7 +1,7 @@
 <div class="board">
     <app-board-header (addTaskToColumn)="openAddCardOverlay($event)" (searchTasks)="onSearchTasks($event)"></app-board-header>
 
-<div class="task-table">
+<div class="task-table" [class.dragging]="isDragging">
 
     <div id="getTaskCollumnOne" cdkDropList [cdkDropListData]="todoTasks" [cdkDropListConnectedTo]="collumns"
         (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">

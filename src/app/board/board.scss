@@ -38,6 +38,19 @@
 
 }
 
+.task-table.dragging .collumn {
+    border-color: transparent !important;
+    background-color: rgba(42, 116, 255, 0.04) !important;
+    box-shadow: 0 0 0 2px rgba(42, 116, 255, 0.12), 0 10px 24px rgba(42, 116, 255, 0.08);
+    border-radius: 24px;
+}
+
+.task-table.dragging .collumn:hover {
+    background-color: rgba(42, 116, 255, 0.1) !important;
+    box-shadow: 0 0 0 2px rgba(42, 116, 255, 0.22), 0 12px 28px rgba(42, 116, 255, 0.12);
+    border-radius: 24px;
+}
+
 .no-tasks {
     width: 100%;
     min-height: 52px;
