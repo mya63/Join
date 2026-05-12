@@ -24,9 +24,14 @@
 
       <div class="footer">
         <div class="avatars">
-          @for (avatar of card.assignTo; track avatar.id) {
+          @for (avatar of getDisplayContacts(); track avatar.id) {
           <div class="avatar" [style.background]="avatar.color">
             {{ avatar.name.charAt(0) + avatar.surname.charAt(0) }}
+          </div>
+          }
+          @if (hasMoreContacts()) {
+          <div class="avatar avatar-ellipsis">
+            .....
           </div>
           }
         </div>
@@ -58,9 +63,14 @@
 
       <div class="footer">
         <div class="avatars">
-          @for (avatar of card.assignTo; track avatar.id) {
+          @for (avatar of getDisplayContacts(); track avatar.id) {
           <div class="avatar" [style.background]="avatar.color">
             {{ avatar.name.charAt(0) + avatar.surname.charAt(0) }}
+          </div>
+          }
+          @if (hasMoreContacts()) {
+          <div class="avatar avatar-ellipsis">
+            .....
           </div>
           }
         </div>

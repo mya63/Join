@@ -44,4 +44,19 @@ export class BoardCard {
     return (this.getSubtaskDone() / subTasks.length) * 100;
   }
 
+  /**
+   * Returns maximum 7 contacts from task's assignTo list.
+   * @returns {Array} Array of up to 7 contacts.
+   */
+  getDisplayContacts(): Array<any> {
+    return (this.card.assignTo ?? []).slice(0, 7);
+  }
+
+  /**
+   * Checks if contact list exceeds 7 items and should show ellipsis.
+   * @returns {boolean} True if more than 7 contacts exist.
+   */
+  hasMoreContacts(): boolean {
+    return (this.card.assignTo ?? []).length > 7;
+  }
 }

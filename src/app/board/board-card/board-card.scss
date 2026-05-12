@@ -169,9 +169,19 @@
     text-align: center;
     margin-left: -8px;
     background: #462f8a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:first-child {
       margin-left: 0;
+    }
+
+    &.avatar-ellipsis {
+      background: #999;
+      font-size: 10px;
+      padding: 0;
+      line-height: 1;
     }
   }
 
