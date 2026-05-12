@@ -103,7 +103,6 @@ export class Login implements OnInit {
    * @returns {void} No return value.
    */
   private handleFirebaseError(error: any): void {
-    console.error('Login failed:', error);
     this.loginErrors.firebase = this.getFirebaseErrorMessage(error);
     this.cdr.markForCheck();
   }

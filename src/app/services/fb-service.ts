@@ -181,7 +181,9 @@ export class FbService {
    * @returns {Promise<void>} Promise resolved after debug flow completes.
    */
   async updateOneField(id: string, field: string, value: number) {
-    console.log(id, field, value);
+    void id;
+    void field;
+    void value;
   }
 
   /**

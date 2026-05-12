@@ -23,9 +23,7 @@ export class FbAuthService {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, (user) => {
         if (!user) return;
-        this.syncDailyTestDataForUser(user).catch((error) => {
-          console.error('Error during auth-state test data sync:', error);
-        });
+        this.syncDailyTestDataForUser(user).catch(() => undefined);
       });
     });
   }
@@ -115,7 +113,6 @@ export class FbAuthService {
       this.setLocalLoginState(false);
       this.router.navigate(['/login'], { queryParams: { email, password, signupSuccess: '1' } });
     } catch (error) {
-      console.error('Sign-up error:', error);
       throw error;
     }
   }
@@ -134,7 +131,6 @@ export class FbAuthService {
       this.setLocalLoginState(true);
       this.router.navigate(['/summary']);
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     }
   }
@@ -207,9 +203,7 @@ export class FbAuthService {
       await signOut(this.auth);
       this.setLocalLoginState(false);
       this.router.navigate(['/login']);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    } catch {}
   }
 
 
@@ -268,7 +262,6 @@ export class FbAuthService {
       this.navigateAfterSignOut();
       return;
     }
-    console.error('Error deleting user account:', error);
     throw error;
   }
 
@@ -286,9 +279,7 @@ export class FbAuthService {
       const alreadyExists = await this.selfContactExists(contactsCollection, user);
       if (alreadyExists) return;
       await this.createSelfContact(contactsCollection, user, name, surname);
-    } catch (error) {
-      console.error('Error ensuring self contact:', error);
-    }
+    } catch {}
   }
 
 

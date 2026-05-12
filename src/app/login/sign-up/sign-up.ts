@@ -223,7 +223,6 @@ export class SignUp {
    * @returns {void} No return value.
    */
   private handleFirebaseError(error: any): void {
-    console.error('Sign-up failed:', error);
     const code = String(error?.code || '');
     const messages: Record<string, string> = {
       'auth/email-already-in-use': 'This email is already registered.',

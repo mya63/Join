@@ -38,7 +38,6 @@ export class crud {
    */
   addContact() {
     this.fbService.addContact(this.contact);
-    console.log(this.contact);
     this.clearInput();
 
   }
@@ -49,7 +48,6 @@ export class crud {
    */
   upContact() {
     this.fbService.updateContact(this.id, this.contact);
-    console.log("Updated contact with ID:", this.id);
     this.clearInput();
   }
 
@@ -58,7 +56,6 @@ export class crud {
    * @returns {void} No return value.
    */
   delContact() {
-    console.log(this.fbService.contactsGroups.length, this.id, this.fbService.addContact.length);
     this.fbService.contactsArray.length > 0 && this.fbService.contactsGroups.length > 0 &&
       this.fbService.contactsArray.length > this.id ? this.fbService.delContact(this.id) : null;
   }

@@ -104,7 +104,6 @@ export class Tasktest {
     this.columnIndex = (this.columnIndex + 1) % this.fbTaskService.tasksArray.length;
     this.currentTask = this.fbTaskService.tasksArray[this.columnIndex];
     this.fbTaskService.currentTask = this.currentTask;
-    console.log(this.currentTask, this.columnIndex);
 
   }
 
