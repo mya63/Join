@@ -4,7 +4,7 @@
   background: #f6f7f8;
   overflow: hidden;
   z-index: 3000;
-  --intro-duration: 1400ms;
+  --intro-duration: 2300ms;
   --intro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --intro-end-top-desktop: var(--auth-logo-top-desktop);
   --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
@@ -25,6 +25,8 @@
   transform: translate(-50%, -50%);
   animation: moveToCorner var(--intro-duration) var(--intro-ease) forwards;
   animation-play-state: paused;
+  will-change: top, left, width, transform;
+  backface-visibility: hidden;
 }
 
 .intro-container.ready .intro-logo {
@@ -36,14 +38,14 @@
     top: 50%;
     left: 50%;
     width: 274px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1.04);
   }
 
-  58% {
+  12% {
     top: 50%;
     left: 50%;
     width: 274px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1);
   }
 
   100% {
@@ -62,7 +64,7 @@
   display: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1350px) {
   .intro-container {
     display: none;
   }
@@ -74,6 +76,8 @@
     background: #2a3647;
     overflow: hidden;
     z-index: 3000;
+    --intro-duration: 2300ms;
+    --intro-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
@@ -94,6 +98,8 @@
     transform: translate(-50%, -50%);
     animation: mobileLogoIntro var(--intro-duration) var(--intro-ease) forwards;
     animation-play-state: paused;
+    will-change: top, left, width, transform;
+    backface-visibility: hidden;
   }
 
   .intro-mobile.ready .intro-logo-m {
@@ -106,14 +112,14 @@
     top: 50%;
     left: 50%;
     width: 180px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1.04);
   }
 
-  58% {
+  12% {
     top: 50%;
     left: 50%;
     width: 180px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1);
   }
 
   100% {

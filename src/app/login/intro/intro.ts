@@ -14,7 +14,7 @@ export class Intro {
   private authService = inject(FbAuthService);
   protected readonly landsOnSidebar = signal(false);
   protected readonly introReady = signal(false);
-  private readonly introDelayMs = 3200;
+  private readonly introDelayMs = 2400;
 
   /**
    * Resolves startup target and redirects after intro delay.
