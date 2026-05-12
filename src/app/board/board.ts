@@ -8,7 +8,7 @@ import { BoardCard } from './board-card/board-card';
 import { AddCard } from './add-card/add-card';
 import { InfoTask } from './info-task/info-task';
 import { EditTask } from './edit-task/edit-task';
-import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList, } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList, } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -38,6 +38,7 @@ export class Board implements OnInit, OnDestroy {
   showEditTask: boolean = false;
   searchTerm: string = '';
   dragHandleOnly: boolean = false;
+  activeDropListId: string = '';
 
   private tasksSubscription: Subscription = new Subscription();
 
@@ -299,6 +300,47 @@ export class Board implements OnInit, OnDestroy {
    */
   onDragStarted(): void {
     this.isDragging = true;
+  }
+
+  /**
+   * Marks the currently hovered drop list while dragging.
+   * @param {CdkDragEnter<ITask[]>} event - Enter event emitted by CDK drop list.
+   * @returns {void} No return value.
+   */
+  onDropListEntered(event: CdkDragEnter<ITask[]>): void {
+    this.activeDropListId = event.container.id;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Clears the hovered drop list when the drag leaves a column.
+   * @param {CdkDragExit<ITask[]>} event - Exit event emitted by CDK drop list.
+   * @returns {void} No return value.
+   */
+  onDropListExited(event: CdkDragExit<ITask[]>): void {
+    if (this.activeDropListId === event.container.id) {
+      this.activeDropListId = '';
+      this.cdr.markForCheck();
+    }
+  }
+
+  /**
+   * Checks whether the given drop list is currently active.
+   * @param {string} dropListId - Drop list container id.
+   * @returns {boolean} True when the drop list is the hovered active target.
+   */
+  isDropListActive(dropListId: string): boolean {
+    return this.activeDropListId === dropListId;
+  }
+
+  /**
+   * Clears drag state and any active drop list after a drag gesture ends.
+   * @returns {void} No return value.
+   */
+  onDragEnded(): void {
+    this.isDragging = false;
+    this.activeDropListId = '';
+    this.cdr.markForCheck();
   }
 
   /**

@@ -4,7 +4,9 @@
 <div class="task-table" [class.dragging]="isDragging">
 
     <div id="getTaskCollumnOne" cdkDropList [cdkDropListData]="todoTasks" [cdkDropListConnectedTo]="collumns"
-        (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        (cdkDropListDropped)="drop($event)" (cdkDropListEntered)="onDropListEntered($event)"
+        (cdkDropListExited)="onDropListExited($event)" [cdkDropListEnterPredicate]="noReturnPredicate"
+        class="collumn" [class.drop-active]="isDropListActive('getTaskCollumnOne')">
         <div class="column-title">
             <span>To do</span>
             <button type="button" class="column-add-btn" (click)="openAddCardOverlay('to-do')">
@@ -23,7 +25,9 @@
             [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks To do</div>} </div>
 
     <div id="getTaskCollumnTwo" cdkDropList [cdkDropListData]="inProgressTasks" [cdkDropListConnectedTo]="collumns"
-        (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        (cdkDropListDropped)="drop($event)" (cdkDropListEntered)="onDropListEntered($event)"
+        (cdkDropListExited)="onDropListExited($event)" [cdkDropListEnterPredicate]="noReturnPredicate"
+        class="collumn" [class.drop-active]="isDropListActive('getTaskCollumnTwo')">
         <div class="column-title">
             <span>In progress</span>
             <button type="button" class="column-add-btn" (click)="openAddCardOverlay('in-progress')">
@@ -42,7 +46,9 @@
             [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks In progress</div>} </div>
 
     <div id="getTaskCollumnThree" cdkDropList [cdkDropListData]="awaitFeedbackTasks" [cdkDropListConnectedTo]="collumns"
-        (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        (cdkDropListDropped)="drop($event)" (cdkDropListEntered)="onDropListEntered($event)"
+        (cdkDropListExited)="onDropListExited($event)" [cdkDropListEnterPredicate]="noReturnPredicate"
+        class="collumn" [class.drop-active]="isDropListActive('getTaskCollumnThree')">
         <div class="column-title">
             <span>Await feedback</span>
             <button type="button" class="column-add-btn" (click)="openAddCardOverlay('await-feedback')">
@@ -61,7 +67,9 @@
             [card]="item" [displayIndex]="idx + 1" [dragHandleOnly]="dragHandleOnly" (cardClick)="openInfoTask($event)"></app-board-card></div>} @empty {<div class="no-tasks">No tasks Await feedback</div>} </div>
 
     <div id="getTaskCollumnFour" cdkDropList [cdkDropListData]="doneTasks" [cdkDropListConnectedTo]="collumns"
-        (cdkDropListDropped)="drop($event)" [cdkDropListEnterPredicate]="noReturnPredicate" class="collumn">
+        (cdkDropListDropped)="drop($event)" (cdkDropListEntered)="onDropListEntered($event)"
+        (cdkDropListExited)="onDropListExited($event)" [cdkDropListEnterPredicate]="noReturnPredicate"
+        class="collumn" [class.drop-active]="isDropListActive('getTaskCollumnFour')">
         <div class="column-title">
             <span>Done</span>
         </div>
