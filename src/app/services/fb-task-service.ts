@@ -199,7 +199,16 @@ export class FbTaskService {
       subTasks: Array.isArray(task.subTasks) ? task.subTasks : [],
       assignTo: Array.isArray(task.assignTo) ? task.assignTo : [],
     };
-    await addDoc(this.tasksCollection, taskData);
+    await this.addDocInContext(taskData);
+  }
+
+  /**
+   * Creates a task document within Angular's injection context.
+   * @param {Partial<ITask>} taskData - Normalized task payload to persist.
+   * @returns {Promise<void>} Promise resolved after document creation.
+   */
+  private addDocInContext(taskData: Partial<ITask>): Promise<void> {
+    return runInInjectionContext(this.injector, () => addDoc(this.tasksCollection, taskData).then(() => undefined));
   }
 
   /**
@@ -236,8 +245,19 @@ export class FbTaskService {
    */
   async deleteTask(taskId?: string | undefined): Promise<void> {
     if (!taskId) return;
-    const taskDoc = doc(this.db, 'tasks', taskId);
-    await deleteDoc(taskDoc);
+    await this.deleteDocInContext(taskId);
+  }
+
+  /**
+   * Deletes a task document within Angular's injection context.
+   * @param {string} taskId - Task document id.
+   * @returns {Promise<void>} Promise resolved after document deletion.
+   */
+  private deleteDocInContext(taskId: string): Promise<void> {
+    return runInInjectionContext(this.injector, () => {
+      const taskDoc = doc(this.db, 'tasks', taskId);
+      return deleteDoc(taskDoc);
+    });
   }
 
   /**
@@ -251,8 +271,20 @@ export class FbTaskService {
     if (updatedData.status) {
       updatedData.status == 'done' ? updatedData.completed = true : updatedData.completed = false;
     }
-    const taskDoc = doc(this.tasksCollection, taskId);
-    await updateDoc(taskDoc, updatedData);
+    await this.updateDocInContext(taskId, updatedData);
+  }
+
+  /**
+   * Updates a task document within Angular's injection context.
+   * @param {string} taskId - Task document id.
+   * @param {Partial<ITask>} updatedData - Task fields to persist.
+   * @returns {Promise<void>} Promise resolved after document update.
+   */
+  private updateDocInContext(taskId: string, updatedData: Partial<ITask>): Promise<void> {
+    return runInInjectionContext(this.injector, () => {
+      const taskDoc = doc(this.tasksCollection, taskId);
+      return updateDoc(taskDoc, updatedData);
+    });
   }
 
   /**
