@@ -13,12 +13,10 @@
         </div>
       </button>
     </div>
-
-    <!-- Pinned Title -->
-    <h2 class="task-title task-title-pinned">{{ task().title }}</h2>
   </div>
 
   <div class="panel-body">
+  <h2 class="task-title">{{ task().title }}</h2>
   <!-- Description -->
   @if (task().description) {
     <p class="task-description">{{ task().description }}</p>

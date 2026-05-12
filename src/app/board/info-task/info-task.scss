@@ -136,12 +136,6 @@
   word-break: break-word;
 }
 
-.task-title-pinned {
-  flex-shrink: 0;
-  margin: 0;
-  padding: 0 48px 12px 48px;
-}
-
 .task-description {
   font-size: 20px;
   color: #2a3647;
@@ -307,10 +301,6 @@
 
   .panel-top {
     padding: 20px 20px 0 20px;
-  }
-
-  .task-title-pinned {
-    padding: 0 20px 8px 20px;
   }
 
   .panel-body {
