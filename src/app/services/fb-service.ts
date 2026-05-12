@@ -1,10 +1,9 @@
-import { Injectable, inject, HostListener, ComponentRef, Injector, runInInjectionContext } from '@angular/core';
-import { Firestore, collectionData, collection, doc, onSnapshot, orderBy, query, where } from '@angular/fire/firestore';
+import { Injectable, inject, Injector, runInInjectionContext } from '@angular/core';
+import { Firestore, collection, doc, onSnapshot, orderBy, query } from '@angular/fire/firestore';
 import { addDoc, deleteDoc, updateDoc } from '@angular/fire/firestore';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { IContact } from '../interfaces/i-contact';
 import { environment } from '../../environments/environment';
-import { Contacts } from '../contacts/contacts';
 import { FbAuthService } from './fb-auth-service';
 
 @Injectable({
@@ -21,8 +20,6 @@ export class FbService {
   contactsCollection = collection(this.db, 'contacts');
   contactsCollectionSorted = query(this.contactsCollection, orderBy('date', 'desc'));
   dataCollection = collection(this.db, 'data');
-
-
   myContacts;
   allContacts: IContact[] = [];
   contactsArray: IContact[] = [];
@@ -33,7 +30,6 @@ export class FbService {
   myWidth: number = window.innerWidth;
   id: number = 0;
   i: number[] = [0];
-
   myData;
   data: any[] = [];
 
@@ -197,14 +193,11 @@ export class FbService {
     const contact = this.contactsArray[id];
     if (!contact) return false;
     if (this.isForeignUserContact(contact)) return false;
-
     const isSelf = this.isSelfAccountContact(contact);
     await deleteDoc(doc(this.contactsCollection, contact.id));
-
     if (isSelf) {
       await this.authService.deleteCurrentUserAccount();
     }
-
     this.id = this.firstConnect();
     return true;
   }

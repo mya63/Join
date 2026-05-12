@@ -11,7 +11,6 @@ import { EditTask } from './edit-task/edit-task';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList, } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 
-
 @Component({
   selector: 'app-board',
   imports: [BoardHeader, FormsModule, BoardCard, AddCard, InfoTask, EditTask, CdkDropList, CdkDrag, CommonModule],
@@ -28,25 +27,24 @@ export class Board implements OnInit, OnDestroy {
 
   columnIndex: number = 0;
   collumns: string[] = ['getTaskCollumnOne', 'getTaskCollumnTwo', 'getTaskCollumnThree', 'getTaskCollumnFour'];
-
   todoTasks: ITask[] = [];
   inProgressTasks: ITask[] = [];
   awaitFeedbackTasks: ITask[] = [];
   doneTasks: ITask[] = [];
-
   showAddCardOverlay: boolean = false;
   selectedColumn: string = '';
-
   showInfoTask: boolean = false;
   selectedTask: ITask | null = null;
-
   showEditTask: boolean = false;
-
   searchTerm: string = '';
   dragHandleOnly: boolean = false;
 
   private tasksSubscription: Subscription = new Subscription();
 
+  /**
+   * Initializes board defaults and resets the shared current-task placeholder.
+   * @returns {void} No return value.
+   */
   constructor() {
     this.columnIndex = 0;
     this.fbTaskService.currentTask = {} as ITask;
@@ -56,7 +54,7 @@ export class Board implements OnInit, OnDestroy {
    * Subscribes to task updates and initializes cached column data.
    * @returns {void} No return value.
    */
-  ngOnInit() {
+  ngOnInit(): void {
     this.tasksSubscription = this.fbTaskService.tasksUpdated$.subscribe(tasks => {
       if (!this.isDragging) {
         this.updateColumnArrays();
@@ -79,7 +77,6 @@ export class Board implements OnInit, OnDestroy {
     return window.innerWidth <= 1350;
   }
 
-
   /**
    * Updates drag mode according to viewport width.
    * @returns {void} No return value.
@@ -94,7 +91,7 @@ export class Board implements OnInit, OnDestroy {
    * Unsubscribes from task stream updates when the component is destroyed.
    * @returns {void} No return value.
    */
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.tasksSubscription.unsubscribe();
   }
 
@@ -292,7 +289,7 @@ export class Board implements OnInit, OnDestroy {
    * Placeholder drop predicate that currently allows all drops.
    * @returns {boolean} Always returns true in the current implementation.
    */
-  noReturnPredicate() {
+  noReturnPredicate(): boolean {
     return true;
   }
 
@@ -300,7 +297,7 @@ export class Board implements OnInit, OnDestroy {
    * Marks the board as actively dragging to prevent conflicting UI refreshes.
    * @returns {void} No return value.
    */
-  onDragStarted() {
+  onDragStarted(): void {
     this.isDragging = true;
   }
 

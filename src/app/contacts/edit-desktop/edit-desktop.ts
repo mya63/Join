@@ -15,6 +15,10 @@ export class EditDesktop {
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
 
+/**
+ * Initializes the edit overlay state from the currently selected contact.
+ * @returns {void} No return value.
+ */
   constructor() { this.getCurrentContact(); }
 
 contact: IContact = { name: '', surname: '', email: '', phone: '' };
@@ -27,7 +31,7 @@ private readonly closeAnimationMs = 400;
  * Closes the desktop edit overlay with exit animation.
  * @returns {void} No return value.
  */
-onClose() {
+onClose(): void {
 this.startCloseAnimation();
 }
 
@@ -36,7 +40,7 @@ this.startCloseAnimation();
  * @param {MouseEvent} event - Overlay click event.
  * @returns {void} No return value.
  */
-onOverlayClick(event: MouseEvent) {
+onOverlayClick(event: MouseEvent): void {
 if (event.target === event.currentTarget) {
   this.onClose();
 }
@@ -46,7 +50,7 @@ if (event.target === event.currentTarget) {
  * Deletes the selected contact and closes the overlay.
  * @returns {void} No return value.
  */
-delContact() {
+delContact(): void {
 this.fbService.contactsArray.length > 0 && this.fbService.contactsGroups.length > 0 &&
 this.fbService.contactsArray.length > this.fbService.id ? this.fbService.delContact(this.fbService.id) : null;
 this.startCloseAnimation();
@@ -89,6 +93,10 @@ try {
 this.startCloseAnimation();
 }
 
+/**
+ * Triggers overlay close animation and hides the overlay after the animation delay.
+ * @returns {void} No return value.
+ */
 private startCloseAnimation(): void {
 this.zone.run(() => {
   this.isClosing = true;
@@ -102,14 +110,28 @@ this.zone.run(() => {
 });
 }
 
+/**
+ * Clears the duplicate-email UI state when the email input changes.
+ * @returns {void} No return value.
+ */
 onEmailChange(): void {
 this.duplicateEmail = false;
 }
 
+/**
+ * Maps service-level save errors to local UI flags.
+ * @param {unknown} error - Error thrown while persisting contact updates.
+ * @returns {void} No return value.
+ */
 private handleSubmitError(error: unknown): void {
 this.duplicateEmail = this.isDuplicateEmailError(error);
 }
 
+/**
+ * Checks whether an error indicates a duplicate contact email.
+ * @param {unknown} error - Error instance to inspect.
+ * @returns {boolean} True when the error matches the duplicate-email marker.
+ */
 private isDuplicateEmailError(error: unknown): boolean {
 return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
 }
@@ -118,7 +140,7 @@ return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
  * Returns a copy of the currently selected contact for editing.
  * @returns {IContact} Editable contact copy.
  */
-getCurrentContact() {
+getCurrentContact(): IContact {
 this.editedContact = { ...this.fbService.currentContact };
 return this.editedContact;
 }
@@ -127,7 +149,7 @@ return this.editedContact;
  * Returns whether the desktop edit overlay is visible.
  * @returns {boolean} True when edit mode is active.
  */
-getShowEditContact() {
+getShowEditContact(): boolean {
 return this.fbService.showEditContact;
 }
 

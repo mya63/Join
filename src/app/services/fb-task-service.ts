@@ -28,6 +28,10 @@ export class FbTaskService {
 
   tasksCollection = collection(this.db, 'tasks');
 
+  /**
+   * Initializes task state and registers the auth-bound task listener.
+   * @returns {void} No return value.
+   */
   constructor() {
     this.task = {} as ITask;
     this.currentTask = {} as ITask;
@@ -42,19 +46,15 @@ export class FbTaskService {
    * @returns {ITask} A task object populated with default values.
    */
   private buildDefaultTask(): ITask {
+    const defaultCategory = this.task.category || {
+      category: -1,
+      categoryProperties: [{ name: 'New Task Category', color: '#000000' }]
+    };
     return {
-      createDate: new Date().toISOString(),
-      ownerId: this.getCurrentUserId(),
-      completed: this.task.completed || false,
-      dueDate: this.task.dueDate || '',
-      status: this.task.status || 'to-do',
-      positionIndex: this.task.positionIndex || 0,
-      category: this.task.category || { category: -1, categoryProperties: [{ name: 'New Task Category', color: '#000000' }] },
-      title: this.task.title || 'New Task Title',
-      description: this.task.description || 'New Task Description',
-      assignTo: this.task.assignTo || [],
-      priority: this.task.priority || 'medium',
-      subTasks: this.task.subTasks || [],
+      createDate: new Date().toISOString(), ownerId: this.getCurrentUserId(), completed: this.task.completed || false,
+      dueDate: this.task.dueDate || '', status: this.task.status || 'to-do', positionIndex: this.task.positionIndex || 0,
+      category: defaultCategory, title: this.task.title || 'New Task Title', description: this.task.description || 'New Task Description',
+      assignTo: this.task.assignTo || [], priority: this.task.priority || 'medium', subTasks: this.task.subTasks || [],
     };
   }
 
@@ -224,7 +224,7 @@ export class FbTaskService {
    * @param {string | undefined} taskId - Task document id.
    * @returns {void} No return value.
    */
-  async deleteTask(taskId?: string | undefined) {
+  async deleteTask(taskId?: string | undefined): Promise<void> {
     if (!taskId) return;
     const taskDoc = doc(this.db, 'tasks', taskId);
     await deleteDoc(taskDoc);
@@ -236,7 +236,7 @@ export class FbTaskService {
    * @param {Partial<ITask>} updatedData - Partial task fields to update.
    * @returns {void} No return value.
    */
-  async updateTask(taskId?: string, updatedData?: Partial<ITask>) {
+  async updateTask(taskId?: string, updatedData?: Partial<ITask>): Promise<void> {
     if (!taskId || !updatedData) return;
     if (updatedData.status) {
       updatedData.status == 'done' ? updatedData.completed = true : updatedData.completed = false;
@@ -252,7 +252,7 @@ export class FbTaskService {
    * @param {string} status - Optional target status/column.
    * @returns {void} No return value.
    */
-  async setNewIndex(task: ITask, newIndex: number, status?: string) {
+  async setNewIndex(task: ITask, newIndex: number, status?: string): Promise<void> {
     const updateData: Partial<ITask> = { positionIndex: newIndex };
     if (status) {
       updateData.status = status;
@@ -310,7 +310,7 @@ export class FbTaskService {
    * Disposes the active Firestore task subscription.
    * @returns {void} No return value.
    */
-  onDestroy() {
+  onDestroy(): void {
     if (this.myTasks) {
       this.myTasks();
     }
