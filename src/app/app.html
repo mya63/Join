@@ -5,4 +5,8 @@
     <router-outlet></router-outlet>
     <figma-bottom-nav [class.showme]="goOn()"></figma-bottom-nav>
   </main>
+
+  @if (introVisible()) {
+  <app-intro [animationConfig]="introConfig()"></app-intro>
+  }
 </div>

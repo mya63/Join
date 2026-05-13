@@ -1,6 +1,5 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { FbAuthService } from '../../services/fb-auth-service';
+import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { IntroAnimationConfig } from './intro-animation-config.model';
 
 @Component({
   selector: 'app-intro',
@@ -10,28 +9,33 @@ import { FbAuthService } from '../../services/fb-auth-service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Intro {
-  private router = inject(Router);
-  private authService = inject(FbAuthService);
-  protected readonly landsOnSidebar = signal(false);
+  readonly animationConfig = input.required<IntroAnimationConfig>();
   protected readonly introReady = signal(false);
-  private readonly introDelayMs = 2400;
 
   /**
-   * Resolves startup target and redirects after intro delay.
+   * Builds desktop wrapper classes from selected configuration and animation readiness.
+   * @returns {string} Desktop class list for the intro wrapper.
+   */
+  protected getDesktopClasses(): string {
+    const readyClass = this.introReady() ? ' ready' : '';
+    return `intro-container ${this.animationConfig().containerClass}${readyClass}`;
+  }
+
+  /**
+   * Builds mobile wrapper classes from selected configuration and animation readiness.
+   * @returns {string} Mobile class list for the intro wrapper.
+   */
+  protected getMobileClasses(): string {
+    const readyClass = this.introReady() ? ' ready' : '';
+    return `intro-mobile ${this.animationConfig().containerClass}${readyClass}`;
+  }
+
+  /**
+   * Arms intro animation playback once overlay is mounted.
    * @returns {void} No return value.
    */
-  async ngOnInit(): Promise<void> {
-    const targetRoute = await this.authService.resolveStartupRoute();
-    this.landsOnSidebar.set(targetRoute === '/summary');
+  ngOnInit(): void {
     this.introReady.set(true);
-
-    /**
-     * Navigates to the resolved startup route after intro animation delay.
-     * @returns {void} No return value.
-     */
-    setTimeout(() => {
-      this.router.navigate([targetRoute]);
-    }, this.introDelayMs);
   }
 }
 

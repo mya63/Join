@@ -11,10 +11,16 @@
   --intro-end-size-desktop: var(--auth-logo-size-desktop);
 }
 
-.intro-container.lands-on-sidebar {
+.intro-container.intro-desktop-auth {
   --intro-end-top-desktop: 64px;
   --intro-end-left-desktop: 65.98px;
   --intro-end-size-desktop: 100px;
+}
+
+.intro-container.intro-desktop-guest {
+  --intro-end-top-desktop: var(--auth-logo-top-desktop);
+  --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
+  --intro-end-size-desktop: var(--auth-logo-size-desktop);
 }
 
 .intro-logo {
@@ -83,10 +89,16 @@
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
   }
 
-  .intro-mobile.lands-on-sidebar {
+  .intro-mobile.intro-mobile-auth {
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
     --intro-end-size-mobile: 24px;
+  }
+
+  .intro-mobile.intro-mobile-guest {
+    --intro-end-top-mobile: var(--auth-logo-top-mobile);
+    --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
+    --intro-end-size-mobile: var(--auth-logo-size-mobile);
   }
 
   .intro-logo-m {

@@ -1,8 +1,12 @@
-<div class="intro-container" [class.lands-on-sidebar]="landsOnSidebar()" [class.ready]="introReady()">
-  <img class="intro-logo" src="assets/img/login/signup/joindark.png" alt="Join Logo" />
+@if (animationConfig().mode === 'desktop') {
+<div [class]="getDesktopClasses()">
+  <img class="intro-logo" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
 </div>
+}
 
-<div class="intro-mobile" [class.lands-on-sidebar]="landsOnSidebar()" [class.ready]="introReady()">
-  <img class="intro-logo-m" src="assets/img/login/joindarkmobilewhite.png" alt="Join Logo Mobile" />
+@if (animationConfig().mode === 'mobile') {
+<div [class]="getMobileClasses()">
+  <img class="intro-logo-m" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
 </div>
+}
 
