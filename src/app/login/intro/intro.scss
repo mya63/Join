@@ -133,6 +133,15 @@
     --intro-scale-mobile: 1;
   }
 
+  .intro-mobile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--intro-bg, #f6f7f8);
+    opacity: 1;
+    pointer-events: none;
+  }
+
   .intro-mobile.intro-mobile-auth {
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
@@ -143,6 +152,15 @@
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
+  }
+
+  .intro-mobile.intro-mobile-guest::before {
+    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+  }
+
+  .intro-mobile.intro-mobile-guest.ready::before {
+    animation-play-state: running;
   }
 
   .intro-logo-shell-m {

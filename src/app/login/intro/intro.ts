@@ -173,11 +173,12 @@ export class Intro {
   }
 
   /**
-   * Hides the login page logo until the intro animation is 99% complete (Desktop Guest only).
+   * Hides the login page logo until the intro animation is 99% complete for guest intro variants.
    * @returns {void} No return value.
    */
   private hideLoginLogoUntilAnimationNearlyDone(): void {
-    if (this.animationConfig().containerClass !== 'intro-desktop-guest') return;
+    const containerClass = this.animationConfig().containerClass;
+    if (containerClass !== 'intro-desktop-guest' && containerClass !== 'intro-mobile-guest') return;
     const logo = document.querySelector('.login-page .logo-img') as HTMLElement | null;
     if (!logo) return;
     logo.classList.add('logo-img--hidden');
