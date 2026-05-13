@@ -457,11 +457,62 @@ export class Board implements OnInit, OnDestroy {
    * @param {{ task: ITask; direction: 'left' | 'right' }} event - Selected task and direction.
    * @returns {Promise<void>} Promise resolved after position updates complete.
    */
-  async onMoveTaskInsideColumn(event: { task: ITask; direction: 'left' | 'right' }): Promise<void> {
+  async onMoveTaskInsideColumn(event: { task: ITask; direction: 'left' | 'right' | 'up' | 'down' }): Promise<void> {
     if (!event.task.dbid) return;
-    const column = this.getColumnArray(event.task.status);
-    const sourceIndex = column.findIndex(task => task.dbid === event.task.dbid);
-    const targetIndex = event.direction === 'left' ? sourceIndex - 1 : sourceIndex + 1;
+    if (event.direction === 'up' || event.direction === 'down') {
+      await this.moveTaskBetweenStatuses(event.task, event.direction);
+    } else {
+      await this.moveTaskWithinColumn(event.task, event.direction);
+    }
+  }
+
+  /**
+   * Moves task to adjacent status column (up/down through columns).
+   * @param {ITask} task - Task to move.
+   * @param {'up' | 'down'} direction - Direction of status change.
+   * @returns {Promise<void>} Promise resolved after move completes.
+   */
+  private async moveTaskBetweenStatuses(task: ITask, direction: 'up' | 'down'): Promise<void> {
+    const statusMap: { [key: string]: number } = {
+      'to-do': 1,
+      'in-progress': 2,
+      'await-feedback': 3,
+      'done': 4
+    };
+    const reverseStatusMap: { [key: number]: string } = {
+      1: 'to-do',
+      2: 'in-progress',
+      3: 'await-feedback',
+      4: 'done'
+    };
+    const currentStatusLevel = statusMap[task.status];
+    const newStatusLevel = direction === 'up' ? currentStatusLevel - 1 : currentStatusLevel + 1;
+    const newStatus = reverseStatusMap[newStatusLevel] as ITask['status'];
+    const sourceColumn = this.getColumnArray(task.status);
+    const targetColumn = this.getColumnArray(newStatus);
+    const sourceIndex = sourceColumn.findIndex(t => t.dbid === task.dbid);
+    if (sourceIndex < 0 || !targetColumn) return;
+    sourceColumn.splice(sourceIndex, 1);
+    targetColumn.push(task);
+    task.status = newStatus;
+    await Promise.all([
+      this.fbTaskService.updateTask(task.dbid, { status: newStatus }),
+      this.persistColumnPositions(sourceColumn),
+      this.persistColumnPositions(targetColumn)
+    ]);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Moves task left/right within the same column (reorder).
+   * @param {ITask} task - Task to reorder.
+   * @param {'left' | 'right'} direction - Direction of reordering.
+   * @returns {Promise<void>} Promise resolved after reorder completes.
+   */
+  private async moveTaskWithinColumn(task: ITask, direction: 'left' | 'right'): Promise<void> {
+    const column = this.getColumnArray(task.status);
+    const sourceIndex = column.findIndex(t => t.dbid === task.dbid);
+    const targetIndex = direction === 'left' ? sourceIndex - 1 : sourceIndex + 1;
     if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= column.length) return;
     moveItemInArray(column, sourceIndex, targetIndex);
     await this.persistColumnPositions(column);

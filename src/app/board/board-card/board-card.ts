@@ -21,7 +21,7 @@ export class BoardCard {
   @Input() dragHandleOnly: boolean = true;
   @Output() cardClick = new EventEmitter<ITask>();
   @Output() moveToStatus = new EventEmitter<{ task: ITask; status: ITask['status'] }>();
-  @Output() moveInColumn = new EventEmitter<{ task: ITask; direction: 'left' | 'right' }>();
+  @Output() moveInColumn = new EventEmitter<{ task: ITask; direction: 'left' | 'right' | 'up' | 'down' }>();
   showMobileMenu: boolean = false;
 
   /**
@@ -55,12 +55,12 @@ export class BoardCard {
   }
 
   /**
-   * Emits a request to move the task left or right inside the same column.
-   * @param {'left' | 'right'} direction - Direction for position change.
+   * Emits a request to move the task in the specified direction.
+   * @param {'left' | 'right' | 'up' | 'down'} direction - Direction for position change.
    * @param {MouseEvent} event - Click event from menu option.
    * @returns {void} No return value.
    */
-  onMoveInColumn(direction: 'left' | 'right', event: MouseEvent): void {
+  onMoveInColumn(direction: 'left' | 'right' | 'up' | 'down', event: MouseEvent): void {
     event.stopPropagation();
     this.moveInColumn.emit({ task: this.card, direction });
     this.showMobileMenu = false;
@@ -110,6 +110,22 @@ export class BoardCard {
    */
   canMoveRight(): boolean {
     return this.displayIndex < this.columnLength;
+  }
+
+  /**
+   * Checks whether current task can move up to the previous status column.
+   * @returns {boolean} True when task is not in the first status column (to-do).
+   */
+  canMoveUp(): boolean {
+    return this.card.status !== 'to-do';
+  }
+
+  /**
+   * Checks whether current task can move down to the next status column.
+   * @returns {boolean} True when task is not in the last status column (done).
+   */
+  canMoveDown(): boolean {
+    return this.card.status !== 'done';
   }
 
   /**

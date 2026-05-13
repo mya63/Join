@@ -1,13 +1,21 @@
 <!-- board-card.component.html -->
 <div class="card-wrap">
   @if (dragHandleOnly) {
-    <div class="card" (click)="onCardClick()">
+    <div class="card" (click)="onCardClick()" (contextmenu)="$event.preventDefault()">
       <button type="button" class="mobile-context-trigger" (click)="toggleMobileMenu($event)" aria-label="Open move menu">
         <span>↕</span>
       </button>
       @if (showMobileMenu) {
       <div class="mobile-context-menu" (click)="$event.stopPropagation()">
-        <div class="menu-title">Move to</div>
+        <div class="menu-title">Move</div>
+        <button type="button" class="menu-item" [disabled]="!canMoveUp()" (click)="onMoveInColumn('up', $event)">
+          <span class="arrow">↑</span>
+          <span>Up</span>
+        </button>
+        <button type="button" class="menu-item" [disabled]="!canMoveDown()" (click)="onMoveInColumn('down', $event)">
+          <span class="arrow">↓</span>
+          <span>Down</span>
+        </button>
         <button type="button" class="menu-item" [disabled]="!canMoveLeft()" (click)="onMoveInColumn('left', $event)">
           <span class="arrow">←</span>
           <span>Left</span>
@@ -16,12 +24,6 @@
           <span class="arrow">→</span>
           <span>Right</span>
         </button>
-        @for (status of getMoveTargets(); track status) {
-        <button type="button" class="menu-item" (click)="onMoveToStatus(status, $event)">
-          <span class="arrow">{{ status === 'to-do' || status === 'in-progress' ? '↑' : '↓' }}</span>
-          <span>{{ getStatusLabel(status) }}</span>
-        </button>
-        }
       </div>
       }
 
@@ -63,13 +65,21 @@
       </div>
     </div>
   } @else {
-    <div cdkDragHandle class="card card-full-drag" (click)="onCardClick()">
+    <div cdkDragHandle class="card card-full-drag" (click)="onCardClick()" (contextmenu)="$event.preventDefault()">
       <button type="button" class="mobile-context-trigger" (click)="toggleMobileMenu($event)" aria-label="Open move menu">
         <span>↕</span>
       </button>
       @if (showMobileMenu) {
       <div class="mobile-context-menu" (click)="$event.stopPropagation()">
-        <div class="menu-title">Move to</div>
+        <div class="menu-title">Move</div>
+        <button type="button" class="menu-item" [disabled]="!canMoveUp()" (click)="onMoveInColumn('up', $event)">
+          <span class="arrow">↑</span>
+          <span>Up</span>
+        </button>
+        <button type="button" class="menu-item" [disabled]="!canMoveDown()" (click)="onMoveInColumn('down', $event)">
+          <span class="arrow">↓</span>
+          <span>Down</span>
+        </button>
         <button type="button" class="menu-item" [disabled]="!canMoveLeft()" (click)="onMoveInColumn('left', $event)">
           <span class="arrow">←</span>
           <span>Left</span>
@@ -78,12 +88,6 @@
           <span class="arrow">→</span>
           <span>Right</span>
         </button>
-        @for (status of getMoveTargets(); track status) {
-        <button type="button" class="menu-item" (click)="onMoveToStatus(status, $event)">
-          <span class="arrow">{{ status === 'to-do' || status === 'in-progress' ? '↑' : '↓' }}</span>
-          <span>{{ getStatusLabel(status) }}</span>
-        </button>
-        }
       </div>
       }
 
