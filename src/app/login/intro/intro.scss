@@ -13,9 +13,6 @@
   --intro-dy-desktop: 0px;
   --intro-scale-desktop: 1;
   --intro-start-size-desktop: 274px;
-  --intro-end-top-desktop: 0px;
-  --intro-end-left-desktop: 0px;
-  --intro-end-size-desktop: 100px;
 }
 
 .intro-container.intro-desktop-auth {
@@ -35,9 +32,9 @@
   top: calc(50% - (var(--intro-start-size-desktop) / 2));
   left: calc(50% - (var(--intro-start-size-desktop) / 2));
   width: var(--intro-start-size-desktop);
-  animation: moveToCornerLayout var(--intro-duration) var(--intro-ease) forwards;
+  animation: moveToCornerTransform var(--intro-duration) var(--intro-ease) forwards;
   animation-play-state: paused;
-  will-change: top, left, width;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
@@ -45,25 +42,34 @@
   display: block;
   width: 100%;
   transform-origin: top left;
-  animation: none;
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards;
+  animation-play-state: paused;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
-.intro-container.ready .intro-logo-shell {
+.intro-container.ready .intro-logo-shell,
+.intro-container.ready .intro-logo {
   animation-play-state: running;
 }
 
-@keyframes moveToCornerLayout {
+@keyframes moveToCornerTransform {
   0% {
-    top: calc(50% - (var(--intro-start-size-desktop) / 2));
-    left: calc(50% - (var(--intro-start-size-desktop) / 2));
-    width: var(--intro-start-size-desktop);
+    transform: translate(0, 0);
   }
 
   100% {
-    top: var(--intro-end-top-desktop);
-    left: var(--intro-end-left-desktop);
-    width: var(--intro-end-size-desktop);
+    transform: translate(var(--intro-dx-desktop), var(--intro-dy-desktop));
+  }
+}
+
+@keyframes scaleToCorner {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(var(--intro-scale-desktop));
   }
 }
 

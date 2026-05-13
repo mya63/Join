@@ -66,20 +66,7 @@ export class Intro {
     const target = this.animationConfig().endPosition?.();
     if (!logoElement || !target) return '';
     const mode = this.animationConfig().mode;
-    return mode === 'desktop'
-      ? this.buildDesktopEndVars(target)
-      : this.buildMeasuredMovementVars(logoElement.getBoundingClientRect(), target, mode);
-  }
-
-  /**
-   * Builds desktop end variables from measured target.
-   * @param {IntroTargetPosition} target - Measured target position.
-   * @returns {string} CSS custom properties for exact desktop end position.
-   */
-  private buildDesktopEndVars(target: IntroTargetPosition): string {
-    const numericTarget = this.getNumericTarget(target);
-    if (!numericTarget) return '';
-    return ` --intro-end-left-desktop: ${numericTarget.left}px; --intro-end-top-desktop: ${numericTarget.top}px; --intro-end-size-desktop: ${numericTarget.width}px;`;
+    return this.buildMeasuredMovementVars(logoElement.getBoundingClientRect(), target, mode);
   }
 
   /**
