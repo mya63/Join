@@ -131,8 +131,7 @@
     --intro-dx-mobile: 0px;
     --intro-dy-mobile: 0px;
     --intro-scale-mobile: 1;
-    --intro-logo-filter-start: brightness(1);
-    --intro-logo-filter-end: brightness(1);
+    --intro-logo-dark-opacity-end: 0;
   }
 
   .intro-mobile::before {
@@ -148,14 +147,14 @@
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
     --intro-end-size-mobile: 24px;
-    --intro-logo-filter-end: brightness(0.28);
+    --intro-logo-dark-opacity-end: 1;
   }
 
   .intro-mobile.intro-mobile-guest {
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
-    --intro-logo-filter-end: brightness(0.28);
+    --intro-logo-dark-opacity-end: 1;
   }
 
   .intro-mobile.intro-mobile-guest::before {
@@ -185,14 +184,28 @@
     display: block;
     width: 180px;
     transform-origin: top left;
-    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards, mobileLogoColorShift var(--intro-duration) linear forwards;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards;
     animation-play-state: paused;
-    will-change: transform, filter;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .intro-logo-m-dark {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 180px;
+    transform-origin: top left;
+    opacity: 0;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards, mobileLogoDarkFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+    will-change: transform, opacity;
     backface-visibility: hidden;
   }
 
   .intro-mobile.ready .intro-logo-shell-m,
-  .intro-mobile.ready .intro-logo-m {
+  .intro-mobile.ready .intro-logo-m,
+  .intro-mobile.ready .intro-logo-m-dark {
     animation-play-state: running;
   }
 }
@@ -217,13 +230,13 @@
   }
 }
 
-@keyframes mobileLogoColorShift {
+@keyframes mobileLogoDarkFade {
   0% {
-    filter: var(--intro-logo-filter-start);
+    opacity: 0;
   }
 
   100% {
-    filter: var(--intro-logo-filter-end);
+    opacity: var(--intro-logo-dark-opacity-end);
   }
 }
 
