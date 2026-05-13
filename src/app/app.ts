@@ -26,7 +26,16 @@ export class App {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
+    /**
+     * Registers the auth-state listener within Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => {
+      /**
+       * Updates local authenticated signal whenever Firebase auth state changes.
+       * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+       * @returns {void} No return value.
+       */
       onAuthStateChanged(this.auth, (user) => {
         this.isAuthenticated.set(!!user);
       });

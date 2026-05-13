@@ -205,6 +205,12 @@ export class FbAuthTestDataService {
     });
   }
 
+  /**
+   * Loads managed fixture contacts and tasks that match known template identifiers.
+   * @param {ReturnType<typeof collection>} contactsCollection - Contacts collection reference.
+   * @param {ReturnType<typeof collection>} tasksCollection - Tasks collection reference.
+   * @returns {Promise<[Awaited<ReturnType<typeof getDocs>>, Awaited<ReturnType<typeof getDocs>>]>} Matching fixture snapshots.
+   */
   private loadMatchingTestFixtures(
     contactsCollection: ReturnType<typeof collection>,
     tasksCollection: ReturnType<typeof collection>
@@ -242,6 +248,10 @@ export class FbAuthTestDataService {
     op: '==' | 'in',
     value: unknown
   ): ReturnType<typeof query> {
+    /**
+     * Executes Firestore query construction within Angular injection context.
+     * @returns {ReturnType<typeof query>} Firestore query reference.
+     */
     return runInInjectionContext(this.injector, () => query(coll, where(field, op, value as never)));
   }
 
@@ -253,9 +263,20 @@ export class FbAuthTestDataService {
   private getDocsInContext(
     docsQuery: Parameters<typeof getDocs>[0]
   ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    /**
+     * Executes getDocs within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Firestore query snapshot.
+     */
     return runInInjectionContext(this.injector, () => getDocs(docsQuery));
   }
 
+  /**
+   * Collects delete operations for matching fixture documents from both collections.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} contactDocs - Matching contact fixture documents.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} taskDocs - Matching task fixture documents.
+   * @param {string} currentOwnerId - Current authenticated owner id.
+   * @returns {Array<Promise<void>>} Delete operations for foreign-owner fixtures.
+   */
   private collectForeignFixtureDeleteJobs(
     contactDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
     taskDocs: Awaited<ReturnType<typeof getDocs>>['docs'],
@@ -267,6 +288,12 @@ export class FbAuthTestDataService {
     ];
   }
 
+  /**
+   * Collects delete operations for fixture records that belong to other owners.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Candidate fixture documents.
+   * @param {string} currentOwnerId - Current authenticated owner id.
+   * @returns {Array<Promise<void>>} Delete operations for foreign-owner fixtures.
+   */
   private collectForeignOwnerDeletes(
     docs: Awaited<ReturnType<typeof getDocs>>['docs'],
     currentOwnerId: string
@@ -286,6 +313,10 @@ export class FbAuthTestDataService {
     coll: Parameters<typeof addDoc>[0],
     payload: Parameters<typeof addDoc>[1]
   ): Promise<Awaited<ReturnType<typeof addDoc>>> {
+    /**
+     * Executes addDoc within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof addDoc>>>} Created document reference.
+     */
     return runInInjectionContext(this.injector, () => addDoc(coll, payload));
   }
 
@@ -297,6 +328,10 @@ export class FbAuthTestDataService {
   private deleteDocInContext(
     docRef: Parameters<typeof deleteDoc>[0]
   ): Promise<void> {
+    /**
+     * Executes deleteDoc within Angular injection context.
+     * @returns {Promise<void>} Promise resolved after deletion.
+     */
     return runInInjectionContext(this.injector, () => deleteDoc(docRef));
   }
 

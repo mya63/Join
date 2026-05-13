@@ -33,6 +33,10 @@ export class FbService {
   myData;
   data: any[] = [];
 
+  /**
+   * Initializes contact state and registers Firestore/auth listeners.
+   * @returns {void} No return value.
+   */
   constructor() {
     this.contact = {} as IContact;
     this.contactsArray = [];
@@ -59,6 +63,10 @@ export class FbService {
    * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
    */
   private bindContactsListener(): VoidFunction {
+    /**
+     * Opens the contacts snapshot listener inside Angular injection context.
+     * @returns {VoidFunction} Snapshot unsubscribe function.
+     */
     return runInInjectionContext(this.injector, () =>
       onSnapshot(this.contactsCollectionSorted, (snapshot) => {
         this.allContacts = [];
@@ -75,6 +83,10 @@ export class FbService {
    * @returns {void} No return value.
    */
   private bindAuthStateToOwnerFilter(): void {
+    /**
+     * Subscribes to Firebase auth changes inside Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, () => {
         this.resetContactState();
@@ -88,6 +100,10 @@ export class FbService {
    * @returns {VoidFunction} Unsubscribe function for the snapshot listener.
    */
   private bindDataListener(): VoidFunction {
+    /**
+     * Opens the auxiliary data snapshot listener inside Angular injection context.
+     * @returns {VoidFunction} Snapshot unsubscribe function.
+     */
     return runInInjectionContext(this.injector, () =>
       onSnapshot(this.dataCollection, (snapshot) => {
         this.data = snapshot.docs.map((document) => document.data());
@@ -415,6 +431,10 @@ export class FbService {
    * @returns {void} No return value.
    */
   refreshContactList() {
+    /**
+     * Delays list-hidden flag update to match overlay transition timing.
+     * @returns {void} No return value.
+     */
     setTimeout(() => {
 
       this.contactlistHidden = true;

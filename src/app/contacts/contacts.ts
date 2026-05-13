@@ -74,6 +74,10 @@ export class Contacts {
     this.clearInput();
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastOpen = true;
+    /**
+     * Hides the create-success toast after a short display duration.
+     * @returns {void} No return value.
+     */
     this.toastTimer = setTimeout(() => (this.toastOpen = false), 800);
   }
 
@@ -169,6 +173,10 @@ export class Contacts {
     this.showAddContact = false;
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastOpen = true;
+    /**
+     * Hides the create-success toast after the standard display duration.
+     * @returns {void} No return value.
+     */
     this.toastTimer = setTimeout(() => (this.toastOpen = false), 2000);
   }
 
@@ -178,11 +186,6 @@ export class Contacts {
    * @returns {void} No return value.
    */
   @HostListener('window:resize', ['$event'])
-  /**
-   * Reacts to viewport changes and restores desktop list visibility.
-   * @param {Event} event - Window resize event.
-   * @returns {void} No return value.
-   */
   onResize(event: Event) {
     this.myWidth = window.innerWidth;
     if (this.myWidth > 1100) {

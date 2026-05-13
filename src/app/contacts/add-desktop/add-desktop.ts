@@ -88,6 +88,10 @@ export class AddDesktop {
       this.isClosing = true;
       this.cdr.detectChanges();
 
+      /**
+       * Finalizes overlay closing after animation duration elapsed.
+       * @returns {void} No return value.
+       */
       setTimeout(() => {
         this.close.emit();
         this.isClosing = false;

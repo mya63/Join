@@ -15,6 +15,10 @@ export class EditMobile {
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
 
+  /**
+   * Initializes the edit overlay state from the currently selected contact.
+   * @returns {void} No return value.
+   */
   constructor() { this.getCurrentContact(); }
 
   contact: IContact = { name: '', surname: '', email: '', phone: '' };
@@ -60,6 +64,10 @@ export class EditMobile {
       this.isClosing = true;
       this.cdr.detectChanges();
 
+      /**
+       * Finalizes overlay closing after animation duration elapsed.
+       * @returns {void} No return value.
+       */
       setTimeout(() => {
         this.onClose();
         this.isClosing = false;

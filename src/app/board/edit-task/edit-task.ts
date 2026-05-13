@@ -291,8 +291,8 @@ export class EditTask implements OnInit {
   closeDropdowns(event: Event): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
-    this.showAssignDropdown = !!target.closest('.assign-dropdown-wrap, .assign-list');
-    this.showCategoryDropdown = !!target.closest('.category-wrap, .category-list');
+    if (!target.closest('.assign-dropdown-wrap, .assign-list')) this.showAssignDropdown = false;
+    if (!target.closest('.category-wrap, .category-list')) this.showCategoryDropdown = false;
   }
 
   /**

@@ -34,6 +34,10 @@ export class Login implements OnInit {
     if (params['password']) this.password = params['password'];
     if (params['signupSuccess'] === '1') {
       this.showSignUpSuccess.set(true);
+      /**
+       * Clears the sign-up success banner after the display timeout.
+       * @returns {void} No return value.
+       */
       setTimeout(() => this.showSignUpSuccess.set(false), 2000);
     }
   }

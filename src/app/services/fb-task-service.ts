@@ -63,8 +63,21 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private bindTaskListenerToAuthState(): void {
+    /**
+     * Creates auth-bound task-listener setup inside Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => {
+      /**
+       * Updates active task listener whenever authentication state changes.
+       * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+       * @returns {void} No return value.
+       */
       onAuthStateChanged(this.auth, (user) => {
+        /**
+         * Re-enters Angular injection context before initializing listener resources.
+         * @returns {void} No return value.
+         */
         runInInjectionContext(this.injector, () => {
           const userId = user?.uid || 'guest';
           this.newTask.ownerId = userId;
@@ -106,6 +119,10 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private attachUnfilteredListener(): void {
+    /**
+     * Opens an unfiltered Firestore snapshot listener inside injection context.
+     * @returns {VoidFunction} Snapshot unsubscribe function.
+     */
     this.myTasks = runInInjectionContext(this.injector, () =>
       onSnapshot(this.tasksCollection, (snapshot) => {
         this.applyTaskSnapshot(snapshot);
@@ -121,6 +138,10 @@ export class FbTaskService {
   private attachFilteredListener(userId: string): void {
     const state = { fallbackActive: false };
     const filteredQuery = this.buildFilteredQuery(userId);
+    /**
+     * Opens a filtered Firestore snapshot listener inside injection context.
+     * @returns {VoidFunction} Snapshot unsubscribe function.
+     */
     this.myTasks = runInInjectionContext(this.injector, () =>
       onSnapshot(
         filteredQuery,
@@ -228,8 +249,18 @@ export class FbTaskService {
    * @returns {Promise<string | null>} Resolved user id or null when unauthenticated.
    */
   private waitForAuthUserId(): Promise<string | null> {
+    /**
+     * Creates a promise that resolves on first auth-state emission.
+     * @param {(value: string | null) => void} resolve - Promise resolver callback.
+     * @returns {void} No return value.
+     */
     return new Promise<string | null>((resolve) => {
       runInInjectionContext(this.injector, () => {
+        /**
+         * Resolves auth user id and unsubscribes the temporary listener.
+         * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+         * @returns {void} No return value.
+         */
         const unsubscribe = onAuthStateChanged(this.auth, (user) => {
           unsubscribe();
           resolve(user?.uid || null);

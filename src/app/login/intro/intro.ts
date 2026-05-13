@@ -25,6 +25,10 @@ export class Intro {
     this.landsOnSidebar.set(targetRoute === '/summary');
     this.introReady.set(true);
 
+    /**
+     * Navigates to the resolved startup route after intro animation delay.
+     * @returns {void} No return value.
+     */
     setTimeout(() => {
       this.router.navigate([targetRoute]);
     }, this.introDelayMs);

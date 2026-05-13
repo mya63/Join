@@ -41,6 +41,10 @@ export class Tasktest {
   showAssignDropdown = { task: false, currentTask: false };
   subtask: { title: string; completed: boolean, onEdit: boolean } = { title: '', completed: false, onEdit: false };
 
+  /**
+   * Initializes task form references from shared task service state.
+   * @returns {void} No return value.
+   */
   constructor() {
     this.task = this.fbTaskService.newTask;
     if (!this.task.assignTo) {

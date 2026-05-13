@@ -93,6 +93,10 @@ export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
    */
   private scrollToBottom(): void {
     if (this.inputContent) {
+      /**
+       * Defers scrolling until the next tick so DOM updates are fully applied.
+       * @returns {void} No return value.
+       */
       setTimeout(() => {
         const element = this.inputContent!.nativeElement;
         element.scrollTop = element.scrollHeight;

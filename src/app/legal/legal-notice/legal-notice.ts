@@ -25,7 +25,16 @@ export class LegalNotice implements OnInit {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
+    /**
+     * Initializes auth-state tracking inside Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => {
+      /**
+       * Updates external-layout state when authentication changes.
+       * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+       * @returns {void} No return value.
+       */
       onAuthStateChanged(this.auth, (user) => {
         this.isExternal.set(!user);
       });

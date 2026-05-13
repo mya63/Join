@@ -66,6 +66,10 @@ export class Summary implements OnInit, OnDestroy {
    * Reads auth state and prepares greeting context.
    */
   private checkAuthStatus(): void {
+    /**
+     * Registers auth-state handling inside Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => onAuthStateChanged(this.auth, async (user) => {
       if (!user) {
         this.isGuest = true;
@@ -132,6 +136,10 @@ export class Summary implements OnInit, OnDestroy {
   private getDocsInContext(
     docsQuery: Parameters<typeof getDocs>[0]
   ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    /**
+     * Executes getDocs within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Firestore query snapshot.
+     */
     return runInInjectionContext(this.injector, () => getDocs(docsQuery));
   }
 

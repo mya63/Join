@@ -19,8 +19,21 @@ export class FbAuthService {
   private readonly injector = inject(Injector);
   private readonly testDataService = inject(FbAuthTestDataService);
 
+  /**
+   * Registers a global auth-state listener to keep daily fixture data synchronized.
+   * @returns {void} No return value.
+   */
   constructor() {
+    /**
+     * Creates the auth-state listener inside Angular injection context.
+     * @returns {void} No return value.
+     */
     runInInjectionContext(this.injector, () => {
+      /**
+       * Triggers fixture sync whenever a valid Firebase user session is available.
+       * @param {User | null} user - Current authenticated user.
+       * @returns {void} No return value.
+       */
       onAuthStateChanged(this.auth, (user) => {
         if (!user) return;
         this.syncDailyTestDataForUser(user).catch(() => undefined);
@@ -67,7 +80,17 @@ export class FbAuthService {
    * @returns {Promise<'/summary' | '/login'>} Target route for app startup.
    */
   private resolveRouteFromAuthState(): Promise<'/summary' | '/login'> {
+    /**
+     * Creates a promise that resolves once Firebase auth emits the current session state.
+     * @param {(value: '/summary' | '/login') => void} resolve - Promise resolver callback.
+     * @returns {void} No return value.
+     */
     return new Promise((resolve) => runInInjectionContext(this.injector, () => {
+      /**
+       * Handles one auth-state emission and resolves startup route accordingly.
+       * @param {User | null} user - Current authenticated user.
+       * @returns {void} No return value.
+       */
       const unsub = onAuthStateChanged(this.auth, (user) => {
         unsub();
         if (!user) {
@@ -375,6 +398,10 @@ export class FbAuthService {
   private getDocsInContext(
     docsQuery: Parameters<typeof getDocs>[0]
   ): Promise<Awaited<ReturnType<typeof getDocs>>> {
+    /**
+     * Executes getDocs within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof getDocs>>>} Firestore query snapshot.
+     */
     return runInInjectionContext(this.injector, () => getDocs(docsQuery));
   }
 
@@ -388,6 +415,10 @@ export class FbAuthService {
     email: string,
     password: string
   ): Promise<Awaited<ReturnType<typeof signInWithEmailAndPassword>>> {
+    /**
+     * Executes email/password sign-in within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof signInWithEmailAndPassword>>>} Auth sign-in result.
+     */
     return runInInjectionContext(this.injector, () => signInWithEmailAndPassword(this.auth, email, password));
   }
 
@@ -401,6 +432,10 @@ export class FbAuthService {
     email: string,
     password: string
   ): Promise<Awaited<ReturnType<typeof createUserWithEmailAndPassword>>> {
+    /**
+     * Executes account creation within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof createUserWithEmailAndPassword>>>} Auth sign-up result.
+     */
     return runInInjectionContext(this.injector, () => createUserWithEmailAndPassword(this.auth, email, password));
   }
 
@@ -431,6 +466,10 @@ export class FbAuthService {
     coll: Parameters<typeof addDoc>[0],
     payload: Parameters<typeof addDoc>[1]
   ): Promise<Awaited<ReturnType<typeof addDoc>>> {
+    /**
+     * Executes addDoc within Angular injection context.
+     * @returns {Promise<Awaited<ReturnType<typeof addDoc>>>} Created document reference.
+     */
     return runInInjectionContext(this.injector, () => addDoc(coll, payload));
   }
 
