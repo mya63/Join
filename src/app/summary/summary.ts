@@ -86,20 +86,20 @@ export class Summary implements OnInit, OnDestroy {
    * @returns {Promise<string>} Resolved display name or generic fallback.
    */
   private async loadDisplayName(uid: string, email: string): Promise<string> {
-    try {
-      return await runInInjectionContext(this.injector, async () => {
-        const contactsRef = collection(this.db, 'contacts');
-        const nameByOwner = await this.resolveNameByField(contactsRef, 'ownerId', uid, email);
-        if (nameByOwner) return nameByOwner;
+    return this.resolveDisplayNameFromContacts(uid, email).catch(() => 'User');
+  }
 
-        const nameByUid = await this.resolveNameByField(contactsRef, 'uid', uid, email);
-        if (nameByUid) return nameByUid;
-
-        return 'User';
-      });
-    } catch {
-    }
-    return 'User';
+  /**
+   * Resolves the display name by checking ownerId and uid backed contacts.
+   * @param {string} uid - Authenticated user id.
+   * @param {string} email - Authenticated user email used for exact-match preference.
+   * @returns {Promise<string>} Resolved display name or fallback user label.
+   */
+  private async resolveDisplayNameFromContacts(uid: string, email: string): Promise<string> {
+    return runInInjectionContext(this.injector, async () => {
+      const contactsRef = collection(this.db, 'contacts');
+      return (await this.resolveNameByField(contactsRef, 'ownerId', uid, email)) || (await this.resolveNameByField(contactsRef, 'uid', uid, email)) || 'User';
+    });
   }
 
   /**
@@ -205,22 +205,25 @@ export class Summary implements OnInit, OnDestroy {
    * Finds the nearest upcoming deadline among all tasks.
    */
   private calculateUpcomingDeadline(tasks: ITask[]): void {
-    const now = new Date();
-    const futureDeadlines = tasks
-      .map((task) => ({ task, parsedDate: this.parseDueDate(task.dueDate) }))
-      .filter((entry) => !!entry.parsedDate && entry.parsedDate >= now)
-      .sort((a, b) => a.parsedDate!.getTime() - b.parsedDate!.getTime());
-
-    if (futureDeadlines.length > 0) {
-      const deadline = futureDeadlines[0].parsedDate!;
-      this.upcomingDeadline = {
-        date: this.formatDate(deadline)
-      };
-    } else {
-      this.upcomingDeadline = null;
-    }
+    const deadline = this.findUpcomingDeadline(tasks);
+    this.upcomingDeadline = deadline ? { date: this.formatDate(deadline) } : null;
   }
 
+  /**
+   * Finds the earliest future due date across all tasks.
+   * @param {ITask[]} tasks - Task list to inspect.
+   * @returns {Date | null} Earliest upcoming deadline or null when none exists.
+   */
+  private findUpcomingDeadline(tasks: ITask[]): Date | null {
+    const now = new Date();
+    return tasks.map((task) => this.parseDueDate(task.dueDate)).filter((date): date is Date => !!date && date >= now).sort((a, b) => a.getTime() - b.getTime())[0] ?? null;
+  }
+
+  /**
+   * Parses due-date values from dd/mm/yyyy or ISO-compatible formats.
+   * @param {string} raw - Raw date string stored in task data.
+   * @returns {Date | null} Parsed date or null when the value is invalid.
+   */
   private parseDueDate(raw: string): Date | null {
     const value = (raw ?? '').trim();
     if (!value) return null;

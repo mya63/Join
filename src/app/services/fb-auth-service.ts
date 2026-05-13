@@ -338,6 +338,10 @@ export class FbAuthService {
    * @returns {Promise<void>} Promise resolved after sync job completes.
    */
   private async runExclusiveSyncJob(user: User): Promise<void> {
+    /**
+     * Performs the serialized per-user self-contact and fixture synchronization flow.
+     * @returns {Promise<void>} Promise resolved after sync steps are complete.
+     */
     const syncJob = (async () => {
       await this.ensureSelfContact(user);
       await this.testDataService.ensureDailyTestData(user);

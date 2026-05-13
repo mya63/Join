@@ -178,6 +178,11 @@ export class Contacts {
    * @returns {void} No return value.
    */
   @HostListener('window:resize', ['$event'])
+  /**
+   * Reacts to viewport changes and restores desktop list visibility.
+   * @param {Event} event - Window resize event.
+   * @returns {void} No return value.
+   */
   onResize(event: Event) {
     this.myWidth = window.innerWidth;
     if (this.myWidth > 1100) {

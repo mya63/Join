@@ -21,42 +21,30 @@ export class FbAuthTestDataService {
     await this.ensureDailyTestTasks(user);
   }
 
+  /**
+   * Ensures managed daily test contacts exist and are up to date for the owner.
+   * @param {User} user - Authenticated Firebase user.
+   * @returns {Promise<void>} Promise resolved after contact synchronization.
+   */
   private async ensureDailyTestContacts(user: User): Promise<void> {
     const contactsCollection = this.getCollectionInContext('contacts');
     const managedDocs = await this.loadManagedTestContactDocs(contactsCollection, user.uid);
-    
-    // If NO test contacts exist, create them
-    if (managedDocs.length === 0) {
+    if (managedDocs.length === 0 || !this.isDailyTestContactsComplete(managedDocs)) {
       await this.recreateManagedTestContacts(contactsCollection, managedDocs, user.uid);
-      return;
     }
-    
-    // If test contacts exist, check if they're older than 24 hours
-    if (this.isDailyTestContactsComplete(managedDocs)) {
-      return;
-    }
-    
-    // If older than 24 hours, recreate them
-    await this.recreateManagedTestContacts(contactsCollection, managedDocs, user.uid);
   }
 
+  /**
+   * Ensures managed daily test tasks exist and are up to date for the owner.
+   * @param {User} user - Authenticated Firebase user.
+   * @returns {Promise<void>} Promise resolved after task synchronization.
+   */
   private async ensureDailyTestTasks(user: User): Promise<void> {
     const tasksCollection = this.getCollectionInContext('tasks');
     const managedDocs = await this.loadManagedTestTaskDocs(tasksCollection, user.uid);
-    
-    // If NO test tasks exist, create them
-    if (managedDocs.length === 0) {
+    if (managedDocs.length === 0 || !this.isDailyTestTasksComplete(managedDocs)) {
       await this.recreateManagedTestTasks(tasksCollection, managedDocs, user.uid);
-      return;
     }
-    
-    // If test tasks exist, check if they're older than 24 hours
-    if (this.isDailyTestTasksComplete(managedDocs)) {
-      return;
-    }
-    
-    // If older than 24 hours, recreate them
-    await this.recreateManagedTestTasks(tasksCollection, managedDocs, user.uid);
   }
 
   private async loadManagedTestContactDocs(
@@ -68,17 +56,32 @@ export class FbAuthTestDataService {
     return ownerContacts.docs.filter((docItem) => this.isManagedTestContactDoc(this.toRecord(docItem.data())));
   }
 
+  /**
+   * Checks whether a contact document belongs to managed test fixtures.
+   * @param {Record<string, unknown>} data - Contact document payload.
+   * @returns {boolean} True when the contact matches known fixture addresses.
+   */
   private isManagedTestContactDoc(data: Record<string, unknown>): boolean {
     const email = String(data['email'] ?? '').toLowerCase();
     return this.isKnownOrLegacyTestEmail(email);
   }
 
+  /**
+   * Checks known and legacy email variants used by managed test contacts.
+   * @param {string} email - Lowercased email value.
+   * @returns {boolean} True when the email belongs to fixture contacts.
+   */
   private isKnownOrLegacyTestEmail(email: string): boolean {
     const knownEmails = new Set(TEST_CONTACTS.map((contact) => contact.email.toLowerCase()));
     const legacyEmails = new Set(TEST_CONTACTS.map((contact) => contact.email.toLowerCase().replace('@join.local', '@test.join.local')));
     return knownEmails.has(email) || legacyEmails.has(email);
   }
 
+  /**
+   * Verifies whether all managed test contacts for today are present and normalized.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Existing managed contact documents.
+   * @returns {boolean} True when the fixture set is complete and current.
+   */
   private isDailyTestContactsComplete(docs: Awaited<ReturnType<typeof getDocs>>['docs']): boolean {
     const todayKey = this.getTodayKey();
     const existingRecords = docs.map((docItem) => this.toRecord(docItem.data()));
@@ -104,6 +107,12 @@ export class FbAuthTestDataService {
     await Promise.all(createJobs);
   }
 
+  /**
+   * Builds the Firestore payload for one managed test contact.
+   * @param {TestContactTemplate} contact - Test contact template.
+   * @param {string} ownerId - Owner id assigned to the fixture.
+   * @returns {Record<string, unknown>} Firestore-ready contact payload.
+   */
   private buildTestContactPayload(contact: TestContactTemplate, ownerId: string): Record<string, unknown> {
     return {
       ownerId,
@@ -117,6 +126,11 @@ export class FbAuthTestDataService {
     };
   }
 
+  /**
+   * Normalizes phone values for stable fixture comparisons.
+   * @param {string} phone - Raw phone value.
+   * @returns {string} Normalized phone value.
+   */
   private normalizePhone(phone: string): string {
     return phone.replace(/\s+/g, '').trim();
   }
@@ -131,6 +145,11 @@ export class FbAuthTestDataService {
     return ownerTasks.docs.filter((docItem) => knownTitles.has(String(this.toRecord(docItem.data())['title'] ?? '')));
   }
 
+  /**
+   * Verifies whether all managed test tasks for today are present.
+   * @param {Awaited<ReturnType<typeof getDocs>>['docs']} docs - Existing managed task documents.
+   * @returns {boolean} True when the fixture set is complete and current.
+   */
   private isDailyTestTasksComplete(docs: Awaited<ReturnType<typeof getDocs>>['docs']): boolean {
     const todayKey = this.getTodayKey();
     const existingTitles = new Set(docs.map((docItem) => String(this.toRecord(docItem.data())['title'] ?? '')).filter(Boolean));
@@ -149,6 +168,13 @@ export class FbAuthTestDataService {
     await Promise.all(createJobs);
   }
 
+  /**
+   * Builds the managed test-task payload before persisting it.
+   * @param {TestTaskTemplate} taskTemplate - Template data for the test task.
+   * @param {string} ownerId - Owner id to assign to the record.
+   * @param {number} index - Position index used for ordering.
+   * @returns {Record<string, unknown>} Firestore-ready payload object.
+   */
   private buildTestTaskPayload(taskTemplate: TestTaskTemplate, ownerId: string, index: number): Record<string, unknown> {
     return {
       createDate: new Date().toISOString(),
@@ -160,12 +186,15 @@ export class FbAuthTestDataService {
       category: taskTemplate.category,
       title: taskTemplate.title,
       description: taskTemplate.description,
-      assignTo: [],
-      priority: taskTemplate.priority,
-      subTasks: taskTemplate.subTasks,
+      assignTo: [], priority: taskTemplate.priority, subTasks: taskTemplate.subTasks,
     };
   }
 
+  /**
+   * Removes managed test fixtures owned by other users.
+   * @param {string} currentOwnerId - Current authenticated owner id.
+   * @returns {Promise<void>} Promise resolved after cleanup completes.
+   */
   private async cleanupTestDataForOtherOwners(currentOwnerId: string): Promise<void> {
     await runInInjectionContext(this.injector, async () => {
       const contactsCollection = this.getCollectionInContext('contacts');
@@ -271,15 +300,30 @@ export class FbAuthTestDataService {
     return runInInjectionContext(this.injector, () => deleteDoc(docRef));
   }
 
+  /**
+   * Checks whether a fixture record belongs to another owner.
+   * @param {Record<string, unknown>} data - Fixture payload.
+   * @param {string} currentOwnerId - Current authenticated owner id.
+   * @returns {boolean} True when the fixture should be deleted.
+   */
   private isForeignOwner(data: Record<string, unknown>, currentOwnerId: string): boolean {
     const ownerId = String(data['ownerId'] ?? '');
     return !!ownerId && ownerId !== currentOwnerId;
   }
 
+  /**
+   * Casts unknown values to records for safe keyed access.
+   * @param {unknown} value - Unknown value from Firestore.
+   * @returns {Record<string, unknown>} Record representation.
+   */
   private toRecord(value: unknown): Record<string, unknown> {
     return (value ?? {}) as Record<string, unknown>;
   }
 
+  /**
+   * Returns today's date key in yyyy-mm-dd format.
+   * @returns {string} Current day key.
+   */
   private getTodayKey(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -288,6 +332,11 @@ export class FbAuthTestDataService {
     return `${year}-${month}-${day}`;
   }
 
+  /**
+   * Formats a date offset from today as dd/mm/yyyy.
+   * @param {number} dayOffset - Day offset relative to today.
+   * @returns {string} Formatted date string.
+   */
   private getDdMmYyyyWithOffset(dayOffset: number): string {
     const date = new Date();
     date.setDate(date.getDate() + dayOffset);
@@ -297,22 +346,42 @@ export class FbAuthTestDataService {
     return `${day}/${month}/${year}`;
   }
 
+  /**
+   * Converts unknown date-like values into day keys.
+   * @param {unknown} value - Raw date-like value.
+   * @returns {string | null} Day key or null when parsing fails.
+   */
   private getDayKeyFromUnknown(value: unknown): string | null {
     const parsedDate = this.parseUnknownDate(value);
     return parsedDate ? this.toDayKey(parsedDate) : null;
   }
 
+  /**
+   * Parses unknown date-like values (Date, string, or timestamp-like object).
+   * @param {unknown} value - Raw value to parse.
+   * @returns {Date | null} Parsed date or null.
+   */
   private parseUnknownDate(value: unknown): Date | null {
     if (value instanceof Date) return value;
     if (typeof value === 'string') return this.parseDateString(value);
     return this.parseTimestampLike(value);
   }
 
+  /**
+   * Parses a string into a valid Date instance.
+   * @param {string} value - Date string value.
+   * @returns {Date | null} Parsed date or null when invalid.
+   */
   private parseDateString(value: string): Date | null {
     const candidate = new Date(value);
     return Number.isNaN(candidate.getTime()) ? null : candidate;
   }
 
+  /**
+   * Parses Firestore timestamp-like objects exposing a toDate function.
+   * @param {unknown} value - Timestamp-like candidate.
+   * @returns {Date | null} Parsed date or null when unsupported.
+   */
   private parseTimestampLike(value: unknown): Date | null {
     if (!value || typeof value !== 'object') return null;
     if (!('toDate' in (value as Record<string, unknown>))) return null;
@@ -322,6 +391,11 @@ export class FbAuthTestDataService {
     return candidate instanceof Date && !Number.isNaN(candidate.getTime()) ? candidate : null;
   }
 
+  /**
+   * Converts a Date to yyyy-mm-dd day-key format.
+   * @param {Date} date - Date value.
+   * @returns {string} Day key string.
+   */
   private toDayKey(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');

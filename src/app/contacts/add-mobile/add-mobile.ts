@@ -68,14 +68,28 @@ export class AddMobile {
     }
   }
 
+  /**
+   * Clears duplicate-email UI state when the email value changes.
+   * @returns {void} No return value.
+   */
   onEmailChange(): void {
     this.duplicateEmail = false;
   }
 
+  /**
+   * Maps submit failures to component-level validation flags.
+   * @param {unknown} error - Error thrown during submit.
+   * @returns {void} No return value.
+   */
   private handleSubmitError(error: unknown): void {
     this.duplicateEmail = this.isDuplicateEmailError(error);
   }
 
+  /**
+   * Identifies whether an error represents a duplicate contact email.
+   * @param {unknown} error - Error thrown during submit.
+   * @returns {boolean} True when duplicate-email condition was detected.
+   */
   private isDuplicateEmailError(error: unknown): boolean {
     return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }

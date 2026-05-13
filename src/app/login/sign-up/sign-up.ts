@@ -51,23 +51,7 @@ export class SignUp {
    * @returns {void} No return value.
    */
   private validateName(): void {
-    const name = this.signUpData.name.trim();
-    this.signUpErrors.name = '';
-    if (!name) {
-      this.signUpErrors.name = 'Please enter your name.';
-      return;
-    }
-    if (name.length < 2) {
-      this.signUpErrors.name = 'Name is too short.';
-      return;
-    }
-    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(name)) {
-      this.signUpErrors.name = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
-      return;
-    }
-    if (!/^[A-ZÄÖÜ]/.test(name)) {
-      this.signUpErrors.name = 'Please start with a capital letter.';
-    }
+    this.validateNameField('name', 'name');
   }
 
   /**
@@ -75,23 +59,22 @@ export class SignUp {
    * @returns {void} No return value.
    */
   private validateSurname(): void {
-    const surname = this.signUpData.surname.trim();
-    this.signUpErrors.surname = '';
-    if (!surname) {
-      this.signUpErrors.surname = 'Please enter your surname.';
-      return;
-    }
-    if (surname.length < 2) {
-      this.signUpErrors.surname = 'Surname is too short.';
-      return;
-    }
-    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(surname)) {
-      this.signUpErrors.surname = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.';
-      return;
-    }
-    if (!/^[A-ZÄÖÜ]/.test(surname)) {
-      this.signUpErrors.surname = 'Please start with a capital letter.';
-    }
+    this.validateNameField('surname', 'surname');
+  }
+
+  /**
+   * Validates a name field with the shared sign-up rules.
+   * @param {'name' | 'surname'} field - Target field to validate.
+   * @param {string} label - Human-readable field label for error text.
+   * @returns {void} No return value.
+   */
+  private validateNameField(field: 'name' | 'surname', label: string): void {
+    const value = this.signUpData[field].trim();
+    this.signUpErrors[field] = '';
+    if (!value) return void (this.signUpErrors[field] = `Please enter your ${label}.`);
+    if (value.length < 2) return void (this.signUpErrors[field] = `${label[0].toUpperCase()}${label.slice(1)} is too short.`);
+    if (!/^[A-ZÄÖÜa-zäöüß\-\.\s]+$/.test(value)) return void (this.signUpErrors[field] = 'Invalid characters. Only letters, hyphens, dots, and spaces are allowed.');
+    if (!/^[A-ZÄÖÜ]/.test(value)) this.signUpErrors[field] = 'Please start with a capital letter.';
   }
 
   /**
@@ -261,12 +244,7 @@ export class SignUp {
       return;
     }
 
-    this.authService.signUp(
-      this.signUpData.email,
-      this.signUpData.password,
-      this.signUpData.name.trim(),
-      this.signUpData.surname.trim()
-    ).catch(error => {
+    this.authService.signUp(this.signUpData.email, this.signUpData.password, this.signUpData.name.trim(), this.signUpData.surname.trim()).catch(error => {
       this.handleFirebaseError(error);
       this.cdr.markForCheck();
     });

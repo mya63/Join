@@ -79,6 +79,10 @@ export class AddDesktop {
     }
   }
 
+  /**
+   * Runs the close animation and emits the final close event afterwards.
+   * @returns {void} No return value.
+   */
   private startCloseAnimation(): void {
     this.zone.run(() => {
       this.isClosing = true;
@@ -92,14 +96,28 @@ export class AddDesktop {
     });
   }
 
+  /**
+   * Clears duplicate-email UI state when the user edits the email field.
+   * @returns {void} No return value.
+   */
   onEmailChange(): void {
     this.duplicateEmail = false;
   }
 
+  /**
+   * Maps contact-submit errors to local component error state.
+   * @param {unknown} error - Error thrown during submit.
+   * @returns {void} No return value.
+   */
   private handleSubmitError(error: unknown): void {
     this.duplicateEmail = this.isDuplicateEmailError(error);
   }
 
+  /**
+   * Detects duplicate email validation errors from the contact service.
+   * @param {unknown} error - Error thrown during submit.
+   * @returns {boolean} True when the error means email already exists.
+   */
   private isDuplicateEmailError(error: unknown): boolean {
     return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }

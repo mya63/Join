@@ -8,6 +8,7 @@ import { BoardCard } from './board-card/board-card';
 import { AddCard } from './add-card/add-card';
 import { InfoTask } from './info-task/info-task';
 import { EditTask } from './edit-task/edit-task';
+import { BoardColumns, getAdjacentBoardStatus, getBoardColumnArray, getBoardStatusFromContainerId, moveTaskBetweenColumns, persistColumnPositions, persistMovedTask, syncBoardColumns, updateColumnPositionsAfterMove } from './board-utils';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem, CdkDrag, CdkDropList, } from '@angular/cdk/drag-drop';
 import { Subscription } from 'rxjs';
 
@@ -39,7 +40,12 @@ export class Board implements OnInit, OnDestroy {
   searchTerm: string = '';
   dragHandleOnly: boolean = false;
   activeDropListId: string = '';
-
+  private readonly boardColumns: BoardColumns = {
+    'to-do': this.todoTasks,
+    'in-progress': this.inProgressTasks,
+    'await-feedback': this.awaitFeedbackTasks,
+    'done': this.doneTasks
+  };
   private tasksSubscription: Subscription = new Subscription();
 
   /**
@@ -58,12 +64,12 @@ export class Board implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.tasksSubscription = this.fbTaskService.tasksUpdated$.subscribe(tasks => {
       if (!this.isDragging) {
-        this.updateColumnArrays();
+        syncBoardColumns(tasks, this.searchTerm, this.boardColumns);
         this.cdr.markForCheck();
       }
     });
 
-    this.updateColumnArrays();
+    syncBoardColumns(this.fbTaskService.tasksArray, this.searchTerm, this.boardColumns);
     this.onViewportResize();
     this.cdr.markForCheck();
   }
@@ -97,74 +103,6 @@ export class Board implements OnInit, OnDestroy {
   }
 
   /**
-   * Rebuilds cached column arrays from the current filtered task set.
-   * @returns {void} No return value.
-   */
-  updateColumnArrays(): void {
-    this.clearColumnArrays();
-    const filteredTasks = this.getFilteredTasks();
-    this.populateColumnArrays(filteredTasks);
-  }
-
-  /**
-   * Resets all column arrays to empty while keeping their references intact.
-   * @returns {void} No return value.
-   */
-  private clearColumnArrays(): void {
-    this.todoTasks.length = 0;
-    this.inProgressTasks.length = 0;
-    this.awaitFeedbackTasks.length = 0;
-    this.doneTasks.length = 0;
-  }
-
-  /**
-   * Distributes filtered tasks into the correct column arrays sorted by position.
-   * @param {ITask[]} tasks - Pre-filtered task list to distribute.
-   * @returns {void} No return value.
-   */
-  private populateColumnArrays(tasks: ITask[]): void {
-    const byStatus = (status: string) =>
-      tasks
-        .filter(t => t.status === status)
-        .sort((a, b) => (a.positionIndex ?? 0) - (b.positionIndex ?? 0));
-
-    this.todoTasks.push(...byStatus('to-do'));
-    this.inProgressTasks.push(...byStatus('in-progress'));
-    this.awaitFeedbackTasks.push(...byStatus('await-feedback'));
-    this.doneTasks.push(...byStatus('done'));
-  }
-
-  /**
-   * Returns the cached task array for a specific status column.
-   * @param {string} status - Status key for the target column.
-   * @returns {ITask[]} Mutable column array used by the board view.
-   */
-  getColumnArray(status: string): ITask[] {
-    switch (status) {
-      case 'to-do':
-        return this.todoTasks;
-      case 'in-progress':
-        return this.inProgressTasks;
-      case 'await-feedback':
-        return this.awaitFeedbackTasks;
-      case 'done':
-        return this.doneTasks;
-      default:
-        return [];
-    }
-  }
-
-  /**
-   * Resolves a drop container id and returns its backing column array.
-   * @param {string} containerId - CDK drop-list container id.
-   * @returns {ITask[]} Column array associated with the container.
-   */
-  getColumnArrayById(containerId: string): ITask[] {
-    const status = this.getStatusFromContainerId(containerId);
-    return this.getColumnArray(status);
-  }
-
-  /**
    * Handles drag-and-drop operations and persists updated ordering/status.
    * @param {CdkDragDrop<ITask[]>} event - Drag-and-drop payload emitted by CDK.
    * @returns {Promise<void>} Promise resolved after all Firestore updates complete.
@@ -174,116 +112,14 @@ export class Board implements OnInit, OnDestroy {
     if (!draggedTask) return;
     this.isDragging = true;
     if (event.previousContainer === event.container) {
-      await this.handleSameColumnDrop(event);
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      await persistColumnPositions(event.container.data, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload));
     } else {
-      await this.handleCrossColumnDrop(event, draggedTask);
+      transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+      await this.fbTaskService.updateTask(draggedTask.dbid, { status: getBoardStatusFromContainerId(event.container.id), positionIndex: event.currentIndex });
+      await updateColumnPositionsAfterMove(event.previousContainer.data, event.container.data, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload));
     }
-    this.finalizeDragState();
-  }
-
-  /**
-   * Reorders tasks within the same column and persists new position indices.
-   * @param {CdkDragDrop<ITask[]>} event - Drop event within a single column.
-   * @returns {Promise<void>} Promise resolved after position updates complete.
-   */
-  private async handleSameColumnDrop(event: CdkDragDrop<ITask[]>): Promise<void> {
-    moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    await this.persistColumnPositions(event.container.data);
-  }
-
-  /**
-   * Moves a task to another column, updates its status, and persists positions in both columns.
-   * @param {CdkDragDrop<ITask[]>} event - Drop event across two columns.
-   * @param {ITask} draggedTask - The task being moved.
-   * @returns {Promise<void>} Promise resolved after all Firestore updates complete.
-   */
-  private async handleCrossColumnDrop(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
-    this.transferTaskBetweenColumns(event);
-    await this.updateDraggedTaskStatus(event, draggedTask);
-    await this.updateColumnPositionsAfterMove(event);
-  }
-
-  /**
-   * Persists the moved task status and index in the new column.
-   * @param {CdkDragDrop<ITask[]>} event - Drop event containing target metadata.
-   * @param {ITask} draggedTask - Task being moved.
-   * @returns {Promise<void>} Promise resolved after status persistence.
-   */
-  private async updateDraggedTaskStatus(event: CdkDragDrop<ITask[]>, draggedTask: ITask): Promise<void> {
-    const newStatus = this.getStatusFromContainerId(event.container.id);
-    draggedTask.status = newStatus;
-    await this.fbTaskService.updateTask(draggedTask.dbid, { status: newStatus, positionIndex: event.currentIndex });
-  }
-
-  /**
-   * Resets drag state and triggers change detection after drop handling.
-   * @returns {void} No return value.
-   */
-  private finalizeDragState(): void {
-    this.isDragging = false;
-    this.cdr.markForCheck();
-  }
-
-  /**
-   * Transfers a task between container arrays using CDK utilities.
-   * @param {CdkDragDrop<ITask[]>} event - Drop event with source and destination containers.
-   * @returns {void} No return value.
-   */
-  private transferTaskBetweenColumns(event: CdkDragDrop<ITask[]>): void {
-    transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
-  }
-
-  /**
-   * Updates position indices in both source and destination columns after a cross-column move.
-   * @param {CdkDragDrop<ITask[]>} event - Drop event with container references.
-   * @returns {Promise<void>} Promise resolved after all Firestore position updates complete.
-   */
-  private async updateColumnPositionsAfterMove(event: CdkDragDrop<ITask[]>): Promise<void> {
-    await Promise.all([
-      ...this.buildPositionUpdates(event.previousContainer.data),
-      ...this.buildPositionUpdates(event.container.data)
-    ]);
-  }
-
-  /**
-   * Assigns sequential position indices to a column array and returns the Firestore update promises.
-   * @param {ITask[]} columnData - Ordered task array for a single column.
-   * @returns {Promise<void>[]} Array of Firestore update promises.
-   */
-  private buildPositionUpdates(columnData: ITask[]): Promise<void>[] {
-    return columnData.map((task, index) => {
-      task.positionIndex = index;
-      return this.fbTaskService.updateTask(task.dbid, { positionIndex: index });
-    });
-  }
-
-  /**
-   * Persists position indices for all tasks in a column.
-   * @param {ITask[]} columnData - Ordered task array to persist.
-   * @returns {Promise<void>} Promise resolved after all updates complete.
-   */
-  private async persistColumnPositions(columnData: ITask[]): Promise<void> {
-    await Promise.all(this.buildPositionUpdates(columnData));
-  }
-
-  /**
-   * Maps a CDK drop-list container id to the internal task status key.
-   * @param {string} containerId - CDK drop-list container id.
-   * @returns {string} Status key for the corresponding board column.
-   */
-  private getStatusFromContainerId(containerId: string): string {
-    switch (containerId) {
-      case 'getTaskCollumnOne':
-        return 'to-do';
-      case 'getTaskCollumnTwo':
-        return 'in-progress';
-      case 'getTaskCollumnThree':
-        return 'await-feedback';
-      case 'getTaskCollumnFour':
-        return 'done';
-      default:
-        return 'to-do';
-    }
+    this.isDragging = false; this.cdr.markForCheck();
   }
 
   /**
@@ -350,23 +186,7 @@ export class Board implements OnInit, OnDestroy {
    */
   onSearchTasks(searchTerm: string): void {
     this.searchTerm = searchTerm.toLowerCase().trim();
-    this.updateColumnArrays();
-  }
-
-  /**
-   * Returns tasks filtered by the normalized search term.
-   * @returns {ITask[]} Tasks matching title or description criteria.
-   */
-  private getFilteredTasks(): ITask[] {
-    if (!this.searchTerm) {
-      return this.fbTaskService.tasksArray;
-    }
-
-    return this.fbTaskService.tasksArray.filter(task => {
-      const titleMatch = task.title?.toLowerCase().includes(this.searchTerm) || false;
-      const descriptionMatch = task.description?.toLowerCase().includes(this.searchTerm) || false;
-      return titleMatch || descriptionMatch;
-    });
+    syncBoardColumns(this.fbTaskService.tasksArray, this.searchTerm, this.boardColumns);
   }
 
   /**
@@ -445,10 +265,10 @@ export class Board implements OnInit, OnDestroy {
    */
   async onMoveTaskFromMenu(event: { task: ITask; status: ITask['status'] }): Promise<void> {
     if (!event.task.dbid || event.task.status === event.status) return;
-    const sourceColumn = this.getColumnArray(event.task.status);
-    const targetColumn = this.getColumnArray(event.status);
-    this.moveTaskBetweenColumns(event.task, sourceColumn, targetColumn, event.status);
-    await this.persistMovedTask(event.task, sourceColumn, targetColumn, event.status);
+    const sourceColumn = getBoardColumnArray(event.task.status, this.boardColumns);
+    const targetColumn = getBoardColumnArray(event.status, this.boardColumns);
+    moveTaskBetweenColumns(event.task, sourceColumn, targetColumn, event.status);
+    await persistMovedTask(event.task, sourceColumn, targetColumn, event.status, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload));
     this.cdr.markForCheck();
   }
 
@@ -473,33 +293,16 @@ export class Board implements OnInit, OnDestroy {
    * @returns {Promise<void>} Promise resolved after move completes.
    */
   private async moveTaskBetweenStatuses(task: ITask, direction: 'up' | 'down'): Promise<void> {
-    const statusMap: { [key: string]: number } = {
-      'to-do': 1,
-      'in-progress': 2,
-      'await-feedback': 3,
-      'done': 4
-    };
-    const reverseStatusMap: { [key: number]: string } = {
-      1: 'to-do',
-      2: 'in-progress',
-      3: 'await-feedback',
-      4: 'done'
-    };
-    const currentStatusLevel = statusMap[task.status];
-    const newStatusLevel = direction === 'up' ? currentStatusLevel - 1 : currentStatusLevel + 1;
-    const newStatus = reverseStatusMap[newStatusLevel] as ITask['status'];
-    const sourceColumn = this.getColumnArray(task.status);
-    const targetColumn = this.getColumnArray(newStatus);
+    const newStatus = getAdjacentBoardStatus(task.status, direction);
+    if (!newStatus) return;
+    const sourceColumn = getBoardColumnArray(task.status, this.boardColumns);
+    const targetColumn = getBoardColumnArray(newStatus, this.boardColumns);
     const sourceIndex = sourceColumn.findIndex(t => t.dbid === task.dbid);
     if (sourceIndex < 0 || !targetColumn) return;
     sourceColumn.splice(sourceIndex, 1);
     targetColumn.push(task);
     task.status = newStatus;
-    await Promise.all([
-      this.fbTaskService.updateTask(task.dbid, { status: newStatus }),
-      this.persistColumnPositions(sourceColumn),
-      this.persistColumnPositions(targetColumn)
-    ]);
+    await Promise.all([this.fbTaskService.updateTask(task.dbid, { status: newStatus }), persistColumnPositions(sourceColumn, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload)), persistColumnPositions(targetColumn, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload))]);
     this.cdr.markForCheck();
   }
 
@@ -510,41 +313,12 @@ export class Board implements OnInit, OnDestroy {
    * @returns {Promise<void>} Promise resolved after reorder completes.
    */
   private async moveTaskWithinColumn(task: ITask, direction: 'left' | 'right'): Promise<void> {
-    const column = this.getColumnArray(task.status);
+    const column = getBoardColumnArray(task.status, this.boardColumns);
     const sourceIndex = column.findIndex(t => t.dbid === task.dbid);
     const targetIndex = direction === 'left' ? sourceIndex - 1 : sourceIndex + 1;
     if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= column.length) return;
     moveItemInArray(column, sourceIndex, targetIndex);
-    await this.persistColumnPositions(column);
+    await persistColumnPositions(column, (dbid, payload) => this.fbTaskService.updateTask(dbid, payload));
     this.cdr.markForCheck();
-  }
-
-  /**
-   * Moves one task locally from its source array to the target array.
-   * @param {ITask} task - Task selected from mobile context menu.
-   * @param {ITask[]} sourceColumn - Source status array.
-   * @param {ITask[]} targetColumn - Destination status array.
-   * @param {ITask['status']} targetStatus - Destination status key.
-   * @returns {void} No return value.
-   */
-  private moveTaskBetweenColumns(task: ITask, sourceColumn: ITask[], targetColumn: ITask[], targetStatus: ITask['status']): void {
-    const sourceIndex = sourceColumn.findIndex(item => item.dbid === task.dbid);
-    if (sourceIndex > -1) sourceColumn.splice(sourceIndex, 1);
-    task.status = targetStatus;
-    targetColumn.push(task);
-  }
-
-  /**
-   * Persists status and updated column positions after mobile context-menu move.
-   * @param {ITask} task - Task to persist.
-   * @param {ITask[]} sourceColumn - Source status array after removal.
-   * @param {ITask[]} targetColumn - Target status array after insert.
-   * @param {ITask['status']} targetStatus - Destination status key.
-   * @returns {Promise<void>} Promise resolved when persistence is complete.
-   */
-  private async persistMovedTask(task: ITask, sourceColumn: ITask[], targetColumn: ITask[], targetStatus: ITask['status']): Promise<void> {
-    const targetIndex = targetColumn.length - 1;
-    await this.fbTaskService.updateTask(task.dbid, { status: targetStatus, positionIndex: targetIndex });
-    await Promise.all([this.persistColumnPositions(sourceColumn), this.persistColumnPositions(targetColumn)]);
   }
 }

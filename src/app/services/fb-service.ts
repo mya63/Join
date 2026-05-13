@@ -144,6 +144,11 @@ export class FbService {
     await updateDoc(doc(this.contactsCollection, current.id), { ...payload });
   }
 
+  /**
+   * Normalizes contact fields before creating or updating records.
+   * @param {IContact} contact - Raw contact payload.
+   * @returns {IContact} Contact payload with normalized email and phone.
+   */
   private withNormalizedContact(contact: IContact): IContact {
     return {
       ...contact,
@@ -152,6 +157,12 @@ export class FbService {
     };
   }
 
+  /**
+   * Checks whether the target email already exists on another contact.
+   * @param {string} email - Email to validate.
+   * @param {string} excludeContactId - Optional contact id to exclude from matching.
+   * @returns {boolean} True when a conflicting contact exists.
+   */
   private hasEmailConflict(email: string, excludeContactId = ''): boolean {
     const target = this.normalizeEmail(email);
     return this.contactsArray.some((contact) => {
@@ -161,10 +172,20 @@ export class FbService {
     });
   }
 
+  /**
+   * Trims and lowercases an email for consistent storage and comparison.
+   * @param {string} email - Raw email value.
+   * @returns {string} Normalized email.
+   */
   private normalizeEmail(email: string): string {
     return email.trim().toLowerCase();
   }
 
+  /**
+   * Removes whitespace from phone values to keep comparisons stable.
+   * @param {string} phone - Raw phone value.
+   * @returns {string} Normalized phone value.
+   */
   private normalizePhone(phone: string): string {
     return phone.replace(/\s+/g, '').trim();
   }

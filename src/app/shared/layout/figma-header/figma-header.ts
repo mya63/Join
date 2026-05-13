@@ -29,9 +29,16 @@ export class FigmaHeader implements OnInit {
    * Initializes responsive state and derives initials from auth user data.
    * @returns {void} No return value.
    */
-  ngOnInit() {
+  ngOnInit(): void {
     this.onResize();
+    this.subscribeToAuthState();
+  }
 
+  /**
+   * Subscribes to auth changes and derives the displayed initials.
+   * @returns {void} No return value.
+   */
+  private subscribeToAuthState(): void {
     runInInjectionContext(this.injector, () => {
       onAuthStateChanged(this.auth, (user) => {
         if (user?.displayName) {

@@ -73,30 +73,55 @@ export class EditMobile {
    * @param {any} form - Template-driven form reference.
    * @returns {void} No return value.
    */
-  async upContact(form?: any) {
+  async upContact(form?: any): Promise<void> {
     this.duplicateEmail = false;
     if (form && !this.isFormValid(form)) {
       this.markAllFieldsAsTouched(form);
       return;
     }
 
-    try {
-      await this.fbService.updateContact(this.fbService.id, this.editedContact);
-    } catch (error) {
-      this.handleSubmitError(error);
+    if (!(await this.saveEditedContact())) {
       return;
     }
     this.closeOverlayWithAnimation();
   }
 
+  /**
+   * Persists the edited contact and translates duplicate-email errors into UI state.
+   * @returns {Promise<boolean>} True when the contact update succeeded.
+   */
+  private async saveEditedContact(): Promise<boolean> {
+    try {
+      await this.fbService.updateContact(this.fbService.id, this.editedContact);
+      return true;
+    } catch (error) {
+      this.handleSubmitError(error);
+      return false;
+    }
+  }
+
+  /**
+   * Clears duplicate-email UI state when the email value changes.
+   * @returns {void} No return value.
+   */
   onEmailChange(): void {
     this.duplicateEmail = false;
   }
 
+  /**
+   * Maps update failures to local validation state.
+   * @param {unknown} error - Error thrown during contact update.
+   * @returns {void} No return value.
+   */
   private handleSubmitError(error: unknown): void {
     this.duplicateEmail = this.isDuplicateEmailError(error);
   }
 
+  /**
+   * Checks whether the thrown update error indicates duplicate email.
+   * @param {unknown} error - Error thrown during contact update.
+   * @returns {boolean} True when duplicate-email condition was detected.
+   */
   private isDuplicateEmailError(error: unknown): boolean {
     return error instanceof Error && error.message === 'CONTACT_EMAIL_EXISTS';
   }

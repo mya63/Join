@@ -176,18 +176,8 @@ export class EditTask implements OnInit {
   private parseDdMmYyyy(raw: string): Date | null {
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(raw);
     if (!match) return null;
-
-    const day = Number(match[1]);
-    const month = Number(match[2]);
-    const year = Number(match[3]);
-
-    const parsed = new Date(year, month - 1, day);
-    const isRealDate =
-      parsed.getFullYear() === year &&
-      parsed.getMonth() === month - 1 &&
-      parsed.getDate() === day;
-
-    return isRealDate ? parsed : null;
+    const parsed = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+    return parsed.getFullYear() === Number(match[3]) && parsed.getMonth() === Number(match[2]) - 1 && parsed.getDate() === Number(match[1]) ? parsed : null;
   }
 
   /**
@@ -301,17 +291,8 @@ export class EditTask implements OnInit {
   closeDropdowns(event: Event): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
-
-    const isInsideAssign = !!target.closest('.assign-dropdown-wrap, .assign-list');
-    const isInsideCategory = !!target.closest('.category-wrap, .category-list');
-
-    if (!isInsideAssign) {
-      this.showAssignDropdown = false;
-    }
-
-    if (!isInsideCategory) {
-      this.showCategoryDropdown = false;
-    }
+    this.showAssignDropdown = !!target.closest('.assign-dropdown-wrap, .assign-list');
+    this.showCategoryDropdown = !!target.closest('.category-wrap, .category-list');
   }
 
   /**
@@ -347,29 +328,54 @@ export class EditTask implements OnInit {
     this.editedTask.subTasks = this.editedTask.subTasks.filter(s => s.subtaskTitle !== title);
   }
 
+  /**
+   * Opens the due-date calendar popover.
+   * @returns {void} No return value.
+   */
   openCalendar(): void { this.showCalendar = true; }
 
 
+  /**
+   * Closes the due-date calendar popover.
+   * @returns {void} No return value.
+   */
   closeCalendar(): void { this.showCalendar = false; }
 
 
+  /**
+   * Resolves the localized month label for the calendar header.
+   * @param {number} month - Zero-based month index.
+   * @returns {string} Localized month name.
+   */
   getMonthName(month: number): string {
     return new Date(2000, month, 1).toLocaleString('default', { month: 'long' });
   }
 
 
+  /**
+   * Navigates the calendar view to the previous month.
+   * @returns {void} No return value.
+   */
   previousMonth(): void {
     if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; }
     else { this.currentMonth--; }
   }
 
 
+  /**
+   * Navigates the calendar view to the next month.
+   * @returns {void} No return value.
+   */
   nextMonth(): void {
     if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; }
     else { this.currentMonth++; }
   }
 
 
+  /**
+   * Builds the calendar grid entries including leading empty slots.
+   * @returns {(number | null)[]} Day numbers plus null placeholders.
+   */
   getCalendarDays(): (number | null)[] {
     const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
     const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
@@ -379,6 +385,11 @@ export class EditTask implements OnInit {
   }
 
 
+  /**
+   * Checks whether a day in the current calendar month lies in the past.
+   * @param {number} day - Day of the month.
+   * @returns {boolean} True when the day is before today.
+   */
   isDayInPast(day: number): boolean {
     const d = new Date(this.currentYear, this.currentMonth, day);
     const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
@@ -386,6 +397,11 @@ export class EditTask implements OnInit {
   }
 
 
+  /**
+   * Applies the selected day as due date and closes the calendar.
+   * @param {number} day - Selected day of month.
+   * @returns {void} No return value.
+   */
   onDayClick(day: number): void {
     const d = new Date(this.currentYear, this.currentMonth, day);
     const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate());
