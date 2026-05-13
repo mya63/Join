@@ -11,5 +11,8 @@ export const introConfigMobileGuest: IntroAnimationConfig = {
   animationDurationMs: 2000,
   easingFunction: 'ease-in',
   backgroundColor: '#2a3647',
+  targetSelectors: ['.login-page .logo-img'],
+  targetRetryFrames: 30,
+  hideTargetUntilPercent: 0.99,
   endPosition: () => measureIntroTarget('.login-page .logo-img'),
 };

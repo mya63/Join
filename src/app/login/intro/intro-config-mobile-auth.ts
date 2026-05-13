@@ -1,5 +1,13 @@
 import { IntroAnimationConfig } from './intro-animation-config.model';
-import { measureFirstVisibleIntroTarget } from './intro-target-position';
+import { IntroTargetPosition } from './intro-target-position';
+
+/**
+ * Returns the fixed mobile-auth target matching the mobile header J-logo slot.
+ * @returns {IntroTargetPosition} Static target position for the mobile-auth intro.
+ */
+function resolveMobileAuthTarget(): IntroTargetPosition {
+  return { x: '16px', y: '24px', width: '24px', height: '32px' };
+}
 
 export const introConfigMobileAuth: IntroAnimationConfig = {
   mode: 'mobile',
@@ -11,5 +19,8 @@ export const introConfigMobileAuth: IntroAnimationConfig = {
   animationDurationMs: 2000,
   easingFunction: 'ease-in',
   backgroundColor: '#2a3647',
-  endPosition: () => measureFirstVisibleIntroTarget(['.mobile-only .j-logo', '.login-page .logo-img']),
+  targetSelectors: ['.mobile-only .j-logo', '.login-page .logo-img'],
+  targetRetryFrames: 30,
+  hideTargetUntilPercent: 0.99,
+  endPosition: () => resolveMobileAuthTarget(),
 };

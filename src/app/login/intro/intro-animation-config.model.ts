@@ -12,5 +12,8 @@ export interface IntroAnimationConfig {
   readonly animationDurationMs: number;
   readonly easingFunction: string;
   readonly backgroundColor: string;
+  readonly targetSelectors: readonly string[];
+  readonly targetRetryFrames: number;
+  readonly hideTargetUntilPercent: number | null;
   readonly endPosition?: () => IntroTargetPosition;
 }

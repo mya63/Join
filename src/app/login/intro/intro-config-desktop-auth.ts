@@ -11,5 +11,8 @@ export const introConfigDesktopAuth: IntroAnimationConfig = {
   animationDurationMs: 2000,
   easingFunction: 'ease-in',
   backgroundColor: '#f6f7f8',
+  targetSelectors: ['.figma-sidenav .logo-img'],
+  targetRetryFrames: 30,
+  hideTargetUntilPercent: null,
   endPosition: () => measureIntroTarget('.figma-sidenav .logo-img'),
 };

@@ -7,6 +7,6 @@
   </main>
 
   @if (introVisible()) {
-  <app-intro [animationConfig]="introConfig()"></app-intro>
+  <app-intro [animationConfig]="introConfig()" (completed)="onIntroCompleted()"></app-intro>
   }
 </div>
