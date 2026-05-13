@@ -141,6 +141,7 @@ export class Intro {
   ngOnInit(): void {
     this.introMountedAtMs = performance.now();
     this.prepareIntroAnimation();
+    this.hideLoginLogoUntilAnimationNearlyDone();
   }
 
   /**
@@ -169,6 +170,21 @@ export class Intro {
         this.introReady.set(true);
       });
     }, this.centerHoldMs);
+  }
+
+  /**
+   * Hides the login page logo until the intro animation is 99% complete (Desktop Guest only).
+   * @returns {void} No return value.
+   */
+  private hideLoginLogoUntilAnimationNearlyDone(): void {
+    if (this.animationConfig().containerClass !== 'intro-desktop-guest') return;
+    const logo = document.querySelector('.login-page .logo-img') as HTMLElement | null;
+    if (!logo) return;
+    logo.classList.add('logo-img--hidden');
+    const duration = this.animationConfig().animationDurationMs;
+    setTimeout(() => {
+      logo.classList.remove('logo-img--hidden');
+    }, Math.floor(duration * 0.99));
   }
 }
 
