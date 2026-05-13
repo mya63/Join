@@ -215,15 +215,20 @@
 
 .badge {
   position: relative;
+  flex: 0 0 42px;
   width: 42px;
+  min-width: 42px;
+  max-width: 42px;
   height: 42px;
+  min-height: 42px;
+  max-height: 42px;
 }
 
 .badge__circle {
   position: absolute;
   inset: 0;
   border: 2px solid #fff;
-  border-radius: 45px;
+  border-radius: 50%;
 }
 
 .badge__initials {
