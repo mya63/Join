@@ -9,6 +9,9 @@
   --intro-end-top-desktop: var(--auth-logo-top-desktop);
   --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
   --intro-end-size-desktop: var(--auth-logo-size-desktop);
+  --intro-dx-desktop: 0px;
+  --intro-dy-desktop: 0px;
+  --intro-scale-desktop: 1;
 }
 
 .intro-container.intro-desktop-auth {
@@ -31,7 +34,7 @@
   transform: translate(-50%, -50%);
   animation: moveToCorner var(--intro-duration) var(--intro-ease) forwards;
   animation-play-state: paused;
-  will-change: top, left, width, transform;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
@@ -41,24 +44,11 @@
 
 @keyframes moveToCorner {
   0% {
-    top: 50%;
-    left: 50%;
-    width: 274px;
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  12% {
-    top: 50%;
-    left: 50%;
-    width: 274px;
     transform: translate(-50%, -50%) scale(1);
   }
 
   100% {
-    top: var(--intro-end-top-desktop);
-    left: var(--intro-end-left-desktop);
-    width: var(--intro-end-size-desktop);
-    transform: translate(0, 0);
+    transform: translate(calc(-50% + var(--intro-dx-desktop)), calc(-50% + var(--intro-dy-desktop))) scale(var(--intro-scale-desktop));
   }
 }
 
@@ -87,6 +77,9 @@
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
+    --intro-dx-mobile: 0px;
+    --intro-dy-mobile: 0px;
+    --intro-scale-mobile: 1;
   }
 
   .intro-mobile.intro-mobile-auth {
@@ -110,7 +103,7 @@
     transform: translate(-50%, -50%);
     animation: mobileLogoIntro var(--intro-duration) var(--intro-ease) forwards;
     animation-play-state: paused;
-    will-change: top, left, width, transform;
+    will-change: transform;
     backface-visibility: hidden;
   }
 
@@ -121,23 +114,10 @@
 
 @keyframes mobileLogoIntro {
   0% {
-    top: 50%;
-    left: 50%;
-    width: 180px;
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  12% {
-    top: 50%;
-    left: 50%;
-    width: 180px;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%);
   }
 
   100% {
-    top: var(--intro-end-top-mobile);
-    left: var(--intro-end-left-mobile);
-    width: var(--intro-end-size-mobile);
-    transform: translate(0, 0);
+    transform: translate(calc(-50% + var(--intro-dx-mobile)), calc(-50% + var(--intro-dy-mobile))) scale(var(--intro-scale-mobile));
   }
 }

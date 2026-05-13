@@ -1,4 +1,5 @@
 import { IntroAnimationConfig } from './intro-animation-config.model';
+import { measureIntroTarget } from './intro-target-position';
 
 export const introConfigMobileGuest: IntroAnimationConfig = {
   mode: 'mobile',
@@ -6,8 +7,9 @@ export const introConfigMobileGuest: IntroAnimationConfig = {
   containerClass: 'intro-mobile-guest',
   logoSrc: 'assets/img/login/joindarkmobilewhite.png',
   logoAlt: 'Join Logo Mobile',
-  redirectDelayMs: 2400,
-  animationDurationMs: 2300,
-  easingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  redirectDelayMs: 3000,
+  animationDurationMs: 3000,
+  easingFunction: 'linear',
   backgroundColor: '#2a3647',
+  endPosition: () => measureIntroTarget('.login-page .logo-img'),
 };
