@@ -3,8 +3,9 @@
 }
 
 .board {
+    --board-top-gap: var(--page-gutter-y, 56px);
     padding-left: 0;
-    padding-top: var(--page-gutter-y, 56px);
+    padding-top: var(--board-top-gap);
     display: flex;
     flex-direction: column;
 }
@@ -13,7 +14,7 @@
     // border: 1px solid blue;
     max-width: var(--content-max-width, 1920px);
     width: 100%;
-    height: calc(100dvh - var(--header-h, 96px) - var(--page-gutter-y, 56px) - 120px);
+    height: calc(100dvh - var(--header-h, 96px) - var(--board-top-gap) - 120px);
     flex: 1;
     margin-left: 0;
     display: flex;
@@ -37,6 +38,18 @@
     gap: 16px;
     border: 1px solid transparent;
 
+}
+
+@media (max-width: 1350px) {
+    .board {
+        --board-top-gap: 32px;
+    }
+}
+
+@media (max-width: 760px) {
+    .board {
+        --board-top-gap: 24px;
+    }
 }
 
 .task-table.dragging .collumn {

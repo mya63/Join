@@ -53,28 +53,3 @@ figma-bottom-nav .item--active {
   color: #29abe2;
 }
 
-
-@media (max-height: 700px) {
-  figma-bottom-nav {
-    height: 30px;
-  } 
-  figma-bottom-nav .item img {
-    height: 50px;
-  }
-  figma-bottom-nav .item {
-    font-size: 10px;
-  }
-}
-
-@media (max-height: 900px) {
-  figma-bottom-nav {
-    height: 40px;
-  } 
-  figma-bottom-nav .item img {
-    height: 60px;
-  }
-  figma-bottom-nav .item {
-    font-size: 10px;
-  }
-}
-

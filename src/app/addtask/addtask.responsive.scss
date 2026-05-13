@@ -53,6 +53,12 @@
     }
 }
 
+@media (max-width: 950px) {
+    .add-task-page .content .inputTask .content-top .page-title {
+        font-size: 47px;
+    }
+}
+
 @media (max-width: 500px) {
     .add-task-page .content .inputTask .content-bottom {
         flex-direction: column-reverse;
@@ -78,7 +84,7 @@
     }
 
     .add-task-page .content .inputTask .content-top .page-title {
-        font-size: 44px;
+        font-size: 47px;
         line-height: 1;
         margin-bottom: 10px;
     }

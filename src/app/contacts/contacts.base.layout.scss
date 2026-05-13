@@ -149,12 +149,30 @@
           overflow: hidden !important;
           padding-bottom: 100px;
 
+          &::after {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 78px;
+            pointer-events: none;
+            visibility: hidden;
+          }
+
           
 
         }
       }
     }
   }
+}
+
+.list-panel .list-panel__inner .contacts-list .contacts-list-center::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 78px;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 

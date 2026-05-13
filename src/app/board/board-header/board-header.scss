@@ -6,7 +6,7 @@
     padding-bottom: 16px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
 
     .border-header-top {
         position: relative;
@@ -199,6 +199,16 @@
             height: clamp(40px, 7vw, 48px);
             padding: 8px 12px;
             font-size: clamp(16px, 3vw, 21px);
+        }
+    }
+}
+
+@media (max-width: 950px) {
+    .board-header {
+        .border-header-top {
+            h1 {
+                font-size: 47px;
+            }
         }
     }
 }

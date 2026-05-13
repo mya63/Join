@@ -61,7 +61,7 @@
     }
 
     .list-panel__inner {
-      height: calc(100dvh - 80px);
+      height: calc(100dvh - 160px);
 
       .contacts-list {
         width: 100%;
@@ -71,6 +71,11 @@
 
         .contacts-list-center {
           width: 352px;
+          height: auto;
+
+          &::after {
+            height: 96px;
+          }
         }
       }
     }
@@ -111,6 +116,13 @@
     position: absolute;
     left: 0px;
     top: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .detail-panel-mobile {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
