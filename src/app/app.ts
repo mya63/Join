@@ -58,7 +58,19 @@ export class App {
    */
   private initializeStartupOverlay(): void {
     if (!this.isStartupEntryRoute()) return;
+    this.showStartupOverlayImmediately();
     this.navigateAndAnimateStartup();
+  }
+
+  /**
+   * Shows a provisional startup overlay immediately to prevent first-paint flashes.
+   * @returns {void} No return value.
+   */
+  private showStartupOverlayImmediately(): void {
+    const targetRoute: '/summary' | '/login' = this.auth.currentUser ? '/summary' : '/login';
+    const config = this.buildStartupIntroConfig(targetRoute);
+    this.introConfig.set(config);
+    this.introVisible.set(true);
   }
 
   /**
@@ -97,7 +109,6 @@ export class App {
     const config = this.buildStartupIntroConfig(targetRoute);
     this.introConfig.set(config);
     await this.router.navigate([targetRoute], { replaceUrl: true });
-    this.introVisible.set(true);
     this.hideIntroOverlayAfterDelay(config.redirectDelayMs);
   }
 
