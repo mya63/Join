@@ -10,9 +10,12 @@ import { IntroTargetPosition } from './intro-target-position';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Intro {
+  private readonly centerHoldMs = 140;
+  private introMountedAtMs = 0;
   readonly animationConfig = input.required<IntroAnimationConfig>();
   protected readonly introReady = signal(false);
   protected readonly movementVars = signal('');
+  protected readonly moveDurationMs = signal<number | null>(null);
 
   /**
    * Builds desktop wrapper classes from selected configuration and animation readiness.
@@ -54,7 +57,17 @@ export class Intro {
    * @returns {string} Inline style declaration without movement variables.
    */
   private buildBaseStyles(config: IntroAnimationConfig): string {
-    return `--intro-duration: ${config.animationDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
+    const moveDurationMs = this.moveDurationMs() ?? config.animationDurationMs;
+    return `--intro-duration: ${moveDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
+  }
+
+  /**
+   * Returns movement runtime after reserving the center-hold phase.
+   * @param {number} totalDurationMs - Full intro runtime from configuration.
+   * @returns {number} Effective movement runtime in milliseconds.
+   */
+  private getMoveDurationMs(totalDurationMs: number, elapsedMs: number): number {
+    return Math.max(0, totalDurationMs - elapsedMs);
   }
 
   /**
@@ -126,6 +139,7 @@ export class Intro {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
+    this.introMountedAtMs = performance.now();
     this.prepareIntroAnimation();
   }
 
@@ -135,11 +149,26 @@ export class Intro {
    */
   private prepareIntroAnimation(): void {
     requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.startIntroAfterCenterHold();
+      });
+    });
+  }
+
+  /**
+   * Starts intro after a short guaranteed center hold.
+   * @returns {void} No return value.
+   */
+  private startIntroAfterCenterHold(): void {
+    setTimeout(() => {
+      const elapsedMs = performance.now() - this.introMountedAtMs;
+      const durationMs = this.getMoveDurationMs(this.animationConfig().animationDurationMs, elapsedMs);
+      this.moveDurationMs.set(durationMs);
       this.movementVars.set(this.measureMovementVars());
       requestAnimationFrame(() => {
         this.introReady.set(true);
       });
-    });
+    }, this.centerHoldMs);
   }
 }
 
