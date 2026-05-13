@@ -1,3 +1,5 @@
+import { IntroTargetPosition } from './intro-target-position';
+
 export type IntroViewportMode = 'desktop' | 'mobile';
 
 export interface IntroAnimationConfig {
@@ -10,4 +12,5 @@ export interface IntroAnimationConfig {
   readonly animationDurationMs: number;
   readonly easingFunction: string;
   readonly backgroundColor: string;
+  readonly endPosition?: () => IntroTargetPosition;
 }

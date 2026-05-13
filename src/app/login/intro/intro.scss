@@ -1,7 +1,7 @@
 .intro-container {
   position: fixed;
   inset: 0;
-  background: #f6f7f8;
+  background: transparent;
   overflow: hidden;
   z-index: 3000;
   --intro-duration: 2300ms;
@@ -9,6 +9,29 @@
   --intro-end-top-desktop: var(--auth-logo-top-desktop);
   --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
   --intro-end-size-desktop: var(--auth-logo-size-desktop);
+  --intro-dx-desktop: 0px;
+  --intro-dy-desktop: 0px;
+  --intro-scale-desktop: 1;
+  --intro-start-size-desktop: 274px;
+}
+
+.intro-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--intro-bg, #f6f7f8);
+  opacity: 1;
+  pointer-events: none;
+}
+
+.intro-container.intro-desktop-guest::before {
+  opacity: 1;
+  animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+  animation-play-state: paused;
+}
+
+.intro-container.intro-desktop-guest.ready::before {
+  animation-play-state: running;
 }
 
 .intro-container.intro-desktop-auth {
@@ -23,42 +46,60 @@
   --intro-end-size-desktop: var(--auth-logo-size-desktop);
 }
 
-.intro-logo {
+.intro-logo-shell {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 274px;
-  transform: translate(-50%, -50%);
-  animation: moveToCorner var(--intro-duration) var(--intro-ease) forwards;
+  top: calc(50% - (var(--intro-start-size-desktop) / 2));
+  left: calc(50% - (var(--intro-start-size-desktop) / 2));
+  width: var(--intro-start-size-desktop);
+  z-index: 1;
+  animation: moveToCornerTransform var(--intro-duration) var(--intro-ease) forwards;
   animation-play-state: paused;
-  will-change: top, left, width, transform;
+  will-change: transform;
   backface-visibility: hidden;
 }
 
+.intro-logo {
+  display: block;
+  width: 100%;
+  transform-origin: top left;
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards;
+  animation-play-state: paused;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.intro-container.ready .intro-logo-shell,
 .intro-container.ready .intro-logo {
   animation-play-state: running;
 }
 
-@keyframes moveToCorner {
+@keyframes moveToCornerTransform {
   0% {
-    top: 50%;
-    left: 50%;
-    width: 274px;
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  12% {
-    top: 50%;
-    left: 50%;
-    width: 274px;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(0, 0);
   }
 
   100% {
-    top: var(--intro-end-top-desktop);
-    left: var(--intro-end-left-desktop);
-    width: var(--intro-end-size-desktop);
-    transform: translate(0, 0);
+    transform: translate(var(--intro-dx-desktop), var(--intro-dy-desktop));
+  }
+}
+
+@keyframes scaleToCorner {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(var(--intro-scale-desktop));
+  }
+}
+
+@keyframes desktopGuestOverlayFade {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
@@ -79,7 +120,7 @@
     display: block;
     position: fixed;
     inset: 0;
-    background: #2a3647;
+    background: transparent;
     overflow: hidden;
     z-index: 3000;
     --intro-duration: 2300ms;
@@ -87,57 +128,124 @@
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
+    --intro-dx-mobile: 0px;
+    --intro-dy-mobile: 0px;
+    --intro-scale-mobile: 1;
+    --intro-logo-dark-opacity-end: 0;
+  }
+
+  .intro-mobile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--intro-bg, #f6f7f8);
+    opacity: 1;
+    pointer-events: none;
   }
 
   .intro-mobile.intro-mobile-auth {
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
     --intro-end-size-mobile: 24px;
+    --intro-logo-dark-opacity-end: 1;
   }
 
   .intro-mobile.intro-mobile-guest {
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
+    --intro-logo-dark-opacity-end: 1;
   }
 
-  .intro-logo-m {
+  .intro-mobile.intro-mobile-guest::before {
+    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+  }
+
+  .intro-mobile.intro-mobile-auth::before {
+    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+  }
+
+  .intro-mobile.intro-mobile-guest.ready::before {
+    animation-play-state: running;
+  }
+
+  .intro-mobile.intro-mobile-auth.ready::before {
+    animation-play-state: running;
+  }
+
+  .intro-logo-shell-m {
     display: block;
     position: absolute;
     top: 50%;
     left: 50%;
     width: 180px;
+    z-index: 1;
     transform: translate(-50%, -50%);
     animation: mobileLogoIntro var(--intro-duration) var(--intro-ease) forwards;
     animation-play-state: paused;
-    will-change: top, left, width, transform;
+    will-change: transform;
     backface-visibility: hidden;
   }
 
-  .intro-mobile.ready .intro-logo-m {
+  .intro-logo-m {
+    display: block;
+    width: 180px;
+    transform-origin: top left;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards;
+    animation-play-state: paused;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .intro-logo-m-dark {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 180px;
+    transform-origin: top left;
+    opacity: 0;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards, mobileLogoDarkFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .intro-mobile.ready .intro-logo-shell-m,
+  .intro-mobile.ready .intro-logo-m,
+  .intro-mobile.ready .intro-logo-m-dark {
     animation-play-state: running;
   }
 }
 
 @keyframes mobileLogoIntro {
   0% {
-    top: 50%;
-    left: 50%;
-    width: 180px;
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  12% {
-    top: 50%;
-    left: 50%;
-    width: 180px;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%);
   }
 
   100% {
-    top: var(--intro-end-top-mobile);
-    left: var(--intro-end-left-mobile);
-    width: var(--intro-end-size-mobile);
-    transform: translate(0, 0);
+    transform: translate(calc(-50% + var(--intro-dx-mobile)), calc(-50% + var(--intro-dy-mobile)));
   }
 }
+
+@keyframes mobileLogoScale {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(var(--intro-scale-mobile));
+  }
+}
+
+@keyframes mobileLogoDarkFade {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: var(--intro-logo-dark-opacity-end);
+  }
+}
+

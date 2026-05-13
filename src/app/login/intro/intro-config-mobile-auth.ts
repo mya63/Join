@@ -1,4 +1,5 @@
 import { IntroAnimationConfig } from './intro-animation-config.model';
+import { measureFirstVisibleIntroTarget } from './intro-target-position';
 
 export const introConfigMobileAuth: IntroAnimationConfig = {
   mode: 'mobile',
@@ -6,8 +7,9 @@ export const introConfigMobileAuth: IntroAnimationConfig = {
   containerClass: 'intro-mobile-auth',
   logoSrc: 'assets/img/login/joindarkmobilewhite.png',
   logoAlt: 'Join Logo Mobile',
-  redirectDelayMs: 2400,
-  animationDurationMs: 2300,
-  easingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+  redirectDelayMs: 2000,
+  animationDurationMs: 2000,
+  easingFunction: 'ease-in',
   backgroundColor: '#2a3647',
+  endPosition: () => measureFirstVisibleIntroTarget(['.mobile-only .j-logo', '.login-page .logo-img']),
 };

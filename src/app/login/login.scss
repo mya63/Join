@@ -1,3 +1,8 @@
+.logo-img--hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.1s linear;
+}
 .login-page {
   font-family: 'Inter', sans-serif;
   min-height: 100vh;

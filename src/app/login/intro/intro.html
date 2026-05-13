@@ -1,12 +1,17 @@
 @if (animationConfig().mode === 'desktop') {
 <div [class]="getDesktopClasses()" [style]="getDesktopStyles()">
-  <img class="intro-logo" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
+  <div class="intro-logo-shell">
+    <img class="intro-logo" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
+  </div>
 </div>
 }
 
 @if (animationConfig().mode === 'mobile') {
 <div [class]="getMobileClasses()" [style]="getMobileStyles()">
-  <img class="intro-logo-m" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
+  <div class="intro-logo-shell-m">
+    <img class="intro-logo-m" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
+    <img class="intro-logo-m-dark" src="assets/img/login/signup/joindark.png" [alt]="animationConfig().logoAlt" aria-hidden="true" />
+  </div>
 </div>
 }
 
