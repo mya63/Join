@@ -17,6 +17,22 @@ export function measureIntroTarget(selector: string): IntroTargetPosition {
 }
 
 /**
+ * Measures the first visible element from a selector list for intro targeting.
+ * @param {readonly string[]} selectors - Ordered CSS selectors to try.
+ * @returns {IntroTargetPosition} Measured target rectangle or zero fallback.
+ */
+export function measureFirstVisibleIntroTarget(selectors: readonly string[]): IntroTargetPosition {
+  for (const selector of selectors) {
+    const element = document.querySelector<HTMLElement>(selector);
+    if (!element) continue;
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    return mapRectToTargetPosition(rect);
+  }
+  return createZeroTargetPosition();
+}
+
+/**
  * Maps a DOM rectangle to intro target position values.
  * @param {DOMRect} rect - Measured element rectangle.
  * @returns {IntroTargetPosition} Target position in pixel strings.

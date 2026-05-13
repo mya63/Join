@@ -102,10 +102,22 @@ export class Intro {
   private buildMeasuredMovementVars(startRect: DOMRect, target: IntroTargetPosition, mode: 'desktop' | 'mobile'): string {
     const numericTarget = this.getNumericTarget(target);
     if (!numericTarget) return '';
-    const deltaX = numericTarget.left - startRect.left;
-    const deltaY = numericTarget.top - startRect.top;
+    const rawDeltaX = numericTarget.left - startRect.left;
+    const rawDeltaY = numericTarget.top - startRect.top;
+    const deltaX = this.snapToDevicePixel(rawDeltaX);
+    const deltaY = this.snapToDevicePixel(rawDeltaY);
     const scale = numericTarget.width / startRect.width;
     return this.formatMovementVars(mode, deltaX, deltaY, scale);
+  }
+
+  /**
+   * Snaps values to device-pixel boundaries for sharper endpoint placement.
+   * @param {number} value - Raw movement delta value.
+   * @returns {number} Device-pixel-aligned value.
+   */
+  private snapToDevicePixel(value: number): number {
+    const dpr = window.devicePixelRatio || 1;
+    return Math.round(value * dpr) / dpr;
   }
 
   /**
@@ -120,6 +132,7 @@ export class Intro {
     const width = Number.parseFloat(target.width);
     const height = Number.parseFloat(target.height);
     if (!Number.isFinite(left) || !Number.isFinite(top) || !Number.isFinite(width) || !Number.isFinite(height)) return null;
+    if (width <= 0 || height <= 0) return null;
     return { left, top, width, height };
   }
 
@@ -163,15 +176,37 @@ export class Intro {
    */
   private startIntroAfterCenterHold(): void {
     setTimeout(() => {
-      const elapsedMs = performance.now() - this.introMountedAtMs;
-      const durationMs = this.getMoveDurationMs(this.animationConfig().animationDurationMs, elapsedMs);
-      this.moveDurationMs.set(durationMs);
-      this.movementVars.set(this.measureMovementVars());
-      requestAnimationFrame(() => {
-        this.introReady.set(true);
-      });
-      this.restoreLoginLogoAfterIntroEnds(durationMs);
+      this.startIntroWhenTargetIsReady(240);
     }, this.centerHoldMs);
+  }
+
+  /**
+   * Waits for a valid measured target and then starts intro playback.
+   * @param {number} attemptsLeft - Remaining animation-frame retries.
+   * @returns {void} No return value.
+   */
+  private startIntroWhenTargetIsReady(attemptsLeft: number): void {
+    const vars = this.measureMovementVars();
+    if (vars || attemptsLeft <= 0) {
+      const durationMs = this.animationConfig().animationDurationMs;
+      this.moveDurationMs.set(durationMs);
+      this.movementVars.set(vars);
+      this.startIntroPlayback(durationMs);
+      return;
+    }
+    requestAnimationFrame(() => this.startIntroWhenTargetIsReady(attemptsLeft - 1));
+  }
+
+  /**
+   * Starts the intro animation and schedules login-logo restoration.
+   * @param {number} durationMs - Effective intro animation duration.
+   * @returns {void} No return value.
+   */
+  private startIntroPlayback(durationMs: number): void {
+    requestAnimationFrame(() => {
+      this.introReady.set(true);
+    });
+    this.restoreLoginLogoAfterIntroEnds(durationMs);
   }
 
   /**

@@ -147,7 +147,7 @@
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
     --intro-end-size-mobile: 24px;
-    --intro-logo-dark-opacity-end: 1;
+    --intro-logo-dark-opacity-end: 0;
   }
 
   .intro-mobile.intro-mobile-guest {
@@ -162,7 +162,16 @@
     animation-play-state: paused;
   }
 
+  .intro-mobile.intro-mobile-auth::before {
+    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation-play-state: paused;
+  }
+
   .intro-mobile.intro-mobile-guest.ready::before {
+    animation-play-state: running;
+  }
+
+  .intro-mobile.intro-mobile-auth.ready::before {
     animation-play-state: running;
   }
 
