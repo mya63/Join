@@ -9,7 +9,7 @@ export const introConfigDesktopAuth: IntroAnimationConfig = {
   logoAlt: 'Join Logo',
   redirectDelayMs: 2000,
   animationDurationMs: 2000,
-  easingFunction: 'linear',
+  easingFunction: 'ease-in',
   backgroundColor: '#f6f7f8',
   endPosition: () => measureIntroTarget('.figma-sidenav .logo-img'),
 };
