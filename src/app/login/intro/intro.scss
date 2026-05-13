@@ -131,6 +131,8 @@
     --intro-dx-mobile: 0px;
     --intro-dy-mobile: 0px;
     --intro-scale-mobile: 1;
+    --intro-logo-filter-start: brightness(1);
+    --intro-logo-filter-end: brightness(1);
   }
 
   .intro-mobile::before {
@@ -146,12 +148,14 @@
     --intro-end-top-mobile: 24px;
     --intro-end-left-mobile: 16px;
     --intro-end-size-mobile: 24px;
+    --intro-logo-filter-end: brightness(0.28);
   }
 
   .intro-mobile.intro-mobile-guest {
     --intro-end-top-mobile: var(--auth-logo-top-mobile);
     --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
+    --intro-logo-filter-end: brightness(0.28);
   }
 
   .intro-mobile.intro-mobile-guest::before {
@@ -181,9 +185,9 @@
     display: block;
     width: 180px;
     transform-origin: top left;
-    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards, mobileLogoColorShift var(--intro-duration) linear forwards;
     animation-play-state: paused;
-    will-change: transform;
+    will-change: transform, filter;
     backface-visibility: hidden;
   }
 
@@ -212,3 +216,14 @@
     transform: scale(var(--intro-scale-mobile));
   }
 }
+
+@keyframes mobileLogoColorShift {
+  0% {
+    filter: var(--intro-logo-filter-start);
+  }
+
+  100% {
+    filter: var(--intro-logo-filter-end);
+  }
+}
+

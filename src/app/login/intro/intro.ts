@@ -12,6 +12,7 @@ import { IntroTargetPosition } from './intro-target-position';
 export class Intro {
   private readonly centerHoldMs = 140;
   private introMountedAtMs = 0;
+  private hiddenLoginLogo: HTMLElement | null = null;
   readonly animationConfig = input.required<IntroAnimationConfig>();
   protected readonly introReady = signal(false);
   protected readonly movementVars = signal('');
@@ -141,7 +142,7 @@ export class Intro {
   ngOnInit(): void {
     this.introMountedAtMs = performance.now();
     this.prepareIntroAnimation();
-    this.hideLoginLogoUntilAnimationNearlyDone();
+    this.hiddenLoginLogo = this.hideLoginLogoDuringGuestIntro();
   }
 
   /**
@@ -169,23 +170,34 @@ export class Intro {
       requestAnimationFrame(() => {
         this.introReady.set(true);
       });
+      this.restoreLoginLogoAfterIntroEnds(durationMs);
     }, this.centerHoldMs);
   }
 
   /**
-   * Hides the login page logo until the intro animation is 99% complete for guest intro variants.
+   * Hides the login page logo for guest intro variants.
+   * @returns {HTMLElement | null} Hidden logo element for later restoration.
+   */
+  private hideLoginLogoDuringGuestIntro(): HTMLElement | null {
+    const containerClass = this.animationConfig().containerClass;
+    if (containerClass !== 'intro-desktop-guest' && containerClass !== 'intro-mobile-guest') return null;
+    const logo = document.querySelector('.login-page .logo-img') as HTMLElement | null;
+    if (!logo) return null;
+    logo.classList.add('logo-img--hidden');
+    return logo;
+  }
+
+  /**
+   * Restores the login page logo after the intro animation has fully completed.
+   * @param {number} durationMs - Effective intro animation duration.
    * @returns {void} No return value.
    */
-  private hideLoginLogoUntilAnimationNearlyDone(): void {
-    const containerClass = this.animationConfig().containerClass;
-    if (containerClass !== 'intro-desktop-guest' && containerClass !== 'intro-mobile-guest') return;
-    const logo = document.querySelector('.login-page .logo-img') as HTMLElement | null;
-    if (!logo) return;
-    logo.classList.add('logo-img--hidden');
-    const duration = this.animationConfig().animationDurationMs;
+  private restoreLoginLogoAfterIntroEnds(durationMs: number): void {
+    if (!this.hiddenLoginLogo) return;
     setTimeout(() => {
-      logo.classList.remove('logo-img--hidden');
-    }, Math.floor(duration * 0.99));
+      this.hiddenLoginLogo?.classList.remove('logo-img--hidden');
+      this.hiddenLoginLogo = null;
+    }, durationMs);
   }
 }
 
