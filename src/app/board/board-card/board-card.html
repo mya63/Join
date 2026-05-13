@@ -2,6 +2,29 @@
 <div class="card-wrap">
   @if (dragHandleOnly) {
     <div class="card" (click)="onCardClick()">
+      <button type="button" class="mobile-context-trigger" (click)="toggleMobileMenu($event)" aria-label="Open move menu">
+        <span>↕</span>
+      </button>
+      @if (showMobileMenu) {
+      <div class="mobile-context-menu" (click)="$event.stopPropagation()">
+        <div class="menu-title">Move to</div>
+        <button type="button" class="menu-item" [disabled]="!canMoveLeft()" (click)="onMoveInColumn('left', $event)">
+          <span class="arrow">←</span>
+          <span>Left</span>
+        </button>
+        <button type="button" class="menu-item" [disabled]="!canMoveRight()" (click)="onMoveInColumn('right', $event)">
+          <span class="arrow">→</span>
+          <span>Right</span>
+        </button>
+        @for (status of getMoveTargets(); track status) {
+        <button type="button" class="menu-item" (click)="onMoveToStatus(status, $event)">
+          <span class="arrow">{{ status === 'to-do' || status === 'in-progress' ? '↑' : '↓' }}</span>
+          <span>{{ getStatusLabel(status) }}</span>
+        </button>
+        }
+      </div>
+      }
+
       <div cdkDragHandle class="drag-handle">
         <div class="label" [style.--myColor]="card.category.categoryProperties[0].color">
           {{ card.category.categoryProperties[0].name }}
@@ -41,6 +64,29 @@
     </div>
   } @else {
     <div cdkDragHandle class="card card-full-drag" (click)="onCardClick()">
+      <button type="button" class="mobile-context-trigger" (click)="toggleMobileMenu($event)" aria-label="Open move menu">
+        <span>↕</span>
+      </button>
+      @if (showMobileMenu) {
+      <div class="mobile-context-menu" (click)="$event.stopPropagation()">
+        <div class="menu-title">Move to</div>
+        <button type="button" class="menu-item" [disabled]="!canMoveLeft()" (click)="onMoveInColumn('left', $event)">
+          <span class="arrow">←</span>
+          <span>Left</span>
+        </button>
+        <button type="button" class="menu-item" [disabled]="!canMoveRight()" (click)="onMoveInColumn('right', $event)">
+          <span class="arrow">→</span>
+          <span>Right</span>
+        </button>
+        @for (status of getMoveTargets(); track status) {
+        <button type="button" class="menu-item" (click)="onMoveToStatus(status, $event)">
+          <span class="arrow">{{ status === 'to-do' || status === 'in-progress' ? '↑' : '↓' }}</span>
+          <span>{{ getStatusLabel(status) }}</span>
+        </button>
+        }
+      </div>
+      }
+
       <div class="drag-handle">
         <div class="label" [style.--myColor]="card.category.categoryProperties[0].color">
           {{ card.category.categoryProperties[0].name }}

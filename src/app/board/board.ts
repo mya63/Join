@@ -437,4 +437,63 @@ export class Board implements OnInit, OnDestroy {
     this.selectedTask = null;
     this.cdr.markForCheck();
   }
+
+  /**
+   * Handles mobile context-menu task moves and persists all updates.
+   * @param {{ task: ITask; status: ITask['status'] }} event - Task and target status.
+   * @returns {Promise<void>} Promise resolved after status and position updates complete.
+   */
+  async onMoveTaskFromMenu(event: { task: ITask; status: ITask['status'] }): Promise<void> {
+    if (!event.task.dbid || event.task.status === event.status) return;
+    const sourceColumn = this.getColumnArray(event.task.status);
+    const targetColumn = this.getColumnArray(event.status);
+    this.moveTaskBetweenColumns(event.task, sourceColumn, targetColumn, event.status);
+    await this.persistMovedTask(event.task, sourceColumn, targetColumn, event.status);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Moves a task left or right inside its current column and persists the new order.
+   * @param {{ task: ITask; direction: 'left' | 'right' }} event - Selected task and direction.
+   * @returns {Promise<void>} Promise resolved after position updates complete.
+   */
+  async onMoveTaskInsideColumn(event: { task: ITask; direction: 'left' | 'right' }): Promise<void> {
+    if (!event.task.dbid) return;
+    const column = this.getColumnArray(event.task.status);
+    const sourceIndex = column.findIndex(task => task.dbid === event.task.dbid);
+    const targetIndex = event.direction === 'left' ? sourceIndex - 1 : sourceIndex + 1;
+    if (sourceIndex < 0 || targetIndex < 0 || targetIndex >= column.length) return;
+    moveItemInArray(column, sourceIndex, targetIndex);
+    await this.persistColumnPositions(column);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Moves one task locally from its source array to the target array.
+   * @param {ITask} task - Task selected from mobile context menu.
+   * @param {ITask[]} sourceColumn - Source status array.
+   * @param {ITask[]} targetColumn - Destination status array.
+   * @param {ITask['status']} targetStatus - Destination status key.
+   * @returns {void} No return value.
+   */
+  private moveTaskBetweenColumns(task: ITask, sourceColumn: ITask[], targetColumn: ITask[], targetStatus: ITask['status']): void {
+    const sourceIndex = sourceColumn.findIndex(item => item.dbid === task.dbid);
+    if (sourceIndex > -1) sourceColumn.splice(sourceIndex, 1);
+    task.status = targetStatus;
+    targetColumn.push(task);
+  }
+
+  /**
+   * Persists status and updated column positions after mobile context-menu move.
+   * @param {ITask} task - Task to persist.
+   * @param {ITask[]} sourceColumn - Source status array after removal.
+   * @param {ITask[]} targetColumn - Target status array after insert.
+   * @param {ITask['status']} targetStatus - Destination status key.
+   * @returns {Promise<void>} Promise resolved when persistence is complete.
+   */
+  private async persistMovedTask(task: ITask, sourceColumn: ITask[], targetColumn: ITask[], targetStatus: ITask['status']): Promise<void> {
+    const targetIndex = targetColumn.length - 1;
+    await this.fbTaskService.updateTask(task.dbid, { status: targetStatus, positionIndex: targetIndex });
+    await Promise.all([this.persistColumnPositions(sourceColumn), this.persistColumnPositions(targetColumn)]);
+  }
 }

@@ -8,14 +8,21 @@ import { ITask } from '../../interfaces/i-task';
   imports: [CommonModule, CdkDragHandle],
   templateUrl: './board-card.html',
   styleUrl: './board-card.scss',
+  host: {
+    '(document:click)': 'onDocumentClick()'
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardCard {
 
   @Input() card!: ITask;
   @Input() displayIndex: number = 0;
+  @Input() columnLength: number = 0;
   @Input() dragHandleOnly: boolean = true;
   @Output() cardClick = new EventEmitter<ITask>();
+  @Output() moveToStatus = new EventEmitter<{ task: ITask; status: ITask['status'] }>();
+  @Output() moveInColumn = new EventEmitter<{ task: ITask; direction: 'left' | 'right' }>();
+  showMobileMenu: boolean = false;
 
   /**
    * Emits the selected task when the board card is clicked.
@@ -23,6 +30,86 @@ export class BoardCard {
    */
   onCardClick(): void {
     this.cardClick.emit(this.card);
+  }
+
+  /**
+   * Toggles the mobile move context menu for the current card.
+   * @param {MouseEvent} event - Click event from menu trigger button.
+   * @returns {void} No return value.
+   */
+  toggleMobileMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showMobileMenu = !this.showMobileMenu;
+  }
+
+  /**
+   * Emits a move request for the current task and closes the context menu.
+   * @param {ITask['status']} status - Target status chosen from the menu.
+   * @param {MouseEvent} event - Click event from menu option.
+   * @returns {void} No return value.
+   */
+  onMoveToStatus(status: ITask['status'], event: MouseEvent): void {
+    event.stopPropagation();
+    this.moveToStatus.emit({ task: this.card, status });
+    this.showMobileMenu = false;
+  }
+
+  /**
+   * Emits a request to move the task left or right inside the same column.
+   * @param {'left' | 'right'} direction - Direction for position change.
+   * @param {MouseEvent} event - Click event from menu option.
+   * @returns {void} No return value.
+   */
+  onMoveInColumn(direction: 'left' | 'right', event: MouseEvent): void {
+    event.stopPropagation();
+    this.moveInColumn.emit({ task: this.card, direction });
+    this.showMobileMenu = false;
+  }
+
+  /**
+   * Closes the mobile context menu when clicking outside the card controls.
+   * @returns {void} No return value.
+   */
+  onDocumentClick(): void {
+    if (!this.showMobileMenu) return;
+    this.showMobileMenu = false;
+  }
+
+  /**
+   * Returns all valid target statuses excluding the task's current status.
+   * @returns {Array<ITask['status']>} List of allowed target statuses.
+   */
+  getMoveTargets(): Array<ITask['status']> {
+    const targets: Array<ITask['status']> = ['to-do', 'in-progress', 'await-feedback', 'done'];
+    return targets.filter(status => status !== this.card.status);
+  }
+
+  /**
+   * Maps internal status key to menu label used in mobile context menu.
+   * @param {ITask['status']} status - Internal status key.
+   * @returns {string} Human-readable label for the status.
+   */
+  getStatusLabel(status: ITask['status']): string {
+    if (status === 'to-do') return 'To-do';
+    if (status === 'in-progress') return 'In progress';
+    if (status === 'await-feedback') return 'Review';
+    return 'Done';
+  }
+
+  /**
+   * Checks whether current task can move one position left in its column.
+   * @returns {boolean} True when task is not at first position.
+   */
+  canMoveLeft(): boolean {
+    return this.displayIndex > 1;
+  }
+
+  /**
+   * Checks whether current task can move one position right in its column.
+   * @returns {boolean} True when task is not at last position.
+   */
+  canMoveRight(): boolean {
+    return this.displayIndex < this.columnLength;
   }
 
   /**
