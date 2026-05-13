@@ -11,8 +11,10 @@ import { IntroTargetPosition } from './intro-target-position';
 })
 export class Intro {
   private readonly centerHoldMs = 140;
+  private readonly introHiddenClass = 'intro-target-hidden';
+  private readonly introBodyHideClass = 'intro-hide-target-logo';
   private introMountedAtMs = 0;
-  private hiddenLoginLogo: HTMLElement | null = null;
+  private hiddenTargetLogos: HTMLElement[] = [];
   readonly animationConfig = input.required<IntroAnimationConfig>();
   protected readonly introReady = signal(false);
   protected readonly movementVars = signal('');
@@ -154,8 +156,9 @@ export class Intro {
    */
   ngOnInit(): void {
     this.introMountedAtMs = performance.now();
+    document.body.classList.add(this.introBodyHideClass);
     this.prepareIntroAnimation();
-    this.hiddenLoginLogo = this.hideLoginLogoDuringGuestIntro();
+    this.hiddenTargetLogos = this.hideTargetLogosForIntro();
   }
 
   /**
@@ -206,33 +209,45 @@ export class Intro {
     requestAnimationFrame(() => {
       this.introReady.set(true);
     });
-    this.restoreLoginLogoAfterIntroEnds(durationMs);
+    this.restoreTargetLogosNearIntroEnd(durationMs);
   }
 
   /**
-   * Hides the login page logo for guest intro variants.
-   * @returns {HTMLElement | null} Hidden logo element for later restoration.
+   * Hides target logo elements used as intro endpoints.
+   * @returns {HTMLElement[]} Hidden logo elements for later restoration.
    */
-  private hideLoginLogoDuringGuestIntro(): HTMLElement | null {
+  private hideTargetLogosForIntro(): HTMLElement[] {
     const containerClass = this.animationConfig().containerClass;
-    if (containerClass !== 'intro-desktop-guest' && containerClass !== 'intro-mobile-guest') return null;
-    const logo = document.querySelector('.login-page .logo-img') as HTMLElement | null;
-    if (!logo) return null;
-    logo.classList.add('logo-img--hidden');
-    return logo;
+    const selectors = this.getTargetLogoSelectors(containerClass);
+    const elements = selectors
+      .map((selector) => document.querySelector(selector) as HTMLElement | null)
+      .filter((element): element is HTMLElement => !!element);
+    elements.forEach((element) => element.classList.add(this.introHiddenClass));
+    return elements;
   }
 
   /**
-   * Restores the login page logo after the intro animation has fully completed.
+   * Resolves target logo selectors by intro variant.
+   * @param {string} containerClass - Active intro container class.
+   * @returns {string[]} Target selectors for the current intro variant.
+   */
+  private getTargetLogoSelectors(containerClass: string): string[] {
+    if (containerClass === 'intro-desktop-auth') return ['.figma-sidenav .logo-img'];
+    if (containerClass === 'intro-mobile-auth') return ['.mobile-only .j-logo', '.login-page .logo-img'];
+    return ['.login-page .logo-img'];
+  }
+
+  /**
+   * Restores hidden target logos near the end of intro animation.
    * @param {number} durationMs - Effective intro animation duration.
    * @returns {void} No return value.
    */
-  private restoreLoginLogoAfterIntroEnds(durationMs: number): void {
-    if (!this.hiddenLoginLogo) return;
+  private restoreTargetLogosNearIntroEnd(durationMs: number): void {
     setTimeout(() => {
-      this.hiddenLoginLogo?.classList.remove('logo-img--hidden');
-      this.hiddenLoginLogo = null;
-    }, durationMs);
+      this.hiddenTargetLogos.forEach((element) => element.classList.remove(this.introHiddenClass));
+      this.hiddenTargetLogos = [];
+      document.body.classList.remove(this.introBodyHideClass);
+    }, Math.floor(durationMs * 0.99));
   }
 }
 

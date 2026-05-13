@@ -70,6 +70,20 @@ img {
 .d-none {
   display: none !important;
 }
+
+.intro-target-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.1s linear;
+}
+
+.intro-hide-target-logo .login-page .logo-img,
+.intro-hide-target-logo .mobile-only .j-logo,
+.intro-hide-target-logo .figma-sidenav .logo-img {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
