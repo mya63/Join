@@ -56,7 +56,7 @@
     border-color: transparent !important;
     background-color: rgba(42, 116, 255, 0.04) !important;
     box-shadow: 0 0 0 2px rgba(42, 116, 255, 0.12), 0 10px 24px rgba(42, 116, 255, 0.08);
-    border-radius: 24px;
+    border-radius: 6px 6px 24px 24px;
 }
 
 .task-table.dragging .collumn.drop-active {
@@ -75,7 +75,7 @@
     border-left: 2px dashed #2a74ff;
     border-right: 2px dashed #2a74ff;
     border-bottom: 0;
-    border-radius: 24px 24px 0 0;
+    border-radius: 4px 4px 0 0;
     background: rgba(42, 116, 255, 0.08);
     pointer-events: none;
     z-index: 1;
@@ -97,7 +97,7 @@
 .task-table.dragging .collumn:hover {
     background-color: rgba(42, 116, 255, 0.1) !important;
     box-shadow: 0 0 0 2px rgba(42, 116, 255, 0.22), 0 12px 28px rgba(42, 116, 255, 0.12);
-    border-radius: 24px;
+    border-radius: 6px 6px 24px 24px;
 }
 
 .no-tasks {
