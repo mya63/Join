@@ -12,6 +12,7 @@ import { IntroTargetPosition } from './intro-target-position';
 export class Intro {
   readonly animationConfig = input.required<IntroAnimationConfig>();
   protected readonly introReady = signal(false);
+  protected readonly movementVars = signal('');
 
   /**
    * Builds desktop wrapper classes from selected configuration and animation readiness.
@@ -36,7 +37,7 @@ export class Intro {
    * @returns {string} Inline style declaration with CSS custom properties.
    */
   protected getDesktopStyles(): string {
-    return this.buildIntroStyles(this.animationConfig(), 274, 'desktop');
+    return this.buildBaseStyles(this.animationConfig()) + this.movementVars();
   }
 
   /**
@@ -44,34 +45,65 @@ export class Intro {
    * @returns {string} Inline style declaration with CSS custom properties.
    */
   protected getMobileStyles(): string {
-    return this.buildIntroStyles(this.animationConfig(), 180, 'mobile');
+    return this.buildBaseStyles(this.animationConfig()) + this.movementVars();
   }
 
   /**
-   * Builds inline intro styles with dynamic movement variables.
+   * Builds static intro styles from the active configuration.
    * @param {IntroAnimationConfig} config - Active intro animation configuration.
-   * @param {number} startSize - Initial rendered logo width.
-   * @param {'desktop' | 'mobile'} mode - Intro viewport mode.
-   * @returns {string} Inline style declaration with CSS custom properties.
+   * @returns {string} Inline style declaration without movement variables.
    */
-  private buildIntroStyles(config: IntroAnimationConfig, startSize: number, mode: 'desktop' | 'mobile'): string {
-    const movementVars = this.buildMovementVars(config.endPosition?.(), startSize, mode);
-    return `--intro-duration: ${config.animationDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};${movementVars}`;
+  private buildBaseStyles(config: IntroAnimationConfig): string {
+    return `--intro-duration: ${config.animationDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
   }
 
   /**
-   * Builds transform movement variables for the selected viewport mode.
-   * @param {IntroTargetPosition | undefined} target - Measured target position.
-   * @param {number} startSize - Initial rendered logo width.
-   * @param {'desktop' | 'mobile'} mode - Intro viewport mode.
+   * Measures movement variables from the rendered intro logo to the rendered target.
    * @returns {string} CSS custom properties for translation and scaling.
    */
-  private buildMovementVars(target: IntroTargetPosition | undefined, startSize: number, mode: 'desktop' | 'mobile'): string {
+  private measureMovementVars(): string {
+    const logoElement = this.getIntroLogoElement();
+    const target = this.animationConfig().endPosition?.();
+    if (!logoElement || !target) return '';
+    const mode = this.animationConfig().mode;
+    return mode === 'desktop'
+      ? this.buildDesktopEndVars(target)
+      : this.buildMeasuredMovementVars(logoElement.getBoundingClientRect(), target, mode);
+  }
+
+  /**
+   * Builds desktop end variables from measured target.
+   * @param {IntroTargetPosition} target - Measured target position.
+   * @returns {string} CSS custom properties for exact desktop end position.
+   */
+  private buildDesktopEndVars(target: IntroTargetPosition): string {
     const numericTarget = this.getNumericTarget(target);
     if (!numericTarget) return '';
-    const deltaX = this.getTargetCenterX(numericTarget) - window.innerWidth / 2;
-    const deltaY = this.getTargetCenterY(numericTarget) - window.innerHeight / 2;
-    const scale = numericTarget.width / startSize;
+    return ` --intro-end-left-desktop: ${numericTarget.left}px; --intro-end-top-desktop: ${numericTarget.top}px; --intro-end-size-desktop: ${numericTarget.width}px;`;
+  }
+
+  /**
+   * Returns the active intro logo element for the current viewport mode.
+   * @returns {HTMLImageElement | null} Mounted intro logo element.
+   */
+  private getIntroLogoElement(): HTMLImageElement | null {
+    const selector = this.animationConfig().mode === 'desktop' ? '.intro-logo-shell' : '.intro-logo-shell-m';
+    return document.querySelector<HTMLImageElement>(selector);
+  }
+
+  /**
+   * Builds movement variables from actual rendered rectangles.
+   * @param {DOMRect} startRect - Current intro logo rectangle.
+   * @param {IntroTargetPosition} target - Measured target position.
+   * @param {'desktop' | 'mobile'} mode - Active intro viewport mode.
+   * @returns {string} CSS custom properties for exact logo alignment.
+   */
+  private buildMeasuredMovementVars(startRect: DOMRect, target: IntroTargetPosition, mode: 'desktop' | 'mobile'): string {
+    const numericTarget = this.getNumericTarget(target);
+    if (!numericTarget) return '';
+    const deltaX = numericTarget.left - startRect.left;
+    const deltaY = numericTarget.top - startRect.top;
+    const scale = numericTarget.width / startRect.width;
     return this.formatMovementVars(mode, deltaX, deltaY, scale);
   }
 
@@ -91,24 +123,6 @@ export class Intro {
   }
 
   /**
-   * Returns the horizontal center of the target rectangle.
-   * @param {{ left: number; top: number; width: number; height: number; }} target - Parsed target rectangle.
-   * @returns {number} Horizontal center in pixels.
-   */
-  private getTargetCenterX(target: { left: number; top: number; width: number; height: number; }): number {
-    return target.left + target.width / 2;
-  }
-
-  /**
-   * Returns the vertical center of the target rectangle.
-   * @param {{ left: number; top: number; width: number; height: number; }} target - Parsed target rectangle.
-   * @returns {number} Vertical center in pixels.
-   */
-  private getTargetCenterY(target: { left: number; top: number; width: number; height: number; }): number {
-    return target.top + target.height / 2;
-  }
-
-  /**
    * Formats CSS custom properties for movement and scaling.
    * @param {'desktop' | 'mobile'} mode - Intro viewport mode.
    * @param {number} deltaX - Horizontal movement from center.
@@ -125,15 +139,16 @@ export class Intro {
    * @returns {void} No return value.
    */
   ngOnInit(): void {
-    this.armIntroOnNextFrame();
+    this.prepareIntroAnimation();
   }
 
   /**
-   * Starts intro animation after initial paint to avoid first-frame stutter.
+   * Prepares intro movement after initial paint and then starts the animation.
    * @returns {void} No return value.
    */
-  private armIntroOnNextFrame(): void {
+  private prepareIntroAnimation(): void {
     requestAnimationFrame(() => {
+      this.movementVars.set(this.measureMovementVars());
       requestAnimationFrame(() => {
         this.introReady.set(true);
       });

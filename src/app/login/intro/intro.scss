@@ -12,6 +12,10 @@
   --intro-dx-desktop: 0px;
   --intro-dy-desktop: 0px;
   --intro-scale-desktop: 1;
+  --intro-start-size-desktop: 274px;
+  --intro-end-top-desktop: 0px;
+  --intro-end-left-desktop: 0px;
+  --intro-end-size-desktop: 100px;
 }
 
 .intro-container.intro-desktop-auth {
@@ -26,29 +30,40 @@
   --intro-end-size-desktop: var(--auth-logo-size-desktop);
 }
 
-.intro-logo {
+.intro-logo-shell {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 274px;
-  transform: translate(-50%, -50%);
-  animation: moveToCorner var(--intro-duration) var(--intro-ease) forwards;
+  top: calc(50% - (var(--intro-start-size-desktop) / 2));
+  left: calc(50% - (var(--intro-start-size-desktop) / 2));
+  width: var(--intro-start-size-desktop);
+  animation: moveToCornerLayout var(--intro-duration) var(--intro-ease) forwards;
   animation-play-state: paused;
-  will-change: transform;
+  will-change: top, left, width;
   backface-visibility: hidden;
 }
 
-.intro-container.ready .intro-logo {
+.intro-logo {
+  display: block;
+  width: 100%;
+  transform-origin: top left;
+  animation: none;
+  backface-visibility: hidden;
+}
+
+.intro-container.ready .intro-logo-shell {
   animation-play-state: running;
 }
 
-@keyframes moveToCorner {
+@keyframes moveToCornerLayout {
   0% {
-    transform: translate(-50%, -50%) scale(1);
+    top: calc(50% - (var(--intro-start-size-desktop) / 2));
+    left: calc(50% - (var(--intro-start-size-desktop) / 2));
+    width: var(--intro-start-size-desktop);
   }
 
   100% {
-    transform: translate(calc(-50% + var(--intro-dx-desktop)), calc(-50% + var(--intro-dy-desktop))) scale(var(--intro-scale-desktop));
+    top: var(--intro-end-top-desktop);
+    left: var(--intro-end-left-desktop);
+    width: var(--intro-end-size-desktop);
   }
 }
 
@@ -94,7 +109,7 @@
     --intro-end-size-mobile: var(--auth-logo-size-mobile);
   }
 
-  .intro-logo-m {
+  .intro-logo-shell-m {
     display: block;
     position: absolute;
     top: 50%;
@@ -107,6 +122,17 @@
     backface-visibility: hidden;
   }
 
+  .intro-logo-m {
+    display: block;
+    width: 180px;
+    transform-origin: top left;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards;
+    animation-play-state: paused;
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .intro-mobile.ready .intro-logo-shell-m,
   .intro-mobile.ready .intro-logo-m {
     animation-play-state: running;
   }
@@ -118,6 +144,16 @@
   }
 
   100% {
-    transform: translate(calc(-50% + var(--intro-dx-mobile)), calc(-50% + var(--intro-dy-mobile))) scale(var(--intro-scale-mobile));
+    transform: translate(calc(-50% + var(--intro-dx-mobile)), calc(-50% + var(--intro-dy-mobile)));
+  }
+}
+
+@keyframes mobileLogoScale {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(var(--intro-scale-mobile));
   }
 }
