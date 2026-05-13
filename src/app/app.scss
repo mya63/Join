@@ -32,4 +32,8 @@
 		width: 100%;
 		padding-top: 80px;
 	}
+
+	#main-content:not(.public-route) {
+		padding-bottom: 80px;
+	}
 }
