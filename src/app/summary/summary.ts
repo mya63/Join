@@ -66,21 +66,27 @@ export class Summary implements OnInit, OnDestroy {
    * Reads auth state and prepares greeting context.
    */
   private checkAuthStatus(): void {
-    /**
-     * Registers auth-state handling inside Angular injection context.
-     * @returns {void} No return value.
-     */
-    runInInjectionContext(this.injector, () => onAuthStateChanged(this.auth, async (user) => {
-      if (!user) {
-        this.isGuest = true;
-        this.currentUserName = '';
-      } else {
-        await this.fbAuthService.forceSyncDailyTestDataForCurrentUser();
-        this.isGuest = false;
-        this.currentUserName = await this.loadDisplayName(user.uid, user.email || '');
-      }
+    runInInjectionContext(this.injector, () => {
+      onAuthStateChanged(this.auth, async (user) => this.applySummaryAuthState(user));
+    });
+  }
+
+  /**
+   * Applies summary greeting state from Firebase auth changes.
+   * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+   * @returns {Promise<void>} Promise resolved after state is applied.
+   */
+  private async applySummaryAuthState(user: import('@angular/fire/auth').User | null): Promise<void> {
+    if (!user) {
+      this.isGuest = true;
+      this.currentUserName = '';
       this.cdr.detectChanges();
-    }));
+      return;
+    }
+    await this.fbAuthService.forceSyncDailyTestDataForCurrentUser();
+    this.isGuest = false;
+    this.currentUserName = await this.loadDisplayName(user.uid, user.email || '');
+    this.cdr.detectChanges();
   }
 
   /**

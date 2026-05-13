@@ -39,26 +39,26 @@ export class FigmaHeader implements OnInit {
    * @returns {void} No return value.
    */
   private subscribeToAuthState(): void {
-    /**
-     * Registers an auth-state listener inside Angular injection context.
-     * @returns {void} No return value.
-     */
     runInInjectionContext(this.injector, () => {
-      /**
-       * Updates displayed initials from display name or fallback email parsing.
-       * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
-       * @returns {void} No return value.
-       */
-      onAuthStateChanged(this.auth, (user) => {
-        if (user?.displayName) {
-          this.userInitials.set(this.getInitialsFromDisplayName(user.displayName));
-        } else if (user?.email) {
-          this.userInitials.set(this.getInitialsFromEmail(user.email));
-        } else {
-          this.userInitials.set('G');
-        }
-      });
+      onAuthStateChanged(this.auth, (user) => this.applyInitialsFromUser(user));
     });
+  }
+
+  /**
+   * Applies header initials from Firebase user data.
+   * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+   * @returns {void} No return value.
+   */
+  private applyInitialsFromUser(user: import('@angular/fire/auth').User | null): void {
+    if (user?.displayName) {
+      this.userInitials.set(this.getInitialsFromDisplayName(user.displayName));
+      return;
+    }
+    if (user?.email) {
+      this.userInitials.set(this.getInitialsFromEmail(user.email));
+      return;
+    }
+    this.userInitials.set('G');
   }
 
   /**

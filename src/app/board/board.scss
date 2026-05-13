@@ -320,6 +320,11 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: sticky;
+        left: 0;
+        z-index: 3;
+        background: #f6f7f8;
+        padding-right: 8px;
         color: #2A3647;
         font-size: 20px;
         font-weight: 700;

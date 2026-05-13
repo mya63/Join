@@ -63,28 +63,29 @@ export class FbTaskService {
    * @returns {void} No return value.
    */
   private bindTaskListenerToAuthState(): void {
-    /**
-     * Creates auth-bound task-listener setup inside Angular injection context.
-     * @returns {void} No return value.
-     */
     runInInjectionContext(this.injector, () => {
-      /**
-       * Updates active task listener whenever authentication state changes.
-       * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
-       * @returns {void} No return value.
-       */
-      onAuthStateChanged(this.auth, (user) => {
-        /**
-         * Re-enters Angular injection context before initializing listener resources.
-         * @returns {void} No return value.
-         */
-        runInInjectionContext(this.injector, () => {
-          const userId = user?.uid || 'guest';
-          this.newTask.ownerId = userId;
-          this.startTasksListener(userId);
-        });
-      });
+      onAuthStateChanged(this.auth, (user) => this.handleTaskListenerAuthChange(user));
     });
+  }
+
+  /**
+   * Handles auth-state changes for task listener initialization.
+   * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+   * @returns {void} No return value.
+   */
+  private handleTaskListenerAuthChange(user: import('@angular/fire/auth').User | null): void {
+    runInInjectionContext(this.injector, () => this.startTaskListenerForUser(user));
+  }
+
+  /**
+   * Starts task listener for the resolved user scope.
+   * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
+   * @returns {void} No return value.
+   */
+  private startTaskListenerForUser(user: import('@angular/fire/auth').User | null): void {
+    const userId = user?.uid || 'guest';
+    this.newTask.ownerId = userId;
+    this.startTasksListener(userId);
   }
 
   /**
@@ -249,24 +250,24 @@ export class FbTaskService {
    * @returns {Promise<string | null>} Resolved user id or null when unauthenticated.
    */
   private waitForAuthUserId(): Promise<string | null> {
-    /**
-     * Creates a promise that resolves on first auth-state emission.
-     * @param {(value: string | null) => void} resolve - Promise resolver callback.
-     * @returns {void} No return value.
-     */
     return new Promise<string | null>((resolve) => {
       runInInjectionContext(this.injector, () => {
-        /**
-         * Resolves auth user id and unsubscribes the temporary listener.
-         * @param {import('@angular/fire/auth').User | null} user - Current authenticated user.
-         * @returns {void} No return value.
-         */
-        const unsubscribe = onAuthStateChanged(this.auth, (user) => {
-          unsubscribe();
-          resolve(user?.uid || null);
-        });
+        const unsubscribe = onAuthStateChanged(this.auth, this.createUserIdResolver(resolve, () => unsubscribe()));
       });
     });
+  }
+
+  /**
+   * Creates a one-shot auth-state handler that resolves a user id.
+   * @param {(value: string | null) => void} resolve - Promise resolver callback.
+   * @param {() => void} unsubscribe - Auth listener unsubscribe callback.
+   * @returns {(user: import('@angular/fire/auth').User | null) => void} Auth-state handler.
+   */
+  private createUserIdResolver(resolve: (value: string | null) => void, unsubscribe: () => void): (user: import('@angular/fire/auth').User | null) => void {
+    return (user: import('@angular/fire/auth').User | null) => {
+      unsubscribe();
+      resolve(user?.uid || null);
+    };
   }
 
   /**

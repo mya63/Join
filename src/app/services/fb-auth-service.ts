@@ -80,27 +80,27 @@ export class FbAuthService {
    * @returns {Promise<'/summary' | '/login'>} Target route for app startup.
    */
   private resolveRouteFromAuthState(): Promise<'/summary' | '/login'> {
-    /**
-     * Creates a promise that resolves once Firebase auth emits the current session state.
-     * @param {(value: '/summary' | '/login') => void} resolve - Promise resolver callback.
-     * @returns {void} No return value.
-     */
     return new Promise((resolve) => runInInjectionContext(this.injector, () => {
-      /**
-       * Handles one auth-state emission and resolves startup route accordingly.
-       * @param {User | null} user - Current authenticated user.
-       * @returns {void} No return value.
-       */
-      const unsub = onAuthStateChanged(this.auth, (user) => {
-        unsub();
-        if (!user) {
-          this.setLocalLoginState(false);
-          resolve('/login');
-          return;
-        }
-        this.syncAndResolveSummary(user, resolve);
-      });
+      const unsub = onAuthStateChanged(this.auth, this.createStartupAuthHandler(resolve, () => unsub()));
     }));
+  }
+
+  /**
+   * Builds a one-shot auth-state handler for startup route resolution.
+   * @param {(value: '/summary' | '/login') => void} resolve - Promise resolver callback.
+   * @param {() => void} unsubscribe - Snapshot unsubscribe callback.
+   * @returns {(user: User | null) => void} Auth-state handler function.
+   */
+  private createStartupAuthHandler(resolve: (value: '/summary' | '/login') => void, unsubscribe: () => void): (user: User | null) => void {
+    return (user: User | null) => {
+      unsubscribe();
+      if (!user) {
+        this.setLocalLoginState(false);
+        resolve('/login');
+        return;
+      }
+      this.syncAndResolveSummary(user, resolve);
+    };
   }
 
 
