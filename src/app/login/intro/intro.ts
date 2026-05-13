@@ -31,6 +31,24 @@ export class Intro {
   }
 
   /**
+   * Builds desktop inline styles from selected configuration animation parameters.
+   * @returns {string} Inline style declaration with CSS custom properties.
+   */
+  protected getDesktopStyles(): string {
+    const config = this.animationConfig();
+    return `--intro-duration: ${config.animationDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
+  }
+
+  /**
+   * Builds mobile inline styles from selected configuration animation parameters.
+   * @returns {string} Inline style declaration with CSS custom properties.
+   */
+  protected getMobileStyles(): string {
+    const config = this.animationConfig();
+    return `--intro-duration: ${config.animationDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
+  }
+
+  /**
    * Arms intro animation playback once overlay is mounted.
    * @returns {void} No return value.
    */

@@ -7,4 +7,7 @@ export interface IntroAnimationConfig {
   readonly logoSrc: string;
   readonly logoAlt: string;
   readonly redirectDelayMs: number;
+  readonly animationDurationMs: number;
+  readonly easingFunction: string;
+  readonly backgroundColor: string;
 }

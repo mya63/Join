@@ -1,11 +1,11 @@
 @if (animationConfig().mode === 'desktop') {
-<div [class]="getDesktopClasses()">
+<div [class]="getDesktopClasses()" [style]="getDesktopStyles()">
   <img class="intro-logo" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
 </div>
 }
 
 @if (animationConfig().mode === 'mobile') {
-<div [class]="getMobileClasses()">
+<div [class]="getMobileClasses()" [style]="getMobileStyles()">
   <img class="intro-logo-m" [src]="animationConfig().logoSrc" [alt]="animationConfig().logoAlt" />
 </div>
 }
