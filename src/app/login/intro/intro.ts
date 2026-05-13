@@ -58,7 +58,7 @@ export class Intro {
    */
   private buildBaseStyles(config: IntroAnimationConfig): string {
     const moveDurationMs = this.moveDurationMs() ?? config.animationDurationMs;
-    return `--intro-duration: ${moveDurationMs}ms; --intro-ease: ${config.easingFunction}; background: ${config.backgroundColor};`;
+    return `--intro-duration: ${moveDurationMs}ms; --intro-ease: ${config.easingFunction}; --intro-bg: ${config.backgroundColor};`;
   }
 
   /**
