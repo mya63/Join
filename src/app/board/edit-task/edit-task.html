@@ -172,7 +172,7 @@
               </span>
             </div>
           } @else {
-            <div class="subtask-view-row" (dblclick)="st.onEdit = true">
+            <div class="subtask-view-row" (click)="st.onEdit = true">
               <span class="subtask-title">&bull; {{ st.subtaskTitle }}</span>
               <span class="subtask-icons">
                 <span class="subtask-icon-btn" (click)="st.onEdit = true"><img src="assets/img/board/add-card/edit.svg" alt="edit"></span>

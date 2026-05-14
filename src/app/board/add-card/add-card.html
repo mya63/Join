@@ -202,7 +202,7 @@
                           (click)="editSubtask(subtask.subtaskTitle, subtaskInput.value, this.task)"></p>
                     </span>
                   </p>
-                  <p class="subtask-label" (dblclick)="subtask.onEdit=true" [class.dNone]="subtask.onEdit">
+                  <p class="subtask-label" (click)="subtask.onEdit=true" [class.dNone]="subtask.onEdit">
                     &bull; {{ subtask.subtaskTitle }}
                     <span class="subtask-icons">
                       <p class="subtask-icon-left"><img src="assets/img/board/add-card/edit.svg" alt="close"
