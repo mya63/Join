@@ -13,6 +13,6 @@ export const introConfigDesktopAuth: IntroAnimationConfig = {
   backgroundColor: '#f6f7f8',
   targetSelectors: ['.figma-sidenav .logo-img'],
   targetRetryFrames: 30,
-  hideTargetUntilPercent: null,
+  hideTargetUntilPercent: 0.99,
   endPosition: () => measureIntroTarget('.figma-sidenav .logo-img'),
 };
