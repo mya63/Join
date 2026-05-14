@@ -242,7 +242,7 @@
   }
 
   .intro-mobile.intro-mobile-auth::before {
-    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation: desktopAuthOverlayFadeIn var(--intro-duration) linear forwards;
     animation-play-state: paused;
   }
 
@@ -278,6 +278,13 @@
     backface-visibility: hidden;
   }
 
+  .intro-mobile.intro-mobile-auth .intro-logo-m {
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards,
+      mobileAuthLogoWhiteOut var(--intro-duration) linear forwards;
+    animation-play-state: paused, paused;
+    will-change: transform, opacity;
+  }
+
   .intro-logo-m-dark {
     display: block;
     position: absolute;
@@ -289,6 +296,12 @@
     animation-play-state: paused;
     will-change: transform, opacity;
     backface-visibility: hidden;
+  }
+
+  .intro-mobile.intro-mobile-auth .intro-logo-m-dark {
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards,
+      mobileAuthLogoDarkIn var(--intro-duration) linear forwards;
+    animation-play-state: paused, paused;
   }
 
   .intro-mobile.ready .intro-logo-shell-m,
@@ -325,6 +338,34 @@
 
   100% {
     opacity: var(--intro-logo-dark-opacity-end);
+  }
+}
+
+@keyframes mobileAuthLogoWhiteOut {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes mobileAuthLogoDarkIn {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 
