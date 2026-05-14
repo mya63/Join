@@ -12,7 +12,7 @@
 
 @media (max-width: 1350px) {
     .add-task-page {
-        min-height: calc(100dvh - var(--header-h-mobile, 80px));
+        min-height: calc(100dvh - var(--header-h-mobile, 80px) - 80px);
         padding: 40px 64px 104px;
         align-items: center;
     }
@@ -265,8 +265,50 @@
     .add-task-page .content .inputTask .content-top .input-content .left-col .field-date .out-date input,
     .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .select-assign-to .assign-to-dropdown .dropdown-header .selected-users .filterAssignedUsers input,
     .add-task-page .content .inputTask .content-top .input-content .right-col .field-category .category .category-dropdown .category-placeholder,
-    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input {
-        font-size: 15px;
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-subtasks .subtask-input input,
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        font-size: 16px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons {
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-priority .priority-buttons .priority-btn {
+        max-width: none;
+        min-width: 0;
+        height: 44px;
+        padding: 8px 6px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .avatars .avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+        line-height: 24px;
+    }
+
+    .add-task-page .content .inputTask .content-top .input-content .right-col .field-assign-to .assign-to-container .user-checkbox .user-checkbox-label {
+        font-size: 16px;
+        gap: 8px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .button-group button {
+        height: 40px;
+        min-width: 0;
+        padding: 8px 6px;
+        font-size: 14px;
+    }
+
+    .add-task-page .content .inputTask .content-bottom .check {
+        font-size: 12px;
     }
 
     .calendar-widget {
