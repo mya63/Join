@@ -317,6 +317,23 @@ export abstract class TaskFormBase {
 
 
   /**
+   * Enters subtask edit mode and places the caret at the end of the current text.
+   * @param {{ onEdit: boolean; subtaskTitle: string }} subtask - Subtask to switch into edit mode.
+   * @param {HTMLInputElement} inputElement - Bound input element for the subtask row.
+   * @returns {void} No return value.
+   */
+  startSubtaskEdit(subtask: { onEdit: boolean; subtaskTitle: string }, inputElement: HTMLInputElement): void {
+    subtask.onEdit = true;
+    setTimeout(() => {
+      if (!inputElement) return;
+      inputElement.focus();
+      const caretIndex = subtask.subtaskTitle.length;
+      inputElement.setSelectionRange(caretIndex, caretIndex);
+    }, 0);
+  }
+
+
+  /**
    * Removes a subtask from the task by its title.
    * @param {string} subtaskTitle - Subtask title to remove.
    * @param {ITask} myTask - Task containing the subtask.
