@@ -1,0 +1,13 @@
+// Styles for desktop-auth intro overlay
+
+.intro-container.intro-desktop-auth {
+  --intro-end-top-desktop: 64px;
+  --intro-end-left-desktop: 65.98px;
+  --intro-end-size-desktop: 100px;
+  --intro-overlay-start-opacity: 1;
+  --intro-overlay-end-opacity: 0;
+  --intro-logo-primary-start-opacity: 1;
+  --intro-logo-primary-end-opacity: 0;
+  --intro-logo-secondary-start-opacity: 0;
+  --intro-logo-secondary-end-opacity: 1;
+}

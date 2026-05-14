@@ -1,0 +1,14 @@
+// Styles for mobile-guest intro overlay
+
+.intro-mobile.intro-mobile-guest {
+  --intro-end-top-mobile: var(--auth-logo-top-mobile);
+  --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
+  --intro-end-size-mobile: var(--auth-logo-size-mobile);
+  --intro-logo-dark-opacity-end: 1;
+  --intro-overlay-start-opacity: 1;
+  --intro-overlay-end-opacity: 0;
+  --intro-logo-primary-start-opacity: 1;
+  --intro-logo-primary-end-opacity: 1;
+  --intro-logo-secondary-start-opacity: 0;
+  --intro-logo-secondary-end-opacity: 1;
+}
