@@ -1,3 +1,4 @@
+// ...entfernt: fehlerhafte Klassendeklaration und Getter außerhalb der Klasse...
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +16,9 @@ import { TaskFormBase } from '../shared/task-form-base';
   }
 })
 export class AddTask extends TaskFormBase implements OnInit {
+  public get duplicateSubtaskError(): boolean {
+    return this._duplicateSubtaskError;
+  }
   private readonly router = inject(Router);
 
 

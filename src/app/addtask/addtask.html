@@ -175,6 +175,9 @@
 
             <div class="field-subtasks">
               <label class="label">Subtasks</label>
+              @if (duplicateSubtaskError) {
+                <span style="color: red; margin-left: 1rem; font-size: 0.95em; vertical-align: middle;">Subtask already exists</span>
+              }
               <div class="subtask-input">
                 <span class="out"><input type="text" name="subtask" (keydown.enter)="addSubtask(this.task)"
                     [(ngModel)]="this.subtask.title" placeholder="Add new subtask" required>
