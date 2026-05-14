@@ -32,7 +32,7 @@
                   required> <img src="assets/img/board/calendar.svg" alt="Calendar" (click)="openCalendar('task')"
                   class="calendar-icon"></span>
 
-              <span [class.dNone]="!submitAttempted || alowAddTaskCalender()"><span [style.color]="'red'">*Date is required and must be today or later
+              <span class="date-error-hint" [class.dNone]="!submitAttempted || alowAddTaskCalender()"><span [style.color]="'red'">*Date is required and must be today or later
                   (dd/mm/yyyy)</span>
               </span>
             </div>
@@ -176,6 +176,9 @@
 
             <div class="field-subtasks">
               <label class="label">Subtasks</label>
+              @if (duplicateSubtaskError) {
+                <span style="color: red; margin-left: 1rem; font-size: 0.95em; vertical-align: middle;">Subtask already exists</span>
+              }
               <div class="subtask-input">
                 <span class="out"><input type="text" name="subtask" (keydown.enter)="addSubtask(this.task)"
                     [(ngModel)]="this.subtask.title" placeholder="Add new subtask" required>
@@ -202,11 +205,11 @@
                           (click)="editSubtask(subtask.subtaskTitle, subtaskInput.value, this.task)"></p>
                     </span>
                   </p>
-                  <p class="subtask-label" (dblclick)="subtask.onEdit=true" [class.dNone]="subtask.onEdit">
+                  <p class="subtask-label" [class.dNone]="subtask.onEdit">
                     &bull; {{ subtask.subtaskTitle }}
                     <span class="subtask-icons">
                       <p class="subtask-icon-left"><img src="assets/img/board/add-card/edit.svg" alt="close"
-                          (click)="editSubtask(subtask.subtaskTitle, subtaskInput.value, this.task)"></p>
+                          (click)="$event.stopPropagation(); startSubtaskEdit(subtask, subtaskInput)"></p>
                       <p class="subtask-icon-right"><img src="assets/img/board/add-card/delete.svg" alt="enter"
                           (click)="deleteSubtask(subtask.subtaskTitle, this.task)"></p>
                     </span>

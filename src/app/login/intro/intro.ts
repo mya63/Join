@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, OnDestroy, inject, input, output, signal } from '@angular/core';
 import { IntroAnimationConfig } from './intro-animation-config.model';
 import { IntroTargetPosition } from './intro-target-position';
 
@@ -9,13 +9,21 @@ import { IntroTargetPosition } from './intro-target-position';
   styleUrl: './intro.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Intro {
+export class Intro implements OnDestroy {
   private readonly centerHoldMs = 140;
   private readonly introHiddenClass = 'intro-target-hidden';
   private readonly introBodyHideClass = 'intro-hide-target-logo';
+  private readonly hostElement = inject(ElementRef<HTMLElement>);
   private introMountedAtMs = 0;
   private hiddenTargetLogos: HTMLElement[] = [];
+  private centerHoldTimeoutId: number | null = null;
+  private restoreTimeoutId: number | null = null;
+  private completionTimeoutId: number | null = null;
+  private retryRafId: number | null = null;
+  private playbackRafId: number | null = null;
+  private destroyed = false;
   readonly animationConfig = input.required<IntroAnimationConfig>();
+  readonly completed = output<void>();
   protected readonly introReady = signal(false);
   protected readonly movementVars = signal('');
   protected readonly moveDurationMs = signal<number | null>(null);
@@ -79,10 +87,61 @@ export class Intro {
    */
   private measureMovementVars(): string {
     const logoElement = this.getIntroLogoElement();
-    const target = this.animationConfig().endPosition?.();
-    if (!logoElement || !target) return '';
+    const target = this.measureTargetPosition();
+    if (!target) return '';
     const mode = this.animationConfig().mode;
-    return this.buildMeasuredMovementVars(logoElement.getBoundingClientRect(), target, mode);
+    const startRect = logoElement?.getBoundingClientRect() ?? this.getVirtualStartRect(mode);
+    if (!startRect) return '';
+    return this.buildMeasuredMovementVars(startRect, target, mode);
+  }
+
+  /**
+   * Returns a virtual centered start rectangle when logo element is not measurable.
+   * @param {'desktop' | 'mobile'} mode - Active intro viewport mode.
+   * @returns {DOMRect | null} Virtual start rectangle for movement calculation.
+   */
+  private getVirtualStartRect(mode: 'desktop' | 'mobile'): DOMRect | null {
+    const size = mode === 'mobile' ? 180 : 274;
+    const left = (window.innerWidth / 2) - (size / 2);
+    const top = (window.innerHeight / 2) - (size / 2);
+    if (!Number.isFinite(left) || !Number.isFinite(top)) return null;
+    return new DOMRect(left, top, size, size);
+  }
+
+  /**
+   * Measures the current intro target using configured selector priority.
+   * @returns {IntroTargetPosition | undefined} Measured target or undefined when not available.
+   */
+  private measureTargetPosition(): IntroTargetPosition | undefined {
+    const primary = this.animationConfig().endPosition?.();
+    if (this.isValidTargetPosition(primary)) return primary;
+    const selectors = this.animationConfig().targetSelectors;
+    return this.measureFirstVisibleTarget(selectors);
+  }
+
+  /**
+   * Returns whether a measured target position contains usable geometry.
+   * @param {IntroTargetPosition | undefined} target - Candidate target position.
+   * @returns {boolean} True when target position is valid for movement.
+   */
+  private isValidTargetPosition(target: IntroTargetPosition | undefined): boolean {
+    return this.getNumericTarget(target) !== null;
+  }
+
+  /**
+   * Measures the first visible target element from selector order.
+   * @param {readonly string[]} selectors - Ordered target selectors.
+   * @returns {IntroTargetPosition | undefined} Measured target or undefined.
+   */
+  private measureFirstVisibleTarget(selectors: readonly string[]): IntroTargetPosition | undefined {
+    for (const selector of selectors) {
+      const element = document.querySelector(selector) as HTMLElement | null;
+      if (!element) continue;
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+      return { x: `${rect.left}px`, y: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` };
+    }
+    return undefined;
   }
 
   /**
@@ -91,7 +150,7 @@ export class Intro {
    */
   private getIntroLogoElement(): HTMLImageElement | null {
     const selector = this.animationConfig().mode === 'desktop' ? '.intro-logo-shell' : '.intro-logo-shell-m';
-    return document.querySelector<HTMLImageElement>(selector);
+    return this.hostElement.nativeElement.querySelector(selector) as HTMLImageElement | null;
   }
 
   /**
@@ -156,9 +215,25 @@ export class Intro {
    */
   ngOnInit(): void {
     this.introMountedAtMs = performance.now();
-    document.body.classList.add(this.introBodyHideClass);
+    if (this.isTargetHideEnabled()) {
+      document.body.classList.add(this.introBodyHideClass);
+    }
     this.prepareIntroAnimation();
     this.hiddenTargetLogos = this.hideTargetLogosForIntro();
+  }
+
+  /**
+   * Cleans up scheduled callbacks when intro is destroyed.
+   * @returns {void} No return value.
+   */
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.clearTimeoutIfSet(this.centerHoldTimeoutId);
+    this.clearTimeoutIfSet(this.restoreTimeoutId);
+    this.clearTimeoutIfSet(this.completionTimeoutId);
+    this.clearRafIfSet(this.retryRafId);
+    this.clearRafIfSet(this.playbackRafId);
+    document.body.classList.remove(this.introBodyHideClass);
   }
 
   /**
@@ -178,8 +253,9 @@ export class Intro {
    * @returns {void} No return value.
    */
   private startIntroAfterCenterHold(): void {
-    setTimeout(() => {
-      this.startIntroWhenTargetIsReady(240);
+    this.centerHoldTimeoutId = window.setTimeout(() => {
+      if (this.destroyed) return;
+      this.startIntroWhenTargetIsReady(this.animationConfig().targetRetryFrames);
     }, this.centerHoldMs);
   }
 
@@ -189,6 +265,7 @@ export class Intro {
    * @returns {void} No return value.
    */
   private startIntroWhenTargetIsReady(attemptsLeft: number): void {
+    if (this.destroyed) return;
     const vars = this.measureMovementVars();
     if (vars || attemptsLeft <= 0) {
       const durationMs = this.animationConfig().animationDurationMs;
@@ -197,7 +274,7 @@ export class Intro {
       this.startIntroPlayback(durationMs);
       return;
     }
-    requestAnimationFrame(() => this.startIntroWhenTargetIsReady(attemptsLeft - 1));
+    this.retryRafId = requestAnimationFrame(() => this.startIntroWhenTargetIsReady(attemptsLeft - 1));
   }
 
   /**
@@ -206,10 +283,24 @@ export class Intro {
    * @returns {void} No return value.
    */
   private startIntroPlayback(durationMs: number): void {
-    requestAnimationFrame(() => {
+    this.playbackRafId = requestAnimationFrame(() => {
+      if (this.destroyed) return;
       this.introReady.set(true);
     });
     this.restoreTargetLogosNearIntroEnd(durationMs);
+    this.emitCompletionAfterPlayback(durationMs);
+  }
+
+  /**
+   * Emits intro completion after full animation playback finished.
+   * @param {number} durationMs - Effective intro animation duration.
+   * @returns {void} No return value.
+   */
+  private emitCompletionAfterPlayback(durationMs: number): void {
+    this.completionTimeoutId = window.setTimeout(() => {
+      if (this.destroyed) return;
+      this.completed.emit();
+    }, durationMs);
   }
 
   /**
@@ -217,8 +308,8 @@ export class Intro {
    * @returns {HTMLElement[]} Hidden logo elements for later restoration.
    */
   private hideTargetLogosForIntro(): HTMLElement[] {
-    const containerClass = this.animationConfig().containerClass;
-    const selectors = this.getTargetLogoSelectors(containerClass);
+    if (!this.isTargetHideEnabled()) return [];
+    const selectors = this.animationConfig().targetSelectors;
     const elements = selectors
       .map((selector) => document.querySelector(selector) as HTMLElement | null)
       .filter((element): element is HTMLElement => !!element);
@@ -227,14 +318,12 @@ export class Intro {
   }
 
   /**
-   * Resolves target logo selectors by intro variant.
-   * @param {string} containerClass - Active intro container class.
-   * @returns {string[]} Target selectors for the current intro variant.
+   * Returns whether target logos should be hidden until near playback end.
+   * @returns {boolean} True when temporary target-logo hiding is enabled.
    */
-  private getTargetLogoSelectors(containerClass: string): string[] {
-    if (containerClass === 'intro-desktop-auth') return ['.figma-sidenav .logo-img'];
-    if (containerClass === 'intro-mobile-auth') return ['.mobile-only .j-logo', '.login-page .logo-img'];
-    return ['.login-page .logo-img'];
+  private isTargetHideEnabled(): boolean {
+    const percent = this.animationConfig().hideTargetUntilPercent;
+    return percent !== null && percent > 0;
   }
 
   /**
@@ -243,11 +332,34 @@ export class Intro {
    * @returns {void} No return value.
    */
   private restoreTargetLogosNearIntroEnd(durationMs: number): void {
-    setTimeout(() => {
+    const percent = this.animationConfig().hideTargetUntilPercent;
+    if (percent === null) return;
+    this.restoreTimeoutId = window.setTimeout(() => {
+      if (this.destroyed) return;
       this.hiddenTargetLogos.forEach((element) => element.classList.remove(this.introHiddenClass));
       this.hiddenTargetLogos = [];
       document.body.classList.remove(this.introBodyHideClass);
-    }, Math.floor(durationMs * 0.99));
+    }, Math.floor(durationMs * percent));
+  }
+
+  /**
+   * Clears a timeout if one is currently scheduled.
+   * @param {number | null} timeoutId - Window timeout identifier.
+   * @returns {void} No return value.
+   */
+  private clearTimeoutIfSet(timeoutId: number | null): void {
+    if (timeoutId === null) return;
+    clearTimeout(timeoutId);
+  }
+
+  /**
+   * Cancels a scheduled animation frame callback if present.
+   * @param {number | null} rafId - requestAnimationFrame identifier.
+   * @returns {void} No return value.
+   */
+  private clearRafIfSet(rafId: number | null): void {
+    if (rafId === null) return;
+    cancelAnimationFrame(rafId);
   }
 }
 

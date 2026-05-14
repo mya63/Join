@@ -153,6 +153,9 @@
   <!-- Subtasks -->
   <div class="field-group">
     <label class="field-label">Subtasks</label>
+    @if (hasSubtaskError) {
+      <span class="error-hint red">{{ subtaskErrorMessage }}</span>
+    }
     <div class="subtask-input-row">
       <input type="text" class="field-input" placeholder="Add new subtask" [(ngModel)]="subtaskInput" name="subtaskNew" (keydown.enter)="addSubtask()">
       <span class="subtask-icons">
@@ -161,21 +164,21 @@
       </span>
     </div>
     <div class="subtasks-list">
-      @for (st of editedTask.subTasks; track $index) {
+      @for (st of editedTask.subTasks; track $index; let i = $index) {
         <div class="subtask-item">
           @if (st.onEdit) {
             <div class="subtask-edit-row">
-              <input #stInput type="text" [value]="st.subtaskTitle" (keydown.enter)="editSubtask(st.subtaskTitle, stInput.value)" class="subtask-edit-input">
+              <input #stInput [id]="'subtask-edit-input-' + i" type="text" [value]="st.subtaskTitle" (keydown.enter)="editSubtask(st.subtaskTitle, stInput.value)" class="subtask-edit-input">
               <span class="subtask-icons">
                 <span class="subtask-icon-btn" (click)="deleteSubtask(st.subtaskTitle)"><img src="assets/img/board/add-card/delete.svg" alt="delete"></span>
                 <span class="subtask-icon-btn" (click)="editSubtask(st.subtaskTitle, stInput.value)"><img src="assets/img/board/add-card/check.svg" alt="save"></span>
               </span>
             </div>
           } @else {
-            <div class="subtask-view-row" (dblclick)="st.onEdit = true">
+            <div class="subtask-view-row" (click)="startSubtaskEdit(st, i)">
               <span class="subtask-title">&bull; {{ st.subtaskTitle }}</span>
               <span class="subtask-icons">
-                <span class="subtask-icon-btn" (click)="st.onEdit = true"><img src="assets/img/board/add-card/edit.svg" alt="edit"></span>
+                <span class="subtask-icon-btn" (click)="$event.stopPropagation(); startSubtaskEdit(st, i)"><img src="assets/img/board/add-card/edit.svg" alt="edit"></span>
                 <span class="subtask-icon-btn" (click)="deleteSubtask(st.subtaskTitle)"><img src="assets/img/board/add-card/delete.svg" alt="delete"></span>
               </span>
             </div>

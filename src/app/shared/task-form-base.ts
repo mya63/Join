@@ -1,3 +1,4 @@
+// ...existing code...
 import { computed, inject, signal } from '@angular/core';
 import { FbService } from '../services/fb-service';
 import { FbTaskService } from '../services/fb-task-service';
@@ -5,6 +6,7 @@ import { ITask } from '../interfaces/i-task';
 import { IContact } from '../interfaces/i-contact';
 
 export abstract class TaskFormBase {
+  protected _duplicateSubtaskError = false;
   protected readonly injectedFbService = inject(FbService);
   protected readonly injectedFbTaskService = inject(FbTaskService);
 
@@ -280,8 +282,20 @@ export abstract class TaskFormBase {
    * @param {ITask} myTask - Task receiving the new subtask.
    * @returns {void} No return value.
    */
+  /**
+   * Adds a new subtask to the given task when the input title is valid and unique.
+   * Sets duplicateSubtaskError to true if a duplicate exists.
+   * @param {ITask} myTask - Task receiving the new subtask.
+   * @returns {void} No return value.
+   */
   addSubtask(myTask: ITask): void {
+    this._duplicateSubtaskError = false;
     if (!myTask || this.subtask.title.trim() === '') return;
+    const exists = myTask.subTasks.some(st => st.subtaskTitle.trim().toLowerCase() === this.subtask.title.trim().toLowerCase());
+    if (exists) {
+      this._duplicateSubtaskError = true;
+      return;
+    }
     myTask.subTasks.push({ subtaskTitle: this.subtask.title, subtaskCompleted: false, onEdit: false });
     this.subtask = { title: '', completed: false, onEdit: false };
   }
@@ -299,6 +313,23 @@ export abstract class TaskFormBase {
     if (!subtask) return;
     subtask.subtaskTitle = newTitle;
     subtask.onEdit = false;
+  }
+
+
+  /**
+   * Enters subtask edit mode and places the caret at the end of the current text.
+   * @param {{ onEdit: boolean; subtaskTitle: string }} subtask - Subtask to switch into edit mode.
+   * @param {HTMLInputElement} inputElement - Bound input element for the subtask row.
+   * @returns {void} No return value.
+   */
+  startSubtaskEdit(subtask: { onEdit: boolean; subtaskTitle: string }, inputElement: HTMLInputElement): void {
+    subtask.onEdit = true;
+    setTimeout(() => {
+      if (!inputElement) return;
+      inputElement.focus();
+      const caretIndex = subtask.subtaskTitle.length;
+      inputElement.setSelectionRange(caretIndex, caretIndex);
+    }, 0);
   }
 
 

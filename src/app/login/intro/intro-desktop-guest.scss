@@ -1,0 +1,13 @@
+// Styles for desktop-guest intro overlay
+
+.intro-container.intro-desktop-guest {
+  --intro-end-top-desktop: var(--auth-logo-top-desktop);
+  --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
+  --intro-end-size-desktop: var(--auth-logo-size-desktop);
+  --intro-overlay-start-opacity: 1;
+  --intro-overlay-end-opacity: 0;
+  --intro-logo-primary-start-opacity: 1;
+  --intro-logo-primary-end-opacity: 1;
+  --intro-logo-secondary-start-opacity: 0;
+  --intro-logo-secondary-end-opacity: 0;
+}

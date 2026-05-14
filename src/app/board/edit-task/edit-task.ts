@@ -17,6 +17,7 @@ import { IContact } from '../../interfaces/i-contact';
   }
 })
 export class EditTask implements OnInit {
+  private _subtaskErrorMessage = '';
   task = input.required<ITask>();
   close = output<void>();
   saved = output<void>();
@@ -42,6 +43,14 @@ export class EditTask implements OnInit {
     { name: 'User Story', color: '#0038FF' },
     { name: 'Technical Task', color: '#1FD7C1' },
   ];
+
+  public get hasSubtaskError(): boolean {
+    return this._subtaskErrorMessage.length > 0;
+  }
+
+  public get subtaskErrorMessage(): string {
+    return this._subtaskErrorMessage;
+  }
 
   /**
    * Initializes editable task copy and view-related state.
@@ -300,9 +309,39 @@ export class EditTask implements OnInit {
    * @returns {void} No return value.
    */
   addSubtask(): void {
-    if (!this.subtaskInput.trim()) return;
-    this.editedTask.subTasks.push({ subtaskTitle: this.subtaskInput.trim(), subtaskCompleted: false, onEdit: false });
+    this.clearSubtaskError();
+    const newTitle = this.subtaskInput.trim();
+    if (!newTitle) return;
+    if (this.isDuplicateSubtaskTitle(newTitle)) {
+      this.setSubtaskError('Subtask already exists');
+      return;
+    }
+    const nextSubtask = { subtaskTitle: newTitle, subtaskCompleted: false, onEdit: false };
+    this.editedTask.subTasks = [...this.editedTask.subTasks, nextSubtask];
     this.subtaskInput = '';
+  }
+
+  /**
+   * Checks whether a subtask title already exists (case-insensitive).
+   * @param {string} newTitle - Candidate title to validate.
+   * @returns {boolean} True when another subtask already has this title.
+   */
+  private isDuplicateSubtaskTitle(newTitle: string): boolean {
+    const normalizedTitle = newTitle.toLowerCase();
+    return this.editedTask.subTasks.some((st) => st.subtaskTitle.trim().toLowerCase() === normalizedTitle);
+  }
+
+  /**
+   * Checks duplicate titles while excluding the currently edited source title.
+   * @param {string} newTitle - Candidate title to validate.
+   * @param {string} oldTitle - Original title of the edited subtask.
+   * @returns {boolean} True when another subtask already has the candidate title.
+   */
+  private isDuplicateSubtaskTitleOnEdit(newTitle: string, oldTitle: string): boolean {
+    const normalizedTitle = newTitle.toLowerCase();
+    const normalizedOldTitle = oldTitle.trim().toLowerCase();
+    return this.editedTask.subTasks.some((st) => st.subtaskTitle.trim().toLowerCase() === normalizedTitle
+      && st.subtaskTitle.trim().toLowerCase() !== normalizedOldTitle);
   }
 
   /**
@@ -312,11 +351,40 @@ export class EditTask implements OnInit {
    * @returns {void} No return value.
    */
   editSubtask(oldTitle: string, newTitle: string): void {
+    this.clearSubtaskError();
+    const normalizedTitle = newTitle.trim();
+    if (!normalizedTitle) {
+      this.setSubtaskError('Subtask title is required');
+      return;
+    }
+    if (this.isDuplicateSubtaskTitleOnEdit(normalizedTitle, oldTitle)) {
+      this.setSubtaskError('Subtask already exists');
+      return;
+    }
     const st = this.editedTask.subTasks.find(s => s.subtaskTitle === oldTitle);
     if (!st) return;
 
-    st.subtaskTitle = newTitle;
+    st.subtaskTitle = normalizedTitle;
     st.onEdit = false;
+    this.editedTask.subTasks = [...this.editedTask.subTasks];
+  }
+
+  /**
+   * Enters subtask edit mode and moves the caret to the title end.
+   * @param {{ subtaskTitle: string; onEdit: boolean }} subtask - Subtask being edited.
+   * @param {number} index - Position of the subtask in the rendered list.
+   * @returns {void} No return value.
+   */
+  startSubtaskEdit(subtask: { subtaskTitle: string; onEdit: boolean }, index: number): void {
+    this.clearSubtaskError();
+    subtask.onEdit = true;
+    setTimeout(() => {
+      if (typeof document === 'undefined') return;
+      const inputElement = document.getElementById(`subtask-edit-input-${index}`) as HTMLInputElement | null;
+      if (!inputElement) return;
+      inputElement.focus();
+      inputElement.setSelectionRange(subtask.subtaskTitle.length, subtask.subtaskTitle.length);
+    }, 0);
   }
 
   /**
@@ -325,7 +393,25 @@ export class EditTask implements OnInit {
    * @returns {void} No return value.
    */
   deleteSubtask(title: string): void {
+    this.clearSubtaskError();
     this.editedTask.subTasks = this.editedTask.subTasks.filter(s => s.subtaskTitle !== title);
+  }
+
+  /**
+   * Sets a visible validation message for subtask operations.
+    * @param {string} message - User-facing validation message.
+   * @returns {void} No return value.
+   */
+  private setSubtaskError(message: string): void {
+    this._subtaskErrorMessage = message;
+  }
+
+  /**
+   * Clears any active subtask validation message.
+   * @returns {void} No return value.
+   */
+  private clearSubtaskError(): void {
+    this._subtaskErrorMessage = '';
   }
 
   /**

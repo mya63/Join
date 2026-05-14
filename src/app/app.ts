@@ -58,19 +58,7 @@ export class App {
    */
   private initializeStartupOverlay(): void {
     if (!this.isStartupEntryRoute()) return;
-    this.showStartupOverlayImmediately();
     this.navigateAndAnimateStartup();
-  }
-
-  /**
-   * Shows a provisional startup overlay immediately to prevent first-paint flashes.
-   * @returns {void} No return value.
-   */
-  private showStartupOverlayImmediately(): void {
-    const targetRoute: '/summary' | '/login' = this.auth.currentUser ? '/summary' : '/login';
-    const config = this.buildStartupIntroConfig(targetRoute);
-    this.introConfig.set(config);
-    this.introVisible.set(true);
   }
 
   /**
@@ -107,20 +95,17 @@ export class App {
   private async navigateAndAnimateStartup(): Promise<void> {
     const targetRoute = await this.authService.resolveStartupRoute();
     const config = this.buildStartupIntroConfig(targetRoute);
-    this.introConfig.set(config);
     await this.router.navigate([targetRoute], { replaceUrl: true });
-    this.hideIntroOverlayAfterDelay(config.redirectDelayMs);
+    this.introConfig.set(config);
+    this.introVisible.set(true);
   }
 
   /**
-   * Hides intro overlay after configured animation runtime elapsed.
-   * @param {number} delayMs - Intro runtime in milliseconds.
+   * Hides intro overlay when intro component reports playback completion.
    * @returns {void} No return value.
    */
-  private hideIntroOverlayAfterDelay(delayMs: number): void {
-    setTimeout(() => {
-      this.introVisible.set(false);
-    }, delayMs);
+  protected onIntroCompleted(): void {
+    this.introVisible.set(false);
   }
 
   /**

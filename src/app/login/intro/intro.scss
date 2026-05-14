@@ -1,3 +1,8 @@
+@use 'intro-desktop-auth';
+@use 'intro-desktop-guest';
+@use 'intro-mobile-auth';
+@use 'intro-mobile-guest';
+
 .intro-container {
   position: fixed;
   inset: 0;
@@ -13,6 +18,13 @@
   --intro-dy-desktop: 0px;
   --intro-scale-desktop: 1;
   --intro-start-size-desktop: 274px;
+  --intro-overlay-start-opacity: 1;
+  --intro-overlay-end-opacity: 0;
+  --intro-overlay-hold-percent: 50%;
+  --intro-logo-primary-start-opacity: 1;
+  --intro-logo-primary-end-opacity: 1;
+  --intro-logo-secondary-start-opacity: 0;
+  --intro-logo-secondary-end-opacity: 0;
 }
 
 .intro-container::before {
@@ -20,30 +32,10 @@
   position: absolute;
   inset: 0;
   background: var(--intro-bg, #f6f7f8);
-  opacity: 1;
+  opacity: var(--intro-overlay-start-opacity);
   pointer-events: none;
-}
-
-.intro-container.intro-desktop-guest::before {
-  opacity: 1;
-  animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+  animation: introOverlayOpacity var(--intro-duration) linear forwards;
   animation-play-state: paused;
-}
-
-.intro-container.intro-desktop-guest.ready::before {
-  animation-play-state: running;
-}
-
-.intro-container.intro-desktop-auth {
-  --intro-end-top-desktop: 64px;
-  --intro-end-left-desktop: 65.98px;
-  --intro-end-size-desktop: 100px;
-}
-
-.intro-container.intro-desktop-guest {
-  --intro-end-top-desktop: var(--auth-logo-top-desktop);
-  --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
-  --intro-end-size-desktop: var(--auth-logo-size-desktop);
 }
 
 .intro-logo-shell {
@@ -62,45 +54,32 @@
   display: block;
   width: 100%;
   transform-origin: top left;
-  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards;
-  animation-play-state: paused;
-  will-change: transform;
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards,
+    introLogoPrimaryOpacity var(--intro-duration) linear forwards;
+  animation-play-state: paused, paused;
+  will-change: transform, opacity;
   backface-visibility: hidden;
 }
 
+.intro-logo-white-desktop {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  transform-origin: top left;
+  opacity: var(--intro-logo-secondary-start-opacity);
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards,
+    introLogoSecondaryOpacity var(--intro-duration) linear forwards;
+  animation-play-state: paused, paused;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.intro-container.ready::before,
 .intro-container.ready .intro-logo-shell,
-.intro-container.ready .intro-logo {
+.intro-container.ready .intro-logo,
+.intro-container.ready .intro-logo-white-desktop {
   animation-play-state: running;
-}
-
-@keyframes moveToCornerTransform {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(var(--intro-dx-desktop), var(--intro-dy-desktop));
-  }
-}
-
-@keyframes scaleToCorner {
-  0% {
-    transform: scale(1);
-  }
-
-  100% {
-    transform: scale(var(--intro-scale-desktop));
-  }
-}
-
-@keyframes desktopGuestOverlayFade {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
 }
 
 .intro-mobile {
@@ -132,6 +111,13 @@
     --intro-dy-mobile: 0px;
     --intro-scale-mobile: 1;
     --intro-logo-dark-opacity-end: 0;
+    --intro-overlay-start-opacity: 1;
+    --intro-overlay-end-opacity: 0;
+    --intro-overlay-hold-percent: 50%;
+    --intro-logo-primary-start-opacity: 1;
+    --intro-logo-primary-end-opacity: 1;
+    --intro-logo-secondary-start-opacity: 0;
+    --intro-logo-secondary-end-opacity: var(--intro-logo-dark-opacity-end);
   }
 
   .intro-mobile::before {
@@ -139,40 +125,10 @@
     position: absolute;
     inset: 0;
     background: var(--intro-bg, #f6f7f8);
-    opacity: 1;
+    opacity: var(--intro-overlay-start-opacity);
     pointer-events: none;
-  }
-
-  .intro-mobile.intro-mobile-auth {
-    --intro-end-top-mobile: 24px;
-    --intro-end-left-mobile: 16px;
-    --intro-end-size-mobile: 24px;
-    --intro-logo-dark-opacity-end: 1;
-  }
-
-  .intro-mobile.intro-mobile-guest {
-    --intro-end-top-mobile: var(--auth-logo-top-mobile);
-    --intro-end-left-mobile: calc((100% - min(100%, var(--auth-mobile-frame-max-width))) / 2 + var(--auth-logo-left-mobile));
-    --intro-end-size-mobile: var(--auth-logo-size-mobile);
-    --intro-logo-dark-opacity-end: 1;
-  }
-
-  .intro-mobile.intro-mobile-guest::before {
-    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation: introOverlayOpacity var(--intro-duration) linear forwards;
     animation-play-state: paused;
-  }
-
-  .intro-mobile.intro-mobile-auth::before {
-    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
-    animation-play-state: paused;
-  }
-
-  .intro-mobile.intro-mobile-guest.ready::before {
-    animation-play-state: running;
-  }
-
-  .intro-mobile.intro-mobile-auth.ready::before {
-    animation-play-state: running;
   }
 
   .intro-logo-shell-m {
@@ -193,9 +149,10 @@
     display: block;
     width: 180px;
     transform-origin: top left;
-    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards;
-    animation-play-state: paused;
-    will-change: transform;
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards,
+      introLogoPrimaryOpacity var(--intro-duration) linear forwards;
+    animation-play-state: paused, paused;
+    will-change: transform, opacity;
     backface-visibility: hidden;
   }
 
@@ -205,17 +162,81 @@
     inset: 0;
     width: 180px;
     transform-origin: top left;
-    opacity: 0;
-    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards, mobileLogoDarkFade var(--intro-duration) linear forwards;
-    animation-play-state: paused;
+    opacity: var(--intro-logo-secondary-start-opacity);
+    animation: mobileLogoScale var(--intro-duration) var(--intro-ease) forwards,
+      introLogoSecondaryOpacity var(--intro-duration) linear forwards;
+    animation-play-state: paused, paused;
     will-change: transform, opacity;
     backface-visibility: hidden;
   }
 
+  .intro-mobile.ready::before,
   .intro-mobile.ready .intro-logo-shell-m,
   .intro-mobile.ready .intro-logo-m,
   .intro-mobile.ready .intro-logo-m-dark {
     animation-play-state: running;
+  }
+}
+
+@keyframes moveToCornerTransform {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(var(--intro-dx-desktop), var(--intro-dy-desktop));
+  }
+}
+
+@keyframes scaleToCorner {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(var(--intro-scale-desktop));
+  }
+}
+
+@keyframes introOverlayOpacity {
+  0% {
+    opacity: var(--intro-overlay-start-opacity);
+  }
+
+  50% {
+    opacity: var(--intro-overlay-start-opacity);
+  }
+
+  100% {
+    opacity: var(--intro-overlay-end-opacity);
+  }
+}
+
+@keyframes introLogoPrimaryOpacity {
+  0% {
+    opacity: var(--intro-logo-primary-start-opacity);
+  }
+
+  50% {
+    opacity: var(--intro-logo-primary-start-opacity);
+  }
+
+  100% {
+    opacity: var(--intro-logo-primary-end-opacity);
+  }
+}
+
+@keyframes introLogoSecondaryOpacity {
+  0% {
+    opacity: var(--intro-logo-secondary-start-opacity);
+  }
+
+  50% {
+    opacity: var(--intro-logo-secondary-start-opacity);
+  }
+
+  100% {
+    opacity: var(--intro-logo-secondary-end-opacity);
   }
 }
 
@@ -239,13 +260,4 @@
   }
 }
 
-@keyframes mobileLogoDarkFade {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: var(--intro-logo-dark-opacity-end);
-  }
-}
 

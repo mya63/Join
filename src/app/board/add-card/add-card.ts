@@ -17,6 +17,14 @@ export class AddCard extends TaskFormBase implements OnInit, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private zone = inject(NgZone);
   @ViewChild('inputContent') inputContent: ElementRef | undefined;
+
+  /**
+   * Exposes duplicate subtask validation state to the template.
+   * @returns {boolean} True when the current subtask title already exists.
+   */
+  public get duplicateSubtaskError(): boolean {
+    return this._duplicateSubtaskError;
+  }
   
   selectedColumn = input<string>('');
   closeOverlay = output<void>();
