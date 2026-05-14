@@ -78,8 +78,35 @@
   backface-visibility: hidden;
 }
 
+.intro-logo-white-desktop {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  transform-origin: top left;
+  opacity: 0;
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards;
+  animation-play-state: paused;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.intro-container.intro-desktop-auth .intro-logo {
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards,
+    desktopAuthLogoDarkOut var(--intro-duration) linear forwards;
+  animation-play-state: paused, paused;
+  will-change: transform, opacity;
+}
+
+.intro-container.intro-desktop-auth .intro-logo-white-desktop {
+  animation: scaleToCorner var(--intro-duration) var(--intro-ease) forwards,
+    desktopAuthLogoWhiteIn var(--intro-duration) linear forwards;
+  animation-play-state: paused, paused;
+}
+
 .intro-container.ready .intro-logo-shell,
-.intro-container.ready .intro-logo {
+.intro-container.ready .intro-logo,
+.intro-container.ready .intro-logo-white-desktop {
   animation-play-state: running;
 }
 
@@ -124,6 +151,34 @@
 
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes desktopAuthLogoDarkOut {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes desktopAuthLogoWhiteIn {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 
