@@ -26,7 +26,7 @@
 
 .intro-container.intro-desktop-guest::before {
   opacity: 1;
-  animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+  animation: desktopGuestOverlayFadeDelayed var(--intro-duration) linear forwards;
   animation-play-state: paused;
 }
 
@@ -140,6 +140,20 @@
   }
 }
 
+@keyframes desktopGuestOverlayFadeDelayed {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes desktopAuthOverlayFadeIn {
   0% {
     opacity: 1;
@@ -237,7 +251,7 @@
   }
 
   .intro-mobile.intro-mobile-guest::before {
-    animation: desktopGuestOverlayFade var(--intro-duration) linear forwards;
+    animation: desktopGuestOverlayFadeDelayed var(--intro-duration) linear forwards;
     animation-play-state: paused;
   }
 
