@@ -40,6 +40,16 @@
   --intro-end-size-desktop: 100px;
 }
 
+.intro-container.intro-desktop-auth::before {
+  opacity: 1;
+  animation: desktopAuthOverlayFadeIn var(--intro-duration) linear forwards;
+  animation-play-state: paused;
+}
+
+.intro-container.intro-desktop-auth.ready::before {
+  animation-play-state: running;
+}
+
 .intro-container.intro-desktop-guest {
   --intro-end-top-desktop: var(--auth-logo-top-desktop);
   --intro-end-left-desktop: calc((100% - min(100%, var(--content-max-width, 1920px))) / 2 + var(--auth-logo-left-desktop));
@@ -95,6 +105,20 @@
 
 @keyframes desktopGuestOverlayFade {
   0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes desktopAuthOverlayFadeIn {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
     opacity: 1;
   }
 
