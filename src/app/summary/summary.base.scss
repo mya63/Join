@@ -19,7 +19,9 @@
 
 .summary-content {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
+  position: relative;
+  align-items: center;
   gap: 48px;
 }
 
@@ -53,7 +55,9 @@
 }
 
 .summary-greeting {
-  padding-top: 224px;
+ 
+  top: 224px;
+  right: 0;
   flex-shrink: 0;
 }
 

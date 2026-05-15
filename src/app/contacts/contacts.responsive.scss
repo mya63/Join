@@ -1,5 +1,9 @@
 ﻿@media (max-width: 1350px) {
 
+  .contacts-canvas {
+    height: calc(100dvh - var(--header-h, 96px) - 80px);
+  }
+
   .detail-panel {
     .heading {
       position: absolute;
@@ -11,6 +15,7 @@
     position: absolute;
     left: 0px;
     top: 0;
+    height: 100%;
   }
 
   .list-panel__inner {
@@ -53,7 +58,8 @@
     left: 0px;
     top: 0;
     width: 100%;
-    height: auto;
+    height: 100%;
+    
 
 
     .primary-contact-container {
@@ -61,7 +67,7 @@
     }
 
     .list-panel__inner {
-      height: calc(100dvh - 160px);
+      height: 100%;
 
       .contacts-list {
         width: 100%;
